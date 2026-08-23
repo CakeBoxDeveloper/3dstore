@@ -19,13 +19,32 @@
       padding: 8px;
     }
 
+    /* ══ Стеклянный стиль блоков (по мотивам 3d.html) ══ */
+
+    /* Хедер */
     .card-header {
-      background: #1a1a1a;
-      border: 1px solid #2e2e2e;
-      border-radius: 14px;
-      overflow: hidden;
+      position: relative;
       flex-shrink: 0;
       padding: 12px 16px;
+      border-radius: 14px;
+      overflow: hidden;
+      /* тёмный фон + тёплый градиент снизу */
+      background:
+        linear-gradient(to bottom, rgba(30,20,10,0.00) 0%, rgba(10,5,0,0.30) 100%),
+        rgba(0,0,0,0.48);
+      /* рамка */
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.18),
+        inset 0 1px 0   rgba(255,255,255,0.28);
+    }
+    /* блик сверху */
+    .card-header::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.08), transparent);
+      pointer-events: none;
     }
     .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
 
@@ -52,6 +71,7 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    /* Грань призмы — стеклянная карточка */
     .h-face {
       position: absolute;
       inset: 0;
@@ -60,28 +80,50 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       overflow: hidden;
-      background: #161a22;
+      /* тёмный фон + тёплый градиент */
+      background:
+        linear-gradient(to bottom, rgba(30,20,10,0.00) 0%, rgba(10,5,0,0.28) 100%),
+        rgba(0,0,0,0.52);
+      /* рамка: постоянная + блик сверху */
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.16),
+        inset 0 1px 0   rgba(255,255,255,0.26);
+    }
+    /* блик сверху на грани */
+    .h-face::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 35%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.07), transparent);
+      pointer-events: none;
+      z-index: 0;
     }
 
-    /* Шиммер — только в области скролла, не на заголовке */
+    /* Шиммер — тонкий блик скользит по поверхности грани */
     .face-scroll-wrap::before {
       content: '';
       position: absolute;
-      inset: -100%;
+      top: -50%;
+      left: -150%;
+      width: 80%;
+      height: 200%;
       z-index: 1;
       pointer-events: none;
       background: linear-gradient(
         105deg,
-        transparent 45%,
-        rgba(255,255,255,0.04) 50%,
-        transparent 55%
+        transparent 30%,
+        rgba(255,255,255,0.055) 48%,
+        rgba(255,255,255,0.09)  50%,
+        rgba(255,255,255,0.055) 52%,
+        transparent 70%
       );
       animation: shimmer-diag 5s ease-in-out infinite;
     }
 
     @keyframes shimmer-diag {
-      0%   { transform: translateX(-60%) translateY(-60%); }
-      100% { transform: translateX(60%) translateY(60%); }
+      0%   { transform: translateX(0%); }
+      100% { transform: translateX(340%); }
     }
 
     .h-f0 { transform: rotateY(0deg)   translateZ(133px); }

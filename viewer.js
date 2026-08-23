@@ -35,7 +35,8 @@ const MATERIALS = [
 
 // ── State ────────────────────────────────────────────────────────────────────
 
-let currentMat = MATERIALS[0];
+// По умолчанию — средний материал в списке
+let currentMat = MATERIALS[Math.floor(MATERIALS.length / 2)];
 let meshObjects = [];
 let scene, camera, renderer, controls;
 
@@ -206,8 +207,13 @@ function buildMaterialSlider() {
   }
 
   wrap.addEventListener('scroll', updateFade, { passive: true });
-  // init после рендера
-  requestAnimationFrame(() => { updateFade(); });
+
+  // Скроллим к середине при инициализации
+  requestAnimationFrame(() => {
+    const mid = (wrap.scrollWidth - wrap.clientWidth) / 2;
+    wrap.scrollLeft = mid;
+    updateFade();
+  });
 }
 
 // ── Валидация украинского номера ─────────────────────────────────────────────
