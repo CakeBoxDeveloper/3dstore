@@ -220,28 +220,24 @@ function isValidUAPhone(raw) {
 // ── 3D Призма-кнопка ─────────────────────────────────────────────────────────
 
 function initFlipOrder(product, categoryName, subcategoryName) {
-  const scene      = document.getElementById('order-scene');
+  const sceneEl    = document.getElementById('order-scene');
   const rotor      = document.getElementById('order-rotor');
   const faceOrder  = document.getElementById('face-order');
   const facePhone  = document.getElementById('face-phone');
   const phoneInput = document.getElementById('phone-input');
 
-  // translateZ = высота / (2√3) — для вертикальной призмы rotateX
-  // Чем больше значение, тем объёмнее. Берём половину высоты кнопки.
-  const H = 52;
-  const r = Math.round(H / (2 * Math.tan(Math.PI / 3)));
-  scene.style.setProperty('--or', r + 'px');
+  // Накопленный угол — вращаем всегда вперёд (вверх по X)
+  let orderAngle = 0; // 0 = Заказати, 120 = телефон, 240 = успех
 
-  function goFace(n) {
-    rotor.style.opacity = '0.5';
-    setTimeout(() => { rotor.style.opacity = '1'; }, 220);
-    rotor.classList.remove('to-phone', 'to-success');
-    if (n === 1) rotor.classList.add('to-phone');
-    if (n === 2) rotor.classList.add('to-success');
+  function spinTo(targetAngle) {
+    orderAngle = targetAngle;
+    rotor.style.opacity = '0.4';
+    rotor.style.transform = `translateZ(-17px) rotateX(${orderAngle}deg)`;
+    setTimeout(() => { rotor.style.opacity = '1'; }, 160);
   }
 
   faceOrder.addEventListener('click', () => {
-    goFace(1);
+    spinTo(orderAngle + 120); // вперёд на одну грань
     setTimeout(() => phoneInput.focus(), 520);
   });
 
@@ -262,20 +258,23 @@ function initFlipOrder(product, categoryName, subcategoryName) {
 
   phoneInput.addEventListener('blur', () => {
     setTimeout(() => {
-      if (!rotor.classList.contains('to-success')) {
-        goFace(0);
+      // Если не на грани успеха — возвращаемся к грани 0
+      const normalised = ((orderAngle % 360) + 360) % 360;
+      if (normalised !== 240 && normalised !== 120 * 2) {
+        // возврат через ближайший путь назад
+        spinTo(orderAngle - (normalised === 120 ? 120 : 0));
         phoneInput.value = '';
       }
     }, 200);
   });
 
   document.addEventListener('pointerdown', e => {
-    if (!scene.contains(e.target)) phoneInput.blur();
+    if (!sceneEl.contains(e.target)) phoneInput.blur();
   });
 
   async function sendOrder() {
     const phone = phoneInput.value.trim();
-    goFace(2);
+    spinTo(orderAngle + 120); // на грань успеха
     try {
       await fetch('/api/order', {
         method: 'POST',
@@ -288,7 +287,11 @@ function initFlipOrder(product, categoryName, subcategoryName) {
         }),
       });
     } catch (e) { console.error(e); }
-    setTimeout(() => { goFace(0); phoneInput.value = ''; }, 4000);
+    // Через 4с возврат на грань 0
+    setTimeout(() => {
+      spinTo(orderAngle + 120);
+      phoneInput.value = '';
+    }, 4000);
   }
 }
 

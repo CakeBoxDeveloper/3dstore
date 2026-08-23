@@ -19,7 +19,6 @@
       padding: 8px;
     }
 
-    /* Хедер */
     .card-header {
       background: #1a1a1a;
       border: 1px solid #2e2e2e;
@@ -27,36 +26,13 @@
       overflow: hidden;
       flex-shrink: 0;
       padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
     }
     .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
 
-    /* Кнопки навигации */
-    .cat-nav { display: flex; align-items: center; gap: 12px; }
-    .cat-nav-btn {
-      background: #242424;
-      border: 1px solid #2e2e2e;
-      border-radius: 8px;
-      color: #f0f0f0;
-      font-size: 16px;
-      width: 32px; height: 32px;
-      cursor: pointer;
-      font-family: inherit;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s;
-      flex-shrink: 0;
-    }
-    .cat-nav-btn:hover { background: #2e2e2e; }
-    .cat-title { font-size: 15px; font-weight: 600; min-width: 80px; text-align: center; }
-
-    /* Прозрачный контейнер — размер задаёт, фон не рисует */
     .card-catalog {
       overflow: visible;
       flex: 1;
       min-height: 0;
-      cursor: pointer;
     }
 
     /* ══ ПРИЗМА (ось Y) ══ */
@@ -73,7 +49,8 @@
       position: relative;
       transform-style: preserve-3d;
       transform: translateZ(-133px) rotateY(0deg);
-      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity   0.12s ease-out;
     }
 
     .h-face {
@@ -83,77 +60,110 @@
       flex-direction: column;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      overflow: hidden; /* clip контента грани, не ломает 3D т.к. грань — лист */
+      overflow: hidden;
+      background: #161a22;
     }
 
-    .h-f0 { transform: rotateY(0deg)   translateZ(133px); background: #1a0e0d; }
-    .h-f1 { transform: rotateY(120deg) translateZ(133px); background: #0d1219; }
-    .h-f2 { transform: rotateY(240deg) translateZ(133px); background: #0d1a10; }
+    .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
+    .h-f1 { transform: rotateY(120deg) translateZ(133px); }
+    .h-f2 { transform: rotateY(240deg) translateZ(133px); }
 
-    /* Заголовок грани — с навигацией */
+    /* Заголовок — без разделителя, название по центру, стрелки без обводки */
     .face-header {
       padding: 12px 14px;
-      font-size: 17px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
       flex-shrink: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      /* нет border-bottom */
     }
-    .h-f0 .face-header { color: #e87060; }
-    .h-f1 .face-header { color: #6090d0; }
-    .h-f2 .face-header { color: #60c070; }
 
-    .face-nav-btn {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      color: #f0f0f0;
-      font-size: 15px;
-      width: 30px; height: 30px;
-      cursor: pointer;
-      font-family: inherit;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.15s;
-    }
-    .face-nav-btn:hover { background: rgba(255,255,255,0.12); }
-
-    /* Скролл внутри грани */
-    .face-body {
+    .face-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #e0e8ff;
+      text-align: center;
       flex: 1;
+    }
+
+    /* Стрелки — просто символ, без фона и обводки */
+    .face-nav-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.45);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px 6px;
+      line-height: 1;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .face-nav-btn:hover { color: #fff; }
+
+    /* Скролл-область грани с fade сверху и снизу */
+    .face-scroll-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+
+    /* fade-out сверху и снизу */
+    .face-scroll-wrap::before,
+    .face-scroll-wrap::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 32px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .face-scroll-wrap::before {
+      top: 0;
+      background: linear-gradient(to bottom, #161a22, transparent);
+    }
+    .face-scroll-wrap::after {
+      bottom: 0;
+      background: linear-gradient(to top, #161a22, transparent);
+    }
+
+    .face-body {
+      height: 100%;
       overflow-y: auto;
       overflow-x: hidden;
       scrollbar-width: none;
-      padding: 12px 16px 16px;
+      padding: 8px 12px 12px;
     }
     .face-body::-webkit-scrollbar { display: none; }
 
     /* Подкатегория */
-    .sub-block { margin-bottom: 20px; }
+    .sub-block { margin-bottom: 16px; }
     .sub-title {
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.09em;
-      color: #666;
+      color: #555;
       text-align: center;
       margin-bottom: 8px;
     }
 
-    /* Сетка: 3 иконки в ряд */
+    /* Сетка: строго 3 в ряд, размер 25% ширины */
     .sub-products {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 6px;
     }
+
+    /* Иконка: 25% от ширины грани.
+       Грань = ширина контейнера (~460px на 480px экране).
+       25% = ~115px. Используем aspect-ratio чтобы быть квадратными. */
     .prod-icon {
+      width: 25%;
       aspect-ratio: 1;
       background: #242424;
       border: 1px solid #2e2e2e;
-      border-radius: 8px;
+      border-radius: 7px;
       overflow: hidden;
       cursor: pointer;
       display: flex;
@@ -161,7 +171,11 @@
       justify-content: center;
       transition: border-color 0.15s;
     }
-    .prod-icon:hover { border-color: #666; }
+    /* В grid — ширина задаётся grid, переопределяем */
+    .sub-products .prod-icon {
+      width: 100%;
+    }
+    .prod-icon:hover { border-color: #555; }
     .prod-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .pi-ph { font-size: 18px; opacity: 0.15; }
   </style>
@@ -175,9 +189,7 @@
 
     <div class="card-catalog">
       <div class="h-scene">
-        <div class="h-rotor" id="h-rotor">
-          <!-- грани генерируются JS -->
-        </div>
+        <div class="h-rotor" id="h-rotor"></div>
       </div>
     </div>
 
@@ -185,38 +197,39 @@
 
   <script src="catalog.js"></script>
   <script>
-    const COLORS = ['#c0392b', '#2471a3', '#1e8449'];
     const R = 133;
-    let current = 0;
+    // Накапливаем угол — не сбрасываем в 0..360, крутим в нужную сторону
+    let angle = 0;
 
     async function init() {
       const data = await loadCatalog();
       const cats = data.categories;
       const rotor = document.getElementById('h-rotor');
 
-      // Строим 3 грани
-      const angles = [0, 120, 240];
       cats.forEach((cat, i) => {
         const face = document.createElement('div');
         face.className = `h-face h-f${i}`;
-        face.style.transform = `rotateY(${angles[i]}deg) translateZ(${R}px)`;
+        face.style.transform = `rotateY(${i * 120}deg) translateZ(${R}px)`;
 
-        // Заголовок с навигацией внутри грани
+        // Заголовок
         const header = document.createElement('div');
         header.className = 'face-header';
         header.innerHTML = `
-          <button class="face-nav-btn" data-dir="-1">←</button>
-          <span>${cat.name}</span>
-          <button class="face-nav-btn" data-dir="1">→</button>
+          <button class="face-nav-btn" data-dir="1">‹</button>
+          <span class="face-title">${cat.name}</span>
+          <button class="face-nav-btn" data-dir="-1">›</button>
         `;
-        // Клики на кнопки навигации
         header.querySelectorAll('.face-nav-btn').forEach(btn => {
           btn.addEventListener('click', e => {
             e.stopPropagation();
-            goTo(current + parseInt(btn.dataset.dir));
+            spin(parseInt(btn.dataset.dir));
           });
         });
         face.appendChild(header);
+
+        // Скролл-обёртка с fade
+        const scrollWrap = document.createElement('div');
+        scrollWrap.className = 'face-scroll-wrap';
 
         const body = document.createElement('div');
         body.className = 'face-body';
@@ -234,7 +247,8 @@
             icon.className = 'prod-icon';
             icon.onclick = () => location.href = `product.html?id=${p.id}`;
             icon.innerHTML = p.thumbnail
-              ? `<img src="${p.thumbnail}" alt="${p.name}" loading="lazy" onerror="this.parentElement.innerHTML='<span class=pi-ph>⬡</span>'">`
+              ? `<img src="${p.thumbnail}" alt="${p.name}" loading="lazy"
+                   onerror="this.parentElement.innerHTML='<span class=pi-ph>⬡</span>'">`
               : `<span class="pi-ph">⬡</span>`;
             grid.appendChild(icon);
           });
@@ -243,35 +257,28 @@
           body.appendChild(block);
         });
 
-        face.appendChild(body);
+        scrollWrap.appendChild(body);
+        face.appendChild(scrollWrap);
         rotor.appendChild(face);
       });
 
-      // Навигация
-      function goTo(idx) {
-        current = ((idx % 3) + 3) % 3;
-        rotor.style.transform = `translateZ(-${R}px) rotateY(${-current * 120}deg)`;
+      // Вращаем в нужную сторону, накапливая угол
+      function spin(dir) {
+        angle += dir * 120;
+        rotor.style.opacity = '0.3';
+        rotor.style.transform = `translateZ(-${R}px) rotateY(${angle}deg)`;
+        setTimeout(() => { rotor.style.opacity = '1'; }, 140);
       }
-
-      document.getElementById('btn-next')?.addEventListener('click', e => {
-        e.stopPropagation();
-        goTo(current + 1);
-      });
-      document.getElementById('btn-prev')?.addEventListener('click', e => {
-        e.stopPropagation();
-        goTo(current - 1);
-      });
 
       // Свайп
       let tx = 0;
-      const stage = document.querySelector('.card-catalog');
-      stage.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
-      stage.addEventListener('touchend', e => {
+      document.querySelector('.card-catalog').addEventListener('touchstart', e => {
+        tx = e.touches[0].clientX;
+      }, { passive: true });
+      document.querySelector('.card-catalog').addEventListener('touchend', e => {
         const dx = e.changedTouches[0].clientX - tx;
-        if (Math.abs(dx) > 40) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+        if (Math.abs(dx) > 40) spin(dx < 0 ? -1 : 1);
       });
-
-      goTo(0);
     }
 
     init();
