@@ -4,6 +4,76 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3D Store — каталог</title>
+
+  <!-- SVG-фильтры для liquid glass на гранях призмы.
+       Применяются через CSS filter: url(#...) на .h-face.
+       НЕ на .h-rotor (preserve-3d) — только на листах-гранях. -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <!-- Liquid glass: turbulence displacement + blur + edge highlight -->
+      <filter id="liquid-glass" x="-5%" y="-5%" width="110%" height="110%"
+              color-interpolation-filters="sRGB">
+
+        <!-- 1. Анимированное искажение поверхности -->
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.015 0.025"
+          numOctaves="3"
+          seed="2"
+          result="noise">
+          <animate attributeName="baseFrequency"
+            values="0.012 0.020; 0.018 0.030; 0.012 0.020"
+            dur="8s" repeatCount="indefinite"/>
+          <animate attributeName="seed"
+            values="2; 5; 2"
+            dur="12s" repeatCount="indefinite"/>
+        </feTurbulence>
+
+        <!-- 2. Displacement — смещение пикселей по шуму -->
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="noise"
+          scale="6"
+          xChannelSelector="R"
+          yChannelSelector="G"
+          result="displaced"/>
+
+        <!-- 3. Лёгкое размытие — frosted glass -->
+        <feGaussianBlur in="displaced" stdDeviation="0.8" result="blurred"/>
+
+        <!-- 4. Осветление краёв — имитация преломления на рёбрах -->
+        <feComposite in="blurred" in2="SourceGraphic" operator="over"/>
+      </filter>
+
+      <!-- Отдельный фильтр для chromatic aberration (радужный ореол) -->
+      <filter id="chromatic" x="-2%" y="-2%" width="104%" height="104%"
+              color-interpolation-filters="sRGB">
+        <!-- Красный канал — сдвинут влево-вверх -->
+        <feColorMatrix type="matrix"
+          values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"
+          in="SourceGraphic" result="r"/>
+        <feOffset in="r" dx="-1.2" dy="-0.6" result="r-shift"/>
+
+        <!-- Синий канал — сдвинут вправо-вниз -->
+        <feColorMatrix type="matrix"
+          values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"
+          in="SourceGraphic" result="b"/>
+        <feOffset in="b" dx="1.2" dy="0.6" result="b-shift"/>
+
+        <!-- Зелёный оригинал -->
+        <feColorMatrix type="matrix"
+          values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0"
+          in="SourceGraphic" result="g"/>
+
+        <!-- Merging: r + g + b -->
+        <feMerge>
+          <feMergeNode in="r-shift"/>
+          <feMergeNode in="g"/>
+          <feMergeNode in="b-shift"/>
+        </feMerge>
+      </filter>
+    </defs>
+  </svg>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; background: #080808; }
@@ -60,7 +130,22 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       overflow: hidden;
-      background: #161a22;
+      /* Полупрозрачное стекло */
+      background: rgba(20, 26, 38, 0.75);
+      /* Liquid glass через SVG фильтр.
+         filter на .h-face (не на preserve-3d контейнере) — безопасно */
+      filter: url(#liquid-glass);
+    }
+
+    /* Дополнительный слой — хроматическая аберрация на заголовке */
+    .face-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #e0e8ff;
+      text-align: center;
+      flex: 1;
+      filter: url(#chromatic);
     }
 
     .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
