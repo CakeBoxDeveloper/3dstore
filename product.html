@@ -2,75 +2,70 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3D Store — товар</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="site-frame">
 
-  <header class="site-header">
-    <div class="site-logo">3D Store</div>
-  </header>
+  <div class="frame-card header-card">
+    <header class="site-header">
+      <div class="site-logo">3D Store</div>
+    </header>
+  </div>
 
-  <main class="product-page">
-    <a href="index.html" class="back-link">← Назад</a>
+  <div class="frame-card content-card">
+    <main class="product-page">
+      <a href="index.html" class="back-link">← Назад</a>
 
-    <!-- 3D Viewer -->
-    <div class="viewer-wrap">
-      <canvas id="viewer-canvas"></canvas>
-      <div class="viewer-loader" id="viewer-loader">
-        <div class="spinner"></div> Загрузка…
-      </div>
-      <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
-    </div>
-
-    <!-- Название + цена в одну строку -->
-    <div class="product-info-block">
-      <div class="product-name-price-row">
-        <div class="product-name-big" id="p-name">—</div>
-        <div class="product-price-big" id="p-price">—</div>
-      </div>
-      <div class="product-category-path" id="p-path">—</div>
-      <div class="product-description" id="p-desc">—</div>
-    </div>
-
-    <!-- Слайдер материалов без заголовка -->
-    <div class="material-section">
-      <div class="material-slider-outer" id="slider-outer">
-        <div class="material-slider-wrap" id="slider-wrap">
-          <div class="material-slider" id="material-slider"></div>
+      <!-- 3D Viewer -->
+      <div class="viewer-wrap">
+        <canvas id="viewer-canvas"></canvas>
+        <div class="viewer-loader" id="viewer-loader">
+          <div class="spinner"></div> Загрузка…
         </div>
       </div>
-    </div>
 
-    <!-- 3D flip кнопка -->
-    <div class="order-block">
-      <div class="flip-btn" id="flip-btn">
-
-        <!-- Грань 0: Заказать -->
-        <button class="flip-face face-order" id="face-order">Заказать</button>
-
-        <!-- Грань 1: Ввод телефона -->
-        <div class="flip-face face-phone" id="face-phone">
-          <input type="tel" id="phone-input" placeholder="+380 XX XXX XX XX" autocomplete="tel" inputmode="tel">
-          <span class="phone-hint" id="phone-hint-btn">→</span>
+      <!-- Название + цена в одну строку -->
+      <div class="product-info-block">
+        <div class="product-name-price-row">
+          <div class="product-name-big" id="p-name">—</div>
+          <div class="product-price-big" id="p-price">—</div>
         </div>
+      </div>
 
-        <!-- Грань 2: Подтвердить / Назад -->
-        <div class="flip-face face-confirm" id="face-confirm">
-          <button class="btn-back" id="btn-back">← Назад</button>
-          <button class="btn-go" id="btn-go">Подтвердить</button>
+      <!-- Слайдер материалов -->
+      <div class="material-section">
+        <div class="material-slider-outer" id="slider-outer">
+          <div class="material-slider-wrap" id="slider-wrap">
+            <div class="material-slider" id="material-slider"></div>
+          </div>
         </div>
-
       </div>
-      <!-- success toast под кнопкой -->
-      <div class="order-success-toast" id="success-toast">
-        ✅ Заказ отправлен! Свяжемся с вами.
-      </div>
-    </div>
 
-  </main>
+      <!-- 3D призма-кнопка -->
+      <div class="order-block" id="order-block">
+        <div class="prism-scene">
+          <div class="prism-rotor" id="prism-rotor">
+            <button class="prism-face prism-face-0" id="face-order">Заказать</button>
+            <div class="prism-face prism-face-1" id="face-phone">
+              <input type="tel" id="phone-input" placeholder="+380 XX XXX XX XX" autocomplete="tel" inputmode="tel">
+              <span class="phone-arrow" id="phone-arrow">→</span>
+            </div>
+            <div class="prism-face prism-face-2" id="face-confirm">
+              <button class="btn-back" id="btn-back">← Назад</button>
+              <button class="btn-go" id="btn-go">Подтвердить</button>
+            </div>
+          </div>
+        </div>
+        <div class="order-success-toast" id="success-toast">
+          ✅ Заказ отправлен! Свяжемся с вами.
+        </div>
+      </div>
+
+    </main>
+  </div>
 
 </div>
 

@@ -112,7 +112,7 @@ function loadModel(url) {
       const box   = new THREE.Box3().setFromObject(model);
       const center = box.getCenter(new THREE.Vector3());
       const size   = box.getSize(new THREE.Vector3());
-      const scale  = 1.8 / Math.max(size.x, size.y, size.z);
+      const scale  = 1.2 / Math.max(size.x, size.y, size.z);
       model.position.sub(center.multiplyScalar(scale));
       model.scale.setScalar(scale);
       model.traverse(c => { if (c.isMesh) c.material = buildMaterial(); });
@@ -133,7 +133,7 @@ function usePlaceholder() {
   meshObjects.forEach(o => scene.remove(o));
   meshObjects = [];
   const mesh = new THREE.Mesh(
-    new THREE.TorusKnotGeometry(0.6, 0.22, 128, 32),
+    new THREE.TorusKnotGeometry(0.45, 0.16, 128, 32),
     buildMaterial()
   );
   scene.add(mesh);
@@ -218,47 +218,60 @@ function isValidUAPhone(raw) {
   return /^0\d{9}$/.test(digits) || /^380\d{9}$/.test(digits);
 }
 
-// ── 3D Flip order button ──────────────────────────────────────────────────────
+// ── 3D Призма-кнопка ─────────────────────────────────────────────────────────
 
 function initFlipOrder(product, categoryName, subcategoryName) {
-  const flipBtn    = document.getElementById('flip-btn');
+  const block      = document.getElementById('order-block');
+  const rotor      = document.getElementById('prism-rotor');
   const faceOrder  = document.getElementById('face-order');
   const facePhone  = document.getElementById('face-phone');
   const phoneInput = document.getElementById('phone-input');
-  const hintBtn    = document.getElementById('phone-hint-btn');
+  const phoneArrow = document.getElementById('phone-arrow');
   const btnBack    = document.getElementById('btn-back');
   const btnGo      = document.getElementById('btn-go');
   const toast      = document.getElementById('success-toast');
 
+  // Вычисляем радиус призмы и задаём CSS-переменную
+  // Для правильной треугольной призмы: r = W / (2 * tan(π/3)) = W / (2√3)
+  function setPrismRadius() {
+    const W = block.offsetWidth;
+    const r = Math.round(W / (2 * Math.sqrt(3)));
+    block.style.setProperty('--prism-r', r + 'px');
+  }
+
+  setPrismRadius();
+  window.addEventListener('resize', setPrismRadius);
+
   // Грань 0 → 1
   faceOrder.addEventListener('click', () => {
-    flipBtn.classList.add('face-1');
-    setTimeout(() => phoneInput.focus(), 460);
+    rotor.classList.remove('to-confirm');
+    rotor.classList.add('to-phone');
+    setTimeout(() => phoneInput.focus(), 520);
   });
 
-  // Стрелка на грани 1 / Enter → проверка и переход на грань 2
+  // Переход на грань 2 после валидации
   function tryAdvance() {
     const phone = phoneInput.value.trim();
     if (!isValidUAPhone(phone)) {
       facePhone.classList.add('invalid');
-      setTimeout(() => facePhone.classList.remove('invalid'), 500);
+      setTimeout(() => facePhone.classList.remove('invalid'), 400);
       return;
     }
-    flipBtn.classList.remove('face-1');
-    flipBtn.classList.add('face-2');
+    rotor.classList.remove('to-phone');
+    rotor.classList.add('to-confirm');
   }
 
-  hintBtn.addEventListener('click', tryAdvance);
+  phoneArrow.addEventListener('click', tryAdvance);
   phoneInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryAdvance(); });
 
   // Грань 2 → назад на грань 1
   btnBack.addEventListener('click', () => {
-    flipBtn.classList.remove('face-2');
-    flipBtn.classList.add('face-1');
-    setTimeout(() => phoneInput.focus(), 460);
+    rotor.classList.remove('to-confirm');
+    rotor.classList.add('to-phone');
+    setTimeout(() => phoneInput.focus(), 520);
   });
 
-  // Грань 2 → подтвердить → отправка
+  // Грань 2 → подтвердить
   btnGo.addEventListener('click', async () => {
     btnGo.disabled = true;
     btnGo.textContent = '…';
@@ -282,18 +295,17 @@ function initFlipOrder(product, categoryName, subcategoryName) {
       });
       if (!res.ok) throw new Error('server');
 
-      // Успех — возвращаем кнопку в исходное состояние и показываем тост
-      flipBtn.classList.remove('face-2');
-      flipBtn.classList.remove('face-1');
+      // Успех — возвращаем на грань 0
+      rotor.classList.remove('to-confirm');
+      rotor.classList.remove('to-phone');
       toast.classList.add('show');
       phoneInput.value = '';
       btnGo.disabled = false;
       btnGo.textContent = 'Подтвердить';
     } catch (err) {
       btnGo.disabled = false;
-      btnGo.textContent = 'Подтвердить';
-      btnGo.style.background = '#c0392b';
       btnGo.textContent = 'Ошибка, повтор';
+      btnGo.style.background = '#c0392b';
       setTimeout(() => {
         btnGo.style.background = '';
         btnGo.textContent = 'Подтвердить';
@@ -325,9 +337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.title = `${product.name} — 3D Store`;
   document.getElementById('p-name').textContent  = product.name;
-  document.getElementById('p-path').textContent  = `${category.name} / ${subcategory.name}`;
-  document.getElementById('p-desc').textContent  = product.description;
-  document.getElementById('p-price').textContent = `${product.price.toLocaleString('ru-RU')} ₽`;
+  document.getElementById('p-price').textContent = `${product.price.toLocaleString('uk-UA')} ₴`;
 
   initScene();
   buildMaterialSlider();
