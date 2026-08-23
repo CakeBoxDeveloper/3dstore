@@ -193,7 +193,6 @@
       const data = await loadCatalog();
       const cats = data.categories;
       const rotor = document.getElementById('h-rotor');
-      const titleEl = document.getElementById('cat-title');
 
       // Строим 3 грани
       const angles = [0, 120, 240];
@@ -202,9 +201,21 @@
         face.className = `h-face h-f${i}`;
         face.style.transform = `rotateY(${angles[i]}deg) translateZ(${R}px)`;
 
+        // Заголовок с навигацией внутри грани
         const header = document.createElement('div');
         header.className = 'face-header';
-        header.textContent = cat.name;
+        header.innerHTML = `
+          <button class="face-nav-btn" data-dir="-1">←</button>
+          <span>${cat.name}</span>
+          <button class="face-nav-btn" data-dir="1">→</button>
+        `;
+        // Клики на кнопки навигации
+        header.querySelectorAll('.face-nav-btn').forEach(btn => {
+          btn.addEventListener('click', e => {
+            e.stopPropagation();
+            goTo(current + parseInt(btn.dataset.dir));
+          });
+        });
         face.appendChild(header);
 
         const body = document.createElement('div');
@@ -240,14 +251,13 @@
       function goTo(idx) {
         current = ((idx % 3) + 3) % 3;
         rotor.style.transform = `translateZ(-${R}px) rotateY(${-current * 120}deg)`;
-        titleEl.textContent = cats[current].name;
       }
 
-      document.getElementById('btn-next').addEventListener('click', e => {
+      document.getElementById('btn-next')?.addEventListener('click', e => {
         e.stopPropagation();
         goTo(current + 1);
       });
-      document.getElementById('btn-prev').addEventListener('click', e => {
+      document.getElementById('btn-prev')?.addEventListener('click', e => {
         e.stopPropagation();
         goTo(current - 1);
       });
