@@ -6,45 +6,49 @@
   <title>3D Store — товар</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<div class="site-frame">
+<body class="page-product">
 
-  <div class="frame-card header-card">
-    <header class="site-header">
-      <div class="site-logo">3D Store</div>
-    </header>
-  </div>
+  <div class="site-frame">
 
-  <div class="frame-card content-card">
-    <main class="product-page">
-      <a href="index.html" class="back-link">← Назад</a>
+    <!-- Хедер -->
+    <div class="frame-card header-card">
+      <header class="site-header">
+        <div class="site-logo">3D Store</div>
+      </header>
+    </div>
 
-      <!-- 3D Viewer -->
-      <div class="viewer-wrap">
-        <canvas id="viewer-canvas"></canvas>
-        <div class="viewer-loader" id="viewer-loader">
-          <div class="spinner"></div> Загрузка…
-        </div>
-      </div>
+    <!-- Контент товара -->
+    <div class="frame-card content-card">
+      <main class="product-page">
+        <a href="index.html" class="back-link">← Назад</a>
 
-      <!-- Название + цена в одну строку -->
-      <div class="product-info-block">
-        <div class="product-name-price-row">
-          <div class="product-name-big" id="p-name">—</div>
-          <div class="product-price-big" id="p-price">—</div>
-        </div>
-      </div>
-
-      <!-- Слайдер материалов -->
-      <div class="material-section">
-        <div class="material-slider-outer" id="slider-outer">
-          <div class="material-slider-wrap" id="slider-wrap">
-            <div class="material-slider" id="material-slider"></div>
+        <div class="viewer-wrap">
+          <canvas id="viewer-canvas"></canvas>
+          <div class="viewer-loader" id="viewer-loader">
+            <div class="spinner"></div> Загрузка…
           </div>
         </div>
-      </div>
 
-      <!-- 3D призма-кнопка -->
+        <div class="product-info-block">
+          <div class="product-name-price-row">
+            <div class="product-name-big" id="p-name">—</div>
+            <div class="product-price-big" id="p-price">—</div>
+          </div>
+        </div>
+
+        <div class="material-section">
+          <div class="material-slider-outer" id="slider-outer">
+            <div class="material-slider-wrap" id="slider-wrap">
+              <div class="material-slider" id="material-slider"></div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- Кнопка заказа — отдельная карточка -->
+    <div class="frame-card order-card">
       <div class="order-block" id="order-block">
         <div class="prism-scene">
           <div class="prism-rotor" id="prism-rotor">
@@ -55,21 +59,18 @@
             </div>
             <div class="prism-face prism-face-2" id="face-confirm">
               <button class="btn-back" id="btn-back">← Назад</button>
-              <button class="btn-go" id="btn-go">Подтвердить</button>
+              <button class="btn-go" id="btn-go">Підтвердити</button>
             </div>
           </div>
         </div>
         <div class="order-success-toast" id="success-toast">
-          ✅ Заказ отправлен! Свяжемся с вами.
+          ✅ Замовлення відправлено! Зв'яжемося з вами.
         </div>
       </div>
+    </div>
 
-    </main>
   </div>
 
-</div>
-
-  <!-- Three.js -->
   <script type="importmap">
   {
     "imports": {
@@ -78,7 +79,6 @@
     }
   }
   </script>
-
   <script src="catalog.js"></script>
   <script type="module" src="viewer.js"></script>
 </body>

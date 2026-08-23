@@ -5,19 +5,24 @@
 }
 
 :root {
-  --bg: #0f0f0f;
+  --bg: #080808;
   --surface: #1a1a1a;
   --surface2: #242424;
   --border: #2e2e2e;
   --text: #f0f0f0;
   --text-muted: #888;
-  --accent: #e0e0e0;
   --accent2: #a0a0a0;
   --price: #c8f0a0;
   --btn: #f0f0f0;
   --btn-text: #0f0f0f;
-  --radius: 10px;
-  --gap: 16px;
+  --radius: 14px;
+  --gap: 8px;       /* зазор между карточками */
+  --pad: 14px;      /* внутренний паддинг */
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden; /* запрет скролла страницы */
 }
 
 body {
@@ -26,69 +31,72 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 15px;
   line-height: 1.5;
-  min-height: 100vh;
-  overflow-x: hidden; /* запрет горизонтального скролла */
-}
-
-/* Mobile-width container */
-.site-frame {
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 10px 10px 24px;
-}
-
-/* Карточки-блоки */
-.frame-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.header-card {
-  /* компактная карточка для хедера */
-  flex-shrink: 0;
-}
-
-.content-card {
-  flex: 1;
+  overflow-x: hidden;
 }
 
 a { color: inherit; text-decoration: none; }
 
-/* ── Body bg — тёмный по бокам от фрейма ── */
-body {
-  background: #080808;
+/* ─────────────────────────────────────────
+   LAYOUT — фиксированный, вся высота экрана
+   ───────────────────────────────────────── */
+
+.site-frame {
+  max-width: 480px;
+  height: 100dvh;          /* точная высота вьюпорта */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: var(--gap);
 }
 
-/* ── Header — внутри frame-card, без sticky ── */
+/* Общий стиль карточки */
+.frame-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  flex-shrink: 0;
+}
+
+/* Хедер */
+.header-card { /* высота по содержимому */ }
+
 .site-header {
-  padding: 14px var(--gap);
+  padding: 12px var(--pad);
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
 .site-logo {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
 }
 
-/* ── Навигация категорий ── */
+/* ─────────────────────────────────────────
+   CATALOG PAGE
+   ───────────────────────────────────────── */
+
+/* Карточка каталога растягивается на всё оставшееся место */
+.catalog-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* НЕТ overflow:hidden — иначе убьёт 3D transform */
+  overflow: visible;
+}
+
 .cat-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 10px;
+  padding: 10px var(--pad);
+  flex-shrink: 0;
 }
 
 .cat-nav-title {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -98,74 +106,98 @@ body {
   border-radius: 8px;
   color: var(--text);
   font-size: 16px;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .cat-nav-btn:hover { background: var(--border); }
 
-/* ── Призма каталога ── */
-.cat-prism-wrap {
+/* Сцена призмы — занимает всё оставшееся в catalog-card */
+.cat-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+  /* clip чтобы боковые грани не вылезали за карточку */
   overflow: hidden;
-  padding: 0 var(--gap) var(--gap);
-  perspective: 1200px;
+  border-radius: 0 0 var(--radius) var(--radius);
 }
 
-.cat-prism {
+/* Ротор — занимает 100% сцены, крутится */
+.cat-rotor {
+  width: 100%;
+  height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  /* height задаётся JS */
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Грань призмы */
 .cat-face {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  /* translateZ задаётся инлайново через CSS var */
+  height: 100%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow-y: auto;          /* скролл ВНУТРИ грани */
+  overflow-x: hidden;
+  scrollbar-width: none;
+  padding: var(--pad);
+  padding-bottom: calc(var(--pad) + 8px);
 }
 
-/* грань 0: rotateY(0deg) translateZ(r) */
-.cat-face[data-index="0"] { transform: rotateY(0deg)    translateZ(var(--cat-r, 100px)); }
-.cat-face[data-index="1"] { transform: rotateY(120deg)  translateZ(var(--cat-r, 100px)); }
-.cat-face[data-index="2"] { transform: rotateY(240deg)  translateZ(var(--cat-r, 100px)); }
+.cat-face::-webkit-scrollbar { display: none; }
 
-.cat-face-inner {
-  /* грань сама по себе без фона — она внутри content-card */
+/* translateZ задаётся через CSS var из JS */
+.cat-face[data-index="0"] {
+  transform: rotateY(0deg) translateZ(var(--cat-r, 120px));
+  background: #1a1a1a;
+}
+.cat-face[data-index="1"] {
+  transform: rotateY(120deg) translateZ(var(--cat-r, 120px));
+  background: #1a1f1a; /* чуть зеленоватый для отладки */
+}
+.cat-face[data-index="2"] {
+  transform: rotateY(240deg) translateZ(var(--cat-r, 120px));
+  background: #1a1a1f; /* чуть синеватый для отладки */
 }
 
-/* ── Подкатегория ── */
+/* Подкатегория */
 .sub-block {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .sub-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   color: var(--text-muted);
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
-/* ── Товары: по 3 в ряд, только иконки ── */
+/* Сетка товаров — строго 3 колонки */
 .sub-products {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .prod-icon {
   aspect-ratio: 1 / 1;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   display: flex;
@@ -176,24 +208,41 @@ body {
 
 .prod-icon:hover {
   border-color: var(--accent2);
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .prod-icon img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .pi-ph {
-  font-size: 24px;
-  opacity: 0.25;
+  font-size: 20px;
+  opacity: 0.2;
 }
 
-/* ── Product page ── */
-.product-page {
-  padding: var(--gap);
+/* ─────────────────────────────────────────
+   PRODUCT PAGE
+   ───────────────────────────────────────── */
+
+/* content-card растягивается */
+.content-card {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
+
+.product-page {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  padding: var(--pad);
+}
+
+.product-page::-webkit-scrollbar { display: none; }
 
 .back-link {
   display: inline-flex;
@@ -201,20 +250,19 @@ body {
   gap: 6px;
   font-size: 14px;
   color: var(--text-muted);
-  padding-bottom: 12px;
+  padding-bottom: 10px;
   transition: color 0.2s;
 }
-
 .back-link:hover { color: var(--text); }
 
-/* ── 3D Viewer — внутри content-card ── */
+/* Вьювер */
 .viewer-wrap {
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   position: relative;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 #viewer-canvas {
@@ -223,224 +271,155 @@ body {
   display: block;
 }
 
-.viewer-hint {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px;
-  color: var(--text-muted);
-  background: rgba(0,0,0,0.5);
-  padding: 4px 10px;
-  border-radius: 20px;
-  pointer-events: none;
-  white-space: nowrap;
+/* Инфо товара */
+.product-info-block {
+  margin-bottom: 12px;
 }
 
-/* ── Product info block ── */
-.product-info-block {
-  margin-bottom: 20px;
+.product-name-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .product-name-big {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: -0.4px;
-  margin-bottom: 4px;
-}
-
-.product-category-path {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-}
-
-.product-description {
-  font-size: 13px;
-  color: var(--accent2);
-  line-height: 1.6;
-  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
 }
 
 .product-price-big {
-  font-size: 24px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--price);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* ── Material section — без заголовка ── */
+/* Слайдер материалов */
 .material-section {
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
-/* горизонтальный слайдер с fade по краям */
 .material-slider-outer {
   position: relative;
-  margin: 0 calc(-1 * var(--gap));
+  margin: 0 calc(-1 * var(--pad));
 }
 
 .material-slider-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding: 0 var(--gap);
+  padding: 0 var(--pad);
 }
-
 .material-slider-wrap::-webkit-scrollbar { display: none; }
 
 .material-slider {
   display: flex;
-  gap: 8px;
+  gap: 7px;
   width: max-content;
   padding-bottom: 4px;
 }
 
-/* fade маски по краям */
+/* fade по краям */
 .material-slider-outer::before,
 .material-slider-outer::after {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 4px;
-  width: 32px;
+  top: 0; bottom: 4px;
+  width: 28px;
   z-index: 2;
   pointer-events: none;
   transition: opacity 0.2s;
 }
-
 .material-slider-outer::before {
   left: 0;
-  background: linear-gradient(to right, var(--bg), transparent);
+  background: linear-gradient(to right, var(--surface), transparent);
 }
-
 .material-slider-outer::after {
   right: 0;
-  background: linear-gradient(to left, var(--bg), transparent);
+  background: linear-gradient(to left, var(--surface), transparent);
 }
-
 .material-slider-outer.at-start::before { opacity: 0; }
 .material-slider-outer.at-end::after    { opacity: 0; }
 
-/* карточка материала */
+/* Чип материала */
 .mat-chip {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  padding: 8px 10px;
-  min-width: 68px;
-  background: var(--surface);
+  gap: 4px;
+  padding: 7px 9px;
+  min-width: 62px;
+  background: var(--surface2);
   border: 1.5px solid var(--border);
-  border-radius: 10px;
+  border-radius: 9px;
   cursor: pointer;
   font-family: inherit;
   transition: border-color 0.15s, background 0.15s;
   flex-shrink: 0;
 }
-
 .mat-chip:hover { border-color: var(--accent2); }
-
-.mat-chip.active {
-  border-color: var(--text);
-  background: var(--surface2);
-}
+.mat-chip.active { border-color: var(--text); background: #2a2a2a; }
 
 .mat-chip-swatch {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,0.1);
-  flex-shrink: 0;
 }
-
 .mat-chip-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
 }
-
 .mat-chip-sub {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text-muted);
   white-space: nowrap;
 }
 
-/* ── Строка: название + цена ── */
-.product-name-price-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 6px;
-}
+/* ─────────────────────────────────────────
+   ORDER PRISM BUTTON — отдельная карточка
+   ───────────────────────────────────────── */
 
-.product-name-big {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.4px;
-  line-height: 1.3;
-}
-
-.product-price-big {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--price);
-  white-space: nowrap;
+.order-card {
   flex-shrink: 0;
 }
 
-/* ── 3D Призма-кнопка ── */
-/*
-  Треугольная призма: 3 прямоугольные грани, вращение вокруг оси Y.
-  Для правильного треугольника с шириной W:
-    радиус описанной окружности поперечного сечения r = W / (2 * tan(60°)) = W / √3 ≈ W * 0.2887
-  Но нам нужен радиус вписанной окружности (inradius), на который выносим грани:
-    r_in = W / (2 * tan(π/3)) = W / (2√3) ≈ W * 0.2887
-  На практике: translateZ(r_in), где r_in подбирается под реальную ширину контейнера.
-  Мы задаём --prism-r через JS после mount, чтобы быть точным.
-  Fallback: 80px (для ~480px wide блока).
-*/
-
 .order-block {
-  padding-top: 8px;
-  /* perspective для 3д эффекта */
-  perspective: 800px;
-  perspective-origin: 50% 50%;
+  padding: 0;
 }
 
 .prism-scene {
   width: 100%;
   height: 52px;
   position: relative;
-  transform-style: preserve-3d;
+  perspective: 600px;
+  perspective-origin: 50% 50%;
 }
 
-/* Обёртка которая крутится */
+/* Ротор крутится вокруг X (вверх) */
 .prism-rotor {
   width: 100%;
   height: 52px;
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  /* грань 0 смотрит на пользователя */
 }
 
-/* повороты призмы:
-   грань 0 (Заказать) → 0°
-   грань 1 (телефон)  → 120° вверх
-   грань 2 (confirm)  → 240° вверх
-*/
 .prism-rotor.to-phone   { transform: rotateX(120deg); }
 .prism-rotor.to-confirm { transform: rotateX(240deg); }
 
-/* Общие стили грани */
+/* Грань */
 .prism-face {
   position: absolute;
   width: 100%;
   height: 52px;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   border-radius: var(--radius);
   display: flex;
   align-items: center;
@@ -448,14 +427,13 @@ body {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   overflow: hidden;
-  /* translateZ будет задан инлайново через JS */
 }
 
-/* Грань 0 — "Заказать" */
+/* Грань 0 — Заказать (красная для отладки) */
 .prism-face-0 {
-  transform: rotateX(0deg) translateZ(var(--prism-r, 80px));
-  background: var(--btn);
-  color: var(--btn-text);
+  transform: rotateX(0deg) translateZ(var(--prism-r, 30px));
+  background: #e74c3c;
+  color: #fff;
   font-size: 15px;
   font-weight: 700;
   font-family: inherit;
@@ -467,11 +445,11 @@ body {
 .prism-face-0:hover  { opacity: 0.88; }
 .prism-face-0:active { opacity: 0.72; }
 
-/* Грань 1 — поле телефона */
+/* Грань 1 — телефон (синяя для отладки) */
 .prism-face-1 {
-  transform: rotateX(-120deg) translateZ(var(--prism-r, 80px));
-  background: var(--surface);
-  border: 1.5px solid var(--border);
+  transform: rotateX(-120deg) translateZ(var(--prism-r, 30px));
+  background: #2980b9;
+  border: none;
   gap: 0;
   padding: 0 14px;
 }
@@ -481,43 +459,42 @@ body {
   background: transparent;
   border: none;
   outline: none;
-  color: var(--text);
+  color: #fff;
   font-size: 16px;
   font-family: inherit;
   letter-spacing: 0.02em;
   min-width: 0;
 }
-
-.prism-face-1 input::placeholder { color: var(--text-muted); }
+.prism-face-1 input::placeholder { color: rgba(255,255,255,0.5); }
 
 .prism-face-1.invalid {
-  border-color: #e74c3c;
+  border: 2px solid #e74c3c;
   animation: shake 0.3s ease;
 }
 
 .phone-arrow {
   font-size: 18px;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.7);
   cursor: pointer;
   padding: 8px 0 8px 8px;
   flex-shrink: 0;
   transition: color 0.15s;
 }
-.phone-arrow:hover { color: var(--text); }
+.phone-arrow:hover { color: #fff; }
 
 @keyframes shake {
-  0%,100% { transform: rotateX(-120deg) translateZ(var(--prism-r,80px)) translateX(0); }
-  25%      { transform: rotateX(-120deg) translateZ(var(--prism-r,80px)) translateX(-5px); }
-  75%      { transform: rotateX(-120deg) translateZ(var(--prism-r,80px)) translateX(5px); }
+  0%,100% { transform: rotateX(-120deg) translateZ(var(--prism-r,30px)) translateX(0); }
+  25%      { transform: rotateX(-120deg) translateZ(var(--prism-r,30px)) translateX(-5px); }
+  75%      { transform: rotateX(-120deg) translateZ(var(--prism-r,30px)) translateX(5px); }
 }
 
-/* Грань 2 — подтвердить / назад */
+/* Грань 2 — подтвердить/назад (зелёная для отладки) */
 .prism-face-2 {
-  transform: rotateX(-240deg) translateZ(var(--prism-r, 80px));
-  background: var(--surface);
-  border: 1.5px solid var(--border);
+  transform: rotateX(-240deg) translateZ(var(--prism-r, 30px));
+  background: #27ae60;
+  border: none;
   gap: 8px;
-  padding: 0 8px;
+  padding: 0 10px;
 }
 
 .prism-face-2 .btn-back,
@@ -532,54 +509,47 @@ body {
   font-family: inherit;
   transition: opacity 0.15s;
 }
-
 .prism-face-2 .btn-back {
-  background: var(--surface2);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.25);
+  color: #fff;
 }
-
 .prism-face-2 .btn-go {
-  background: var(--btn);
-  color: var(--btn-text);
+  background: rgba(0,0,0,0.35);
+  color: #fff;
 }
-
 .prism-face-2 .btn-back:hover,
 .prism-face-2 .btn-go:hover { opacity: 0.8; }
-
 .prism-face-2 .btn-go:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ── Success toast ── */
+/* Success toast */
 .order-success-toast {
   display: none;
   align-items: center;
   gap: 10px;
-  padding: 14px 16px;
-  background: #1a2e1a;
-  border: 1px solid #2e5e2e;
-  border-radius: var(--radius);
+  padding: 12px var(--pad);
   font-size: 14px;
   color: var(--price);
-  margin-top: 10px;
 }
-
 .order-success-toast.show { display: flex; }
 
-/* ── Loading spinner ── */
+/* ─────────────────────────────────────────
+   LOADER / SPINNER
+   ───────────────────────────────────────── */
+
 .viewer-loader {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface);
+  background: var(--surface2);
   font-size: 13px;
   color: var(--text-muted);
 }
 
 .spinner {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border: 2px solid var(--border);
   border-top-color: var(--text-muted);
   border-radius: 50%;

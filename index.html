@@ -6,33 +6,40 @@
   <title>3D Store — каталог</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<div class="site-frame">
+<body class="page-catalog">
 
-  <div class="frame-card header-card">
-    <header class="site-header">
-      <div class="site-logo">3D Store</div>
-    </header>
-  </div>
+  <div class="site-frame">
 
-  <div class="frame-card content-card">
-    <!-- Навигация призмы: стрелки и название текущей категории -->
-    <div class="cat-nav">
-      <button class="cat-nav-btn" id="cat-prev">←</button>
-      <span class="cat-nav-title" id="cat-title">Пластик</span>
-      <button class="cat-nav-btn" id="cat-next">→</button>
+    <!-- Хедер — отдельная карточка -->
+    <div class="frame-card header-card">
+      <header class="site-header">
+        <div class="site-logo">3D Store</div>
+      </header>
     </div>
 
-    <!-- Призма каталога -->
-    <div class="cat-prism-wrap" id="cat-prism-wrap">
-      <div class="cat-prism" id="cat-prism">
-        <!-- 3 грани генерируются JS -->
+    <!-- Каталог-призма — растягивается на оставшееся место -->
+    <div class="frame-card catalog-card">
+
+      <!-- Навигация -->
+      <div class="cat-nav">
+        <button class="cat-nav-btn" id="cat-prev">←</button>
+        <span class="cat-nav-title" id="cat-title">Пластик</span>
+        <button class="cat-nav-btn" id="cat-next">→</button>
       </div>
+
+      <!-- Обёртка с perspective — НЕТ overflow:hidden здесь -->
+      <div class="cat-stage" id="cat-stage">
+        <!-- Ротор вращается -->
+        <div class="cat-rotor" id="cat-rotor">
+          <!-- 3 грани генерируются JS -->
+        </div>
+      </div>
+
     </div>
+
   </div>
 
-</div>
-<script src="catalog.js"></script>
-<script src="main.js"></script>
+  <script src="catalog.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>

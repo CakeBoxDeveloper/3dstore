@@ -1,29 +1,27 @@
-// main.js
+// main.js — горизонтальная призма каталога
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const data = await loadCatalog();
-  const categories = data.categories; // массив из 3 категорий
+  const data       = await loadCatalog();
+  const categories = data.categories; // 3 категории
 
-  let currentCat = 0; // 0, 1, 2
+  let currentCat = 0;
 
-  const prism   = document.getElementById('cat-prism');
-  const wrap    = document.getElementById('cat-prism-wrap');
+  const rotor   = document.getElementById('cat-rotor');
+  const stage   = document.getElementById('cat-stage');
   const titleEl = document.getElementById('cat-title');
   const btnPrev = document.getElementById('cat-prev');
   const btnNext = document.getElementById('cat-next');
 
-  // Строим 3 грани призмы
-  // Призма горизонтальная (rotateY): грань i повёрнута на i*120deg
-  // translateZ вычисляется из ширины: r = W / (2*sqrt(3))
+  // ── Строим грани ──────────────────────────────────────────────────────────
 
   function buildFaces() {
-    prism.innerHTML = '';
+    rotor.innerHTML = '';
+
     categories.forEach((cat, i) => {
       const face = document.createElement('div');
       face.className = 'cat-face';
       face.dataset.index = i;
 
-      // Содержимое грани: подкатегории по центру, под каждой — товары по 3 в ряд (только иконки)
       face.innerHTML = `
         <div class="cat-face-inner">
           ${cat.subcategories.map(sub => `
@@ -33,7 +31,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ${sub.products.map(p => `
                   <div class="prod-icon" onclick="openProduct('${p.id}')">
                     ${p.thumbnail
-                      ? `<img src="${p.thumbnail}" alt="${p.name}" loading="lazy" onerror="this.parentElement.innerHTML='<span class=pi-ph>⬡</span>'">`
+                      ? `<img src="${p.thumbnail}" alt="${p.name}" loading="lazy"
+                           onerror="this.parentElement.innerHTML='<span class=pi-ph>⬡</span>'">`
                       : `<span class="pi-ph">⬡</span>`
                     }
                   </div>
@@ -43,40 +42,45 @@ document.addEventListener('DOMContentLoaded', async () => {
           `).join('')}
         </div>
       `;
-      prism.appendChild(face);
+
+      rotor.appendChild(face);
     });
-    setPrismRadius();
-    rotateTo(currentCat);
   }
+
+  // ── Вычисляем translateZ для правильной призмы ────────────────────────────
+  // Для равносторонней треугольной призмы, вращающейся вокруг центральной оси:
+  // inradius = W / (2 * tan(60°)) = W / (2√3) ≈ W * 0.2887
+  // где W — ширина грани (= ширина stage)
 
   function setPrismRadius() {
-    const W = wrap.offsetWidth;
+    const W = stage.offsetWidth;
     const r = Math.round(W / (2 * Math.sqrt(3)));
-    wrap.style.setProperty('--cat-r', r + 'px');
-    // Высота призмы = высота самой высокой грани
-    // Задаём после рендера
-    requestAnimationFrame(() => {
-      let maxH = 0;
-      prism.querySelectorAll('.cat-face').forEach(f => {
-        maxH = Math.max(maxH, f.scrollHeight);
-      });
-      prism.style.height = maxH + 'px';
-    });
+    stage.style.setProperty('--cat-r', r + 'px');
   }
 
+  // ── Поворот ───────────────────────────────────────────────────────────────
+
   function rotateTo(idx) {
-    // грань 0 при rotateY(0), грань 1 при rotateY(-120deg), грань 2 при rotateY(-240deg)
-    prism.style.transform = `rotateY(${-idx * 120}deg)`;
-    titleEl.textContent = categories[idx].name;
+    rotor.style.transform = `rotateY(${-idx * 120}deg)`;
+    titleEl.textContent   = categories[idx].name;
     currentCat = idx;
   }
 
-  btnNext.addEventListener('click', () => {
-    rotateTo((currentCat + 1) % 3);
-  });
+  // ── Навигация ─────────────────────────────────────────────────────────────
 
-  btnPrev.addEventListener('click', () => {
-    rotateTo((currentCat + 2) % 3); // (currentCat - 1 + 3) % 3
+  btnNext.addEventListener('click', () => rotateTo((currentCat + 1) % 3));
+  btnPrev.addEventListener('click', () => rotateTo((currentCat + 2) % 3));
+
+  // Свайп на мобильном
+  let touchStartX = 0;
+  stage.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  stage.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) {
+      dx < 0
+        ? rotateTo((currentCat + 1) % 3)
+        : rotateTo((currentCat + 2) % 3);
+    }
   });
 
   window.addEventListener('resize', () => {
@@ -84,7 +88,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     rotateTo(currentCat);
   });
 
+  // ── Init ──────────────────────────────────────────────────────────────────
+
   buildFaces();
+  setPrismRadius();
+  rotateTo(0);
 });
 
 function openProduct(productId) {

@@ -231,16 +231,14 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   const btnGo      = document.getElementById('btn-go');
   const toast      = document.getElementById('success-toast');
 
-  // Вычисляем радиус призмы и задаём CSS-переменную
-  // Для правильной треугольной призмы: r = W / (2 * tan(π/3)) = W / (2√3)
+  // Для вертикальной призмы (rotateX) inradius считается от высоты блока
   function setPrismRadius() {
-    const W = block.offsetWidth;
-    const r = Math.round(W / (2 * Math.sqrt(3)));
+    const H = 52; // фиксированная высота кнопки
+    const r = Math.round(H / (2 * Math.sqrt(3)));
     block.style.setProperty('--prism-r', r + 'px');
   }
 
   setPrismRadius();
-  window.addEventListener('resize', setPrismRadius);
 
   // Грань 0 → 1
   faceOrder.addEventListener('click', () => {
