@@ -220,19 +220,21 @@ function isValidUAPhone(raw) {
 // ── 3D Призма-кнопка ─────────────────────────────────────────────────────────
 
 function initFlipOrder(product, categoryName, subcategoryName) {
-  const sceneEl    = document.getElementById('order-scene');
+  const scene      = document.getElementById('order-scene');
   const rotor      = document.getElementById('order-rotor');
   const faceOrder  = document.getElementById('face-order');
   const facePhone  = document.getElementById('face-phone');
   const phoneInput = document.getElementById('phone-input');
 
-  // r = H / (2√3) для rotateX призмы высотой 52px
-  const r = Math.round(52 / (2 * Math.sqrt(3)));
-  // translateZ уже задан в CSS (.v-f0,.v-f1,.v-f2) как 17px — совпадает
+  // translateZ = высота / (2√3) — для вертикальной призмы rotateX
+  // Чем больше значение, тем объёмнее. Берём половину высоты кнопки.
+  const H = 52;
+  const r = Math.round(H / (2 * Math.tan(Math.PI / 3)));
+  scene.style.setProperty('--or', r + 'px');
 
   function goFace(n) {
-    rotor.style.opacity = '0.4';
-    setTimeout(() => { rotor.style.opacity = '1'; }, 180);
+    rotor.style.opacity = '0.5';
+    setTimeout(() => { rotor.style.opacity = '1'; }, 220);
     rotor.classList.remove('to-phone', 'to-success');
     if (n === 1) rotor.classList.add('to-phone');
     if (n === 2) rotor.classList.add('to-success');
@@ -268,7 +270,7 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   });
 
   document.addEventListener('pointerdown', e => {
-    if (!sceneEl.contains(e.target)) phoneInput.blur();
+    if (!scene.contains(e.target)) phoneInput.blur();
   });
 
   async function sendOrder() {

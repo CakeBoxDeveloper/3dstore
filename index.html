@@ -19,6 +19,7 @@
       padding: 8px;
     }
 
+    /* Хедер */
     .card-header {
       background: #1a1a1a;
       border: 1px solid #2e2e2e;
@@ -28,13 +29,34 @@
       padding: 12px 16px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
     }
     .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
 
+    /* Кнопки навигации */
+    .cat-nav { display: flex; align-items: center; gap: 12px; }
+    .cat-nav-btn {
+      background: #242424;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      color: #f0f0f0;
+      font-size: 16px;
+      width: 32px; height: 32px;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .cat-nav-btn:hover { background: #2e2e2e; }
+    .cat-title { font-size: 15px; font-weight: 600; min-width: 80px; text-align: center; }
+
+    /* Прозрачный контейнер — размер задаёт, фон не рисует */
     .card-catalog {
       overflow: visible;
       flex: 1;
       min-height: 0;
+      cursor: pointer;
     }
 
     /* ══ ПРИЗМА (ось Y) ══ */
@@ -51,8 +73,7 @@
       position: relative;
       transform-style: preserve-3d;
       transform: translateZ(-133px) rotateY(0deg);
-      transition: transform 0.9s cubic-bezier(0.25, 0.1, 0.25, 1),
-                  opacity   0.15s ease-out;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .h-face {
@@ -62,14 +83,55 @@
       flex-direction: column;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      overflow: hidden;
-      background: #161a22;
+      overflow: hidden; /* clip контента грани, не ломает 3D т.к. грань — лист */
     }
 
-    .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
-    .h-f1 { transform: rotateY(120deg) translateZ(133px); }
-    .h-f2 { transform: rotateY(240deg) translateZ(133px); }
+    .h-f0 { transform: rotateY(0deg)   translateZ(133px); background: rgba(20,24,32,0.82); }
+    .h-f1 { transform: rotateY(120deg) translateZ(133px); background: rgba(20,24,32,0.82); }
+    .h-f2 { transform: rotateY(240deg) translateZ(133px); background: rgba(20,24,32,0.82); }
 
+    /* Стеклянный эффект + обводка с шиммером */
+    .h-face::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      /* Фаска: градиент по углам имитирует скос */
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 30%),
+        linear-gradient(315deg, rgba(255,255,255,0.06) 0%, transparent 30%);
+    }
+
+    /* Шиммер-обводка — бегущий блик по рёбрам */
+    .h-face::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 11;
+      border-radius: inherit;
+      /* SVG-like border через outline + box-shadow */
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.35);
+      /* шиммер — маска движется по периметру */
+      background: linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(255,255,255,0.18) 50%,
+        transparent 60%
+      );
+      background-size: 200% 200%;
+      animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 200%; }
+      100% { background-position: -200% -200%; }
+    }
+
+    /* Заголовок грани — с навигацией */
     .face-header {
       padding: 12px 14px;
       font-size: 17px;
@@ -80,8 +142,10 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      color: #e0e8ff;
     }
+    .h-f0 .face-header { color: #e0e8ff; }
+    .h-f1 .face-header { color: #e0e8ff; }
+    .h-f2 .face-header { color: #e0e8ff; }
 
     .face-nav-btn {
       background: rgba(255,255,255,0.07);
@@ -98,6 +162,21 @@
     }
     .face-nav-btn:hover { background: rgba(255,255,255,0.12); }
 
+    /* Фаска — дополнительные CSS 3D грани вдоль рёбер.
+       Каждая фаска: тонкая полоска повёрнутая на 45° от плоскости грани.
+       Генерируется через JS после рендера (нужна реальная высота).
+    */
+    .bevel {
+      position: absolute;
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.22),
+        rgba(255,255,255,0.04)
+      );
+      transform-origin: 0 0;
+      backface-visibility: hidden;
+      pointer-events: none;
+    }
     .face-body {
       flex: 1;
       overflow-y: auto;
@@ -107,6 +186,7 @@
     }
     .face-body::-webkit-scrollbar { display: none; }
 
+    /* Подкатегория */
     .sub-block { margin-bottom: 20px; }
     .sub-title {
       font-size: 11px;
@@ -118,6 +198,7 @@
       margin-bottom: 8px;
     }
 
+    /* Сетка: 3 иконки в ряд */
     .sub-products {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -149,7 +230,9 @@
 
     <div class="card-catalog">
       <div class="h-scene">
-        <div class="h-rotor" id="h-rotor"></div>
+        <div class="h-rotor" id="h-rotor">
+          <!-- грани генерируются JS -->
+        </div>
       </div>
     </div>
 
@@ -157,20 +240,54 @@
 
   <script src="catalog.js"></script>
   <script>
+    const COLORS = ['#c0392b', '#2471a3', '#1e8449'];
     const R = 133;
     let current = 0;
+
+    // Фаска: добавляет 4 тонких грани по рёбрам (лево/право/верх/низ)
+    function addBevels(face, angleY, r) {
+      const W = face.offsetWidth;
+      const H = face.offsetHeight;
+      const B = 8; // ширина фаски в px
+      const DEG = 45;
+
+      const bevels = [
+        // левое ребро: повёрнуто на -45° вокруг оси Y, прилегает к левому краю
+        { w: B, h: H, orig: '100% 0', tx: 0,   ty: 0, ry: -DEG, rx: 0 },
+        // правое ребро: повёрнуто на +45° вокруг оси Y, прилегает к правому краю
+        { w: B, h: H, orig: '0% 0',   tx: W,   ty: 0, ry:  DEG, rx: 0 },
+        // верхнее ребро: повёрнуто на +45° вокруг оси X
+        { w: W, h: B, orig: '0 100%', tx: 0,   ty: 0, ry: 0, rx:  DEG },
+        // нижнее ребро: повёрнуто на -45° вокруг оси X
+        { w: W, h: B, orig: '0 0%',   tx: 0,   ty: H, ry: 0, rx: -DEG },
+      ];
+
+      bevels.forEach(b => {
+        const el = document.createElement('div');
+        el.className = 'bevel';
+        el.style.cssText = `
+          width:${b.w}px; height:${b.h}px;
+          left:${b.tx}px; top:${b.ty}px;
+          transform-origin: ${b.orig};
+          transform: rotateY(${b.ry}deg) rotateX(${b.rx}deg);
+        `;
+        face.appendChild(el);
+      });
+    }
 
     async function init() {
       const data = await loadCatalog();
       const cats = data.categories;
       const rotor = document.getElementById('h-rotor');
 
+      // Строим 3 грани
       const angles = [0, 120, 240];
       cats.forEach((cat, i) => {
         const face = document.createElement('div');
         face.className = `h-face h-f${i}`;
         face.style.transform = `rotateY(${angles[i]}deg) translateZ(${R}px)`;
 
+        // Заголовок с навигацией внутри грани
         const header = document.createElement('div');
         header.className = 'face-header';
         header.innerHTML = `
@@ -178,6 +295,7 @@
           <span>${cat.name}</span>
           <button class="face-nav-btn" data-dir="1">→</button>
         `;
+        // Клики на кнопки навигации
         header.querySelectorAll('.face-nav-btn').forEach(btn => {
           btn.addEventListener('click', e => {
             e.stopPropagation();
@@ -213,20 +331,31 @@
 
         face.appendChild(body);
         rotor.appendChild(face);
+
+        // Фаска: добавляем после того как грань в DOM
+        requestAnimationFrame(() => addBevels(face, angles[i], R));
       });
 
+      // Навигация
       function goTo(idx) {
         current = ((idx % 3) + 3) % 3;
-        // opacity flash — motion blur без filter
-        rotor.style.opacity = '0.3';
         rotor.style.transform = `translateZ(-${R}px) rotateY(${-current * 120}deg)`;
-        setTimeout(() => { rotor.style.opacity = '1'; }, 160);
       }
+
+      document.getElementById('btn-next')?.addEventListener('click', e => {
+        e.stopPropagation();
+        goTo(current + 1);
+      });
+      document.getElementById('btn-prev')?.addEventListener('click', e => {
+        e.stopPropagation();
+        goTo(current - 1);
+      });
 
       // Свайп
       let tx = 0;
-      document.querySelector('.card-catalog').addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
-      document.querySelector('.card-catalog').addEventListener('touchend', e => {
+      const stage = document.querySelector('.card-catalog');
+      stage.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+      stage.addEventListener('touchend', e => {
         const dx = e.changedTouches[0].clientX - tx;
         if (Math.abs(dx) > 40) dx < 0 ? goTo(current + 1) : goTo(current - 1);
       });
