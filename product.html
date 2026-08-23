@@ -25,48 +25,54 @@
       <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
     </div>
 
-    <!-- Product info -->
+    <!-- Название + цена в одну строку -->
     <div class="product-info-block">
-      <div class="product-name-big" id="p-name">—</div>
+      <div class="product-name-price-row">
+        <div class="product-name-big" id="p-name">—</div>
+        <div class="product-price-big" id="p-price">—</div>
+      </div>
       <div class="product-category-path" id="p-path">—</div>
       <div class="product-description" id="p-desc">—</div>
-      <div class="product-price-big" id="p-price">—</div>
     </div>
 
-    <!-- Material slider -->
+    <!-- Слайдер материалов без заголовка -->
     <div class="material-section">
-      <div class="section-label">Материал</div>
-      <div class="material-slider-wrap">
-        <div class="material-slider" id="material-slider"></div>
+      <div class="material-slider-outer" id="slider-outer">
+        <div class="material-slider-wrap" id="slider-wrap">
+          <div class="material-slider" id="material-slider"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Order button -->
+    <!-- 3D flip кнопка -->
     <div class="order-block">
-      <button class="btn-order" id="btn-order">Заказать</button>
+      <div class="flip-btn" id="flip-btn">
+
+        <!-- Грань 0: Заказать -->
+        <button class="flip-face face-order" id="face-order">Заказать</button>
+
+        <!-- Грань 1: Ввод телефона -->
+        <div class="flip-face face-phone" id="face-phone">
+          <input type="tel" id="phone-input" placeholder="+380 XX XXX XX XX" autocomplete="tel" inputmode="tel">
+          <span class="phone-hint" id="phone-hint-btn">→</span>
+        </div>
+
+        <!-- Грань 2: Подтвердить / Назад -->
+        <div class="flip-face face-confirm" id="face-confirm">
+          <button class="btn-back" id="btn-back">← Назад</button>
+          <button class="btn-go" id="btn-go">Подтвердить</button>
+        </div>
+
+      </div>
+      <!-- success toast под кнопкой -->
+      <div class="order-success-toast" id="success-toast">
+        ✅ Заказ отправлен! Свяжемся с вами.
+      </div>
     </div>
 
   </main>
 
 </div>
-
-  <!-- Order modal -->
-  <div class="modal-overlay" id="modal-overlay">
-    <div class="modal" id="modal-inner">
-      <h3>Оформить заказ</h3>
-      <p class="modal-sub">Введите номер телефона — мы свяжемся с вами</p>
-
-      <div class="order-summary" id="modal-summary"></div>
-
-      <label for="phone-input">Номер телефона</label>
-      <input type="tel" id="phone-input" placeholder="+7 999 000 00 00" autocomplete="tel">
-
-      <div class="modal-actions">
-        <button class="btn-cancel" id="btn-cancel">Отмена</button>
-        <button class="btn-confirm" id="btn-confirm">Отправить заказ</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Three.js -->
   <script type="importmap">

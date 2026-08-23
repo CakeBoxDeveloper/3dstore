@@ -172,10 +172,12 @@ function applyMaterialToAll() {
   });
 }
 
-// ── Material slider ───────────────────────────────────────────────────────────
+// ── Material slider + fade edges ─────────────────────────────────────────────
 
 function buildMaterialSlider() {
   const slider = document.getElementById('material-slider');
+  const wrap   = document.getElementById('slider-wrap');
+  const outer  = document.getElementById('slider-outer');
   slider.innerHTML = '';
 
   MATERIALS.forEach(mat => {
@@ -195,42 +197,71 @@ function buildMaterialSlider() {
     });
     slider.appendChild(card);
   });
+
+  // fade-out по краям
+  function updateFade() {
+    const { scrollLeft, scrollWidth, clientWidth } = wrap;
+    outer.classList.toggle('at-start', scrollLeft < 8);
+    outer.classList.toggle('at-end',   scrollLeft + clientWidth >= scrollWidth - 8);
+  }
+
+  wrap.addEventListener('scroll', updateFade, { passive: true });
+  // init после рендера
+  requestAnimationFrame(() => { updateFade(); });
 }
 
-// ── Order modal ───────────────────────────────────────────────────────────────
+// ── Валидация украинского номера ─────────────────────────────────────────────
+// Форматы: +380XXXXXXXXX, 0XXXXXXXXX, 380XXXXXXXXX
+function isValidUAPhone(raw) {
+  const digits = raw.replace(/[\s\-().+]/g, '');
+  // должно быть 10 цифр начиная с 0, или 12 начиная с 380
+  return /^0\d{9}$/.test(digits) || /^380\d{9}$/.test(digits);
+}
 
-function initOrderModal(product, categoryName, subcategoryName) {
-  const overlay    = document.getElementById('modal-overlay');
-  const btnOrder   = document.getElementById('btn-order');
-  const btnCancel  = document.getElementById('btn-cancel');
-  const btnConfirm = document.getElementById('btn-confirm');
+// ── 3D Flip order button ──────────────────────────────────────────────────────
+
+function initFlipOrder(product, categoryName, subcategoryName) {
+  const flipBtn    = document.getElementById('flip-btn');
+  const faceOrder  = document.getElementById('face-order');
+  const facePhone  = document.getElementById('face-phone');
   const phoneInput = document.getElementById('phone-input');
+  const hintBtn    = document.getElementById('phone-hint-btn');
+  const btnBack    = document.getElementById('btn-back');
+  const btnGo      = document.getElementById('btn-go');
+  const toast      = document.getElementById('success-toast');
 
-  btnOrder.addEventListener('click', () => {
-    document.getElementById('modal-summary').innerHTML = `
-      <strong>${product.name}</strong><br>
-      ${categoryName} / ${subcategoryName}<br>
-      Материал: <strong>${currentMat.label} · ${currentMat.sublabel}</strong><br>
-      Цена: <strong>${product.price.toLocaleString('ru-RU')} ₽</strong>
-    `;
-    phoneInput.value = '';
-    overlay.classList.add('open');
+  // Грань 0 → 1
+  faceOrder.addEventListener('click', () => {
+    flipBtn.classList.add('face-1');
+    setTimeout(() => phoneInput.focus(), 460);
   });
 
-  btnCancel.addEventListener('click', () => overlay.classList.remove('open'));
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
-
-  btnConfirm.addEventListener('click', async () => {
+  // Стрелка на грани 1 / Enter → проверка и переход на грань 2
+  function tryAdvance() {
     const phone = phoneInput.value.trim();
-    if (!phone) {
-      phoneInput.focus();
-      phoneInput.style.borderColor = '#e74c3c';
-      setTimeout(() => { phoneInput.style.borderColor = ''; }, 1500);
+    if (!isValidUAPhone(phone)) {
+      facePhone.classList.add('invalid');
+      setTimeout(() => facePhone.classList.remove('invalid'), 500);
       return;
     }
+    flipBtn.classList.remove('face-1');
+    flipBtn.classList.add('face-2');
+  }
 
-    btnConfirm.disabled = true;
-    btnConfirm.textContent = 'Отправка…';
+  hintBtn.addEventListener('click', tryAdvance);
+  phoneInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryAdvance(); });
+
+  // Грань 2 → назад на грань 1
+  btnBack.addEventListener('click', () => {
+    flipBtn.classList.remove('face-2');
+    flipBtn.classList.add('face-1');
+    setTimeout(() => phoneInput.focus(), 460);
+  });
+
+  // Грань 2 → подтвердить → отправка
+  btnGo.addEventListener('click', async () => {
+    btnGo.disabled = true;
+    btnGo.textContent = '…';
 
     const payload = {
       product:     product.name,
@@ -240,7 +271,7 @@ function initOrderModal(product, categoryName, subcategoryName) {
       material:    `${currentMat.label} · ${currentMat.sublabel}`,
       color:       currentMat.sublabel,
       price:       product.price,
-      phone,
+      phone:       phoneInput.value.trim(),
     };
 
     try {
@@ -249,20 +280,24 @@ function initOrderModal(product, categoryName, subcategoryName) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Server error');
+      if (!res.ok) throw new Error('server');
 
-      document.getElementById('modal-inner').innerHTML = `
-        <div class="modal-success">
-          <div class="success-icon">✅</div>
-          <h3>Заказ отправлен!</h3>
-          <p>Свяжемся с вами по номеру <strong>${phone}</strong> в ближайшее время.</p>
-          <button class="btn-order" onclick="document.getElementById('modal-overlay').classList.remove('open')">Закрыть</button>
-        </div>
-      `;
+      // Успех — возвращаем кнопку в исходное состояние и показываем тост
+      flipBtn.classList.remove('face-2');
+      flipBtn.classList.remove('face-1');
+      toast.classList.add('show');
+      phoneInput.value = '';
+      btnGo.disabled = false;
+      btnGo.textContent = 'Подтвердить';
     } catch (err) {
-      btnConfirm.disabled = false;
-      btnConfirm.textContent = 'Отправить заказ';
-      alert('Ошибка отправки. Попробуйте ещё раз.');
+      btnGo.disabled = false;
+      btnGo.textContent = 'Подтвердить';
+      btnGo.style.background = '#c0392b';
+      btnGo.textContent = 'Ошибка, повтор';
+      setTimeout(() => {
+        btnGo.style.background = '';
+        btnGo.textContent = 'Подтвердить';
+      }, 2000);
     }
   });
 }
@@ -297,5 +332,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   initScene();
   buildMaterialSlider();
   loadModel(product.model);
-  initOrderModal(product, category.name, subcategory.name);
+  initFlipOrder(product, category.name, subcategory.name);
 });
