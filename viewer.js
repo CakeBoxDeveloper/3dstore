@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 // ── Материалы = финиш + цвет ─────────────────────────────────────────────────
 // Каждый объект — один вариант в слайдере
@@ -38,7 +39,69 @@ const MATERIALS = [
 // По умолчанию — средний материал в списке
 let currentMat = MATERIALS[Math.floor(MATERIALS.length / 2)];
 let meshObjects = [];
+let proceduralMode = false;
 let scene, camera, renderer, controls;
+
+// ── Grid background (ShaderMaterial) ─────────────────────────────────────────
+
+function createGridBackground() {
+  const geo = new THREE.PlaneGeometry(20, 20);
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor1: { value: new THREE.Color(0x1a1a1a) }, // фон
+      uColor2: { value: new THREE.Color(0x2a2a2a) }, // линии сетки
+      uScale:  { value: 20.0 },
+      uWidth:  { value: 0.02 },
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uColor1;
+      uniform vec3 uColor2;
+      uniform float uScale;
+      uniform float uWidth;
+      varying vec2 vUv;
+      void main() {
+        vec2 grid = fract(vUv * uScale);
+        float line = step(1.0 - uWidth, grid.x) + step(1.0 - uWidth, grid.y);
+        line = clamp(line, 0.0, 1.0);
+        vec3 col = mix(uColor1, uColor2, line);
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+    depthWrite: false,
+    side: THREE.FrontSide,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.z = -4; // позади модели
+  mesh.renderOrder = -1;
+  return mesh;
+}
+
+// ── HDR environment ───────────────────────────────────────────────────────────
+
+function loadHDR() {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  new RGBELoader()
+    .setDataType(THREE.FloatType)
+    .load(
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr',
+      (hdrTex) => {
+        const envMap = pmrem.fromEquirectangular(hdrTex).texture;
+        scene.environment = envMap;
+        hdrTex.dispose();
+        pmrem.dispose();
+      },
+      undefined,
+      () => { /* fallback — без HDR, просто lights */ }
+    );
+}
 
 // ── Init scene ───────────────────────────────────────────────────────────────
 
@@ -56,7 +119,8 @@ function initScene() {
   renderer.setSize(W, W);
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1a1a1a);
+  // фон — процедурная сетка через ShaderMaterial
+  scene.add(createGridBackground());
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
   camera.position.set(0, 0.5, 2.5);
@@ -302,6 +366,7 @@ function initFlipOrder(product, categoryName, subcategoryName) {
           category: categoryName, subcategory: subcategoryName,
           material: `${currentMat.label} · ${currentMat.sublabel}`,
           color: currentMat.sublabel, price: product.price, phone,
+          procedural: proceduralMode,
         }),
       });
     } catch (e) { console.error(e); }
@@ -341,6 +406,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('p-price').textContent = `${product.price.toLocaleString('uk-UA')} ₴`;
 
   initScene();
+  loadHDR();
   buildMaterialSlider();
   loadModel(product.model);
-  initFlipOrder(product, category.name, subcategory.name);});
+  initFlipOrder(product, category.name, subcategory.name);
+
+  const procToggle = document.getElementById('proc-toggle');
+  if (procToggle) {
+    procToggle.addEventListener('change', () => {
+      proceduralMode = procToggle.checked;
+    });
+  }
+});

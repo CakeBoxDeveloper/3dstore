@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   }
 
   // Валидация тела запроса
-  const { product, productId, category, subcategory, material, color, price, phone } = req.body || {};
+  const { product, productId, category, subcategory, material, color, price, phone, procedural } = req.body || {};
 
   if (!product || !phone || !material) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -47,6 +47,7 @@ export default async function handler(req, res) {
     `🏷 *Категория:* ${escMd(category)} / ${escMd(subcategory)}`,
     `🎨 *Материал:* ${escMd(material)}`,
     `🎨 *Цвет:* ${escMd(color)}`,
+    `🔧 *Генерація:* ${procedural ? 'Процедурна' : 'Стандарт'}`,
     `💰 *Цена:* ${Number(price).toLocaleString('ru-RU')} ₽`,
     '',
     `📞 *Телефон:* ${escMd(phoneClean)}`,

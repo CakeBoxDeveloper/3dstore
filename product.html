@@ -210,6 +210,49 @@
       border: 1.5px solid #27ae60;
       color: #c8f0a0;
     }
+
+    /* ── Тумблер "Процедурна генерація" ── */
+    .procedural-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0 4px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input { display: none; }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: #2e2e2e;
+      border-radius: 12px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #666;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-track {
+      background: #1a5276;
+    }
+    .toggle-switch input:checked + .toggle-track::after {
+      transform: translateX(20px);
+      background: #fff;
+    }
   </style>
 </head>
 <body>
@@ -242,6 +285,14 @@
             </div>
           </div>
         </div>
+
+        <div class="procedural-toggle">
+          <span class="toggle-label">Процедурна генерація</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="proc-toggle">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
       </main>
     </div>
 
@@ -266,7 +317,8 @@
   {
     "imports": {
       "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/",
+      "three/addons/loaders/RGBELoader.js": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/loaders/RGBELoader.js"
     }
   }
   </script>
