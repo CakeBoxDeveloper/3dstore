@@ -226,29 +226,31 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   const facePhone  = document.getElementById('face-phone');
   const phoneInput = document.getElementById('phone-input');
 
-  // Накопленный угол — вращаем всегда вперёд (вверх по X)
-  let orderAngle = 0; // 0 = Заказати, 120 = телефон, 240 = успех
+  let orderAngle = 0;
 
-  function spinTo(targetAngle) {
-    orderAngle = targetAngle;
-    rotor.style.opacity = '0.4';
+  function spinTo(deg) {
+    orderAngle = deg;
     rotor.style.transform = `translateZ(-17px) rotateX(${orderAngle}deg)`;
-    setTimeout(() => { rotor.style.opacity = '1'; }, 160);
+  }
+
+  function isValid(raw) {
+    const d = raw.replace(/[\s\-().+]/g, '');
+    return /^0\d{9}$/.test(d) || /^380\d{9}$/.test(d);
   }
 
   faceOrder.addEventListener('click', () => {
-    spinTo(orderAngle + 120); // вперёд на одну грань
-    setTimeout(() => phoneInput.focus(), 520);
+    spinTo(orderAngle + 120);
+    setTimeout(() => phoneInput.focus(), 500);
   });
 
   phoneInput.addEventListener('input', () => {
     if (phoneInput.value.length > 13) phoneInput.value = phoneInput.value.slice(0, 13);
-    if (isValidUAPhone(phoneInput.value.trim())) sendOrder();
+    if (isValid(phoneInput.value.trim())) sendOrder();
   });
 
   phoneInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
-      if (isValidUAPhone(phoneInput.value.trim())) sendOrder();
+      if (isValid(phoneInput.value.trim())) sendOrder();
       else {
         facePhone.classList.add('invalid');
         setTimeout(() => facePhone.classList.remove('invalid'), 400);
@@ -258,11 +260,9 @@ function initFlipOrder(product, categoryName, subcategoryName) {
 
   phoneInput.addEventListener('blur', () => {
     setTimeout(() => {
-      // Если не на грани успеха — возвращаемся к грани 0
-      const normalised = ((orderAngle % 360) + 360) % 360;
-      if (normalised !== 240 && normalised !== 120 * 2) {
-        // возврат через ближайший путь назад
-        spinTo(orderAngle - (normalised === 120 ? 120 : 0));
+      const mod = ((orderAngle % 360) + 360) % 360;
+      if (mod === 120) { // на грани ввода, не успех
+        spinTo(orderAngle - 120);
         phoneInput.value = '';
       }
     }, 200);
@@ -274,7 +274,7 @@ function initFlipOrder(product, categoryName, subcategoryName) {
 
   async function sendOrder() {
     const phone = phoneInput.value.trim();
-    spinTo(orderAngle + 120); // на грань успеха
+    spinTo(orderAngle + 120); // → успех
     try {
       await fetch('/api/order', {
         method: 'POST',
@@ -287,7 +287,7 @@ function initFlipOrder(product, categoryName, subcategoryName) {
         }),
       });
     } catch (e) { console.error(e); }
-    // Через 4с возврат на грань 0
+    // Через 4с → назад на грань 0
     setTimeout(() => {
       spinTo(orderAngle + 120);
       phoneInput.value = '';
