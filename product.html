@@ -50,19 +50,19 @@
     <!-- Кнопка заказа — отдельная карточка -->
     <div class="frame-card order-card">
       <div class="order-block" id="order-block">
-        <div class="prism-scene">
-          <div class="prism-rotor" id="prism-rotor">
-            <button class="prism-face prism-face-0" id="face-order">Заказать</button>
-            <div class="prism-face prism-face-1" id="face-phone">
-              <input type="tel" id="phone-input" placeholder="+380XXXXXXXXX" autocomplete="tel" inputmode="tel">
-            </div>
-            <div class="prism-face prism-face-2" id="face-success">
-              ✅ Заявка прийнята!
+        <!-- wrapper даёт вертикальный зазор чтобы грани не клипались -->
+        <div class="prism-wrap">
+          <div class="prism-scene">
+            <div class="prism-rotor" id="prism-rotor">
+              <button class="prism-face prism-face-0" id="face-order">Заказати</button>
+              <div class="prism-face prism-face-1" id="face-phone">
+                <input type="tel" id="phone-input" placeholder="+380XXXXXXXXX" autocomplete="tel" inputmode="tel">
+              </div>
+              <div class="prism-face prism-face-2" id="face-success">
+                ✅ Заявка прийнята!
+              </div>
             </div>
           </div>
-        </div>
-        <div class="order-success-toast" id="success-toast">
-          ✅ Замовлення відправлено! Зв'яжемося з вами.
         </div>
       </div>
     </div>

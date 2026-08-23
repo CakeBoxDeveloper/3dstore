@@ -227,9 +227,16 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   const phoneInput = document.getElementById('phone-input');
   const toast      = document.getElementById('success-toast');
 
-  // Для вертикальной призмы (rotateX) inradius от высоты 52px
-  const r = Math.round(52 / (2 * Math.sqrt(3)));
-  block.style.setProperty('--prism-r', r + 'px');
+  // --prism-r вычисляем от ШИРИНЫ кнопки (это и есть "диаметр" призмы)
+  // inradius правильного треугольника = W / (2√3)
+  function setPrismRadius() {
+    const W = block.offsetWidth;
+    const r = Math.round(W / (2 * Math.sqrt(3)));
+    block.style.setProperty('--prism-r', r + 'px');
+  }
+
+  setPrismRadius();
+  window.addEventListener('resize', setPrismRadius);
 
   // ── Motion blur при вращении — через opacity вместо filter (filter убивает 3D) ──
   function addBlur() {
