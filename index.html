@@ -16,16 +16,23 @@
   </div>
 
   <div class="frame-card content-card">
-    <main class="catalog-wrap">
-      <h1 class="page-title">Каталог</h1>
-      <p class="page-subtitle">Изделия, напечатанные на 3D принтере и изготовленные вручную</p>
-      <div id="catalog-root"></div>
-    </main>
+    <!-- Навигация призмы: стрелки и название текущей категории -->
+    <div class="cat-nav">
+      <button class="cat-nav-btn" id="cat-prev">←</button>
+      <span class="cat-nav-title" id="cat-title">Пластик</span>
+      <button class="cat-nav-btn" id="cat-next">→</button>
+    </div>
+
+    <!-- Призма каталога -->
+    <div class="cat-prism-wrap" id="cat-prism-wrap">
+      <div class="cat-prism" id="cat-prism">
+        <!-- 3 грани генерируются JS -->
+      </div>
+    </div>
   </div>
 
 </div>
-
-  <script src="catalog.js"></script>
-  <script src="main.js"></script>
+<script src="catalog.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
