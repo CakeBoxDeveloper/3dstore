@@ -231,14 +231,10 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   const r = Math.round(52 / (2 * Math.sqrt(3)));
   block.style.setProperty('--prism-r', r + 'px');
 
-  // ── Motion blur при вращении ──
+  // ── Motion blur при вращении — через opacity вместо filter (filter убивает 3D) ──
   function addBlur() {
-    rotor.style.filter = 'blur(3px)';
-    rotor.style.transition = 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), filter 0s';
-    setTimeout(() => {
-      rotor.style.filter = 'blur(0px)';
-      rotor.style.transition = 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), filter 0.15s ease-out';
-    }, 80);
+    rotor.style.opacity = '0.6';
+    setTimeout(() => { rotor.style.opacity = '1'; }, 180);
   }
 
   function goToFace(face) {
