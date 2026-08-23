@@ -48,10 +48,10 @@ function createGridBackground() {
   const geo = new THREE.PlaneGeometry(20, 20);
   const mat = new THREE.ShaderMaterial({
     uniforms: {
-      uColor1: { value: new THREE.Color(0x1a1a1a) }, // фон
-      uColor2: { value: new THREE.Color(0x2a2a2a) }, // линии сетки
-      uScale:  { value: 20.0 },
-      uWidth:  { value: 0.02 },
+      uColor1: { value: new THREE.Color(0x111418) }, // тёмный фон
+      uColor2: { value: new THREE.Color(0x303840) }, // заметные линии
+      uScale:  { value: 14.0 },
+      uWidth:  { value: 0.03 },
     },
     vertexShader: `
       varying vec2 vUv;
@@ -78,7 +78,7 @@ function createGridBackground() {
     side: THREE.FrontSide,
   });
   const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.z = -4; // позади модели
+  mesh.position.z = -3.5;
   mesh.renderOrder = -1;
   return mesh;
 }
@@ -402,8 +402,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const { product, category, subcategory } = found;
 
   document.title = `${product.name} — 3D Store`;
-  document.getElementById('p-name').textContent  = product.name;
-  document.getElementById('p-price').textContent = `${product.price.toLocaleString('uk-UA')} ₴`;
+  document.getElementById('p-name').textContent = product.name;
+
+  // Цена и название на кнопке
+  const priceStr = product.price.toLocaleString('uk-UA') + ' ₴';
+  const btnLabel = document.getElementById('btn-order-label');
+  const btnPrice = document.getElementById('btn-order-price');
+  if (btnLabel) btnLabel.textContent = `Заказати ${product.name}`;
+  if (btnPrice) btnPrice.textContent = `за ${priceStr}`;
 
   initScene();
   loadHDR();

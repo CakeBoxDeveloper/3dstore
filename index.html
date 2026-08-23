@@ -25,7 +25,7 @@
     .card-header {
       background: #1a1a1a;
       border: 1px solid #2e2e2e;
-      border-radius: 14px;
+      border-radius: 2px;
       overflow: hidden;
       flex-shrink: 0;
       padding: 12px 16px;
@@ -70,9 +70,8 @@
     }
     .h-face::after { display: none; }
 
-    /* Шиммер — тонкий блик скользит по поверхности грани */
-    .face-scroll-wrap::before {
-      content: '';
+    /* Шиммер — отдельный div .face-shimmer внутри грани (добавляется JS) */
+    .face-shimmer {
       position: absolute;
       top: -50%;
       left: -150%;
@@ -83,9 +82,9 @@
       background: linear-gradient(
         105deg,
         transparent 30%,
-        rgba(255,255,255,0.055) 48%,
-        rgba(255,255,255,0.09)  50%,
-        rgba(255,255,255,0.055) 52%,
+        rgba(255,255,255,0.05) 48%,
+        rgba(255,255,255,0.08) 50%,
+        rgba(255,255,255,0.05) 52%,
         transparent 70%
       );
       animation: shimmer-diag 5s ease-in-out infinite;
@@ -140,10 +139,8 @@
       position: relative;
     }
 
-    /* fade-out сверху и снизу — z-index 2, поверх шиммера */
-    .face-scroll-wrap::before,
-    .face-scroll-wrap::after {
-      content: '';
+    /* fade-out сверху и снизу — отдельные div .fade-top / .fade-bottom */
+    .fade-top, .fade-bottom {
       position: absolute;
       left: 0; right: 0;
       height: 36px;
@@ -151,18 +148,10 @@
       pointer-events: none;
       transition: opacity 0.3s ease;
     }
-    .face-scroll-wrap::before {
-      top: 0;
-      background: linear-gradient(to bottom, #161a22, transparent);
-    }
-    .face-scroll-wrap::after {
-      bottom: 0;
-      background: linear-gradient(to top, #161a22, transparent);
-    }
-
-    /* Классы скрытия fade */
-    .face-scroll-wrap.at-top::before    { opacity: 0; }
-    .face-scroll-wrap.at-bottom::after  { opacity: 0; }
+    .fade-top    { top: 0;    background: linear-gradient(to bottom, #161a22, transparent); }
+    .fade-bottom { bottom: 0; background: linear-gradient(to top,    #161a22, transparent); }
+    .fade-top.hidden    { opacity: 0; }
+    .fade-bottom.hidden { opacity: 0; }
 
     .face-body {
       height: 100%;
@@ -200,7 +189,7 @@
       aspect-ratio: 1;
       background: #242424;
       border: 1px solid #2e2e2e;
-      border-radius: 7px;
+      border-radius: 2px;
       overflow: hidden;
       cursor: pointer;
       display: flex;
@@ -268,6 +257,19 @@
         const scrollWrap = document.createElement('div');
         scrollWrap.className = 'face-scroll-wrap';
 
+        // Шиммер (под fade)
+        const shimmer = document.createElement('div');
+        shimmer.className = 'face-shimmer';
+        scrollWrap.appendChild(shimmer);
+
+        // Fade-элементы поверх шиммера
+        const fadeTop = document.createElement('div');
+        fadeTop.className = 'fade-top';
+        const fadeBot = document.createElement('div');
+        fadeBot.className = 'fade-bottom';
+        scrollWrap.appendChild(fadeTop);
+        scrollWrap.appendChild(fadeBot);
+
         const body = document.createElement('div');
         body.className = 'face-body';
 
@@ -301,11 +303,10 @@
         // Fade исчезает когда список упирается в край
         function updateFade() {
           const { scrollTop, scrollHeight, clientHeight } = body;
-          scrollWrap.classList.toggle('at-top',    scrollTop < 8);
-          scrollWrap.classList.toggle('at-bottom', scrollTop + clientHeight >= scrollHeight - 8);
+          fadeTop.classList.toggle('hidden', scrollTop < 8);
+          fadeBot.classList.toggle('hidden', scrollTop + clientHeight >= scrollHeight - 8);
         }
         body.addEventListener('scroll', updateFade, { passive: true });
-        // Начальное состояние после рендера
         requestAnimationFrame(updateFade);
       });
 
