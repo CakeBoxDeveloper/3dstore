@@ -86,9 +86,50 @@
       overflow: hidden; /* clip контента грани, не ломает 3D т.к. грань — лист */
     }
 
-    .h-f0 { transform: rotateY(0deg)   translateZ(133px); background: #1a0e0d; }
-    .h-f1 { transform: rotateY(120deg) translateZ(133px); background: #0d1219; }
-    .h-f2 { transform: rotateY(240deg) translateZ(133px); background: #0d1a10; }
+    .h-f0 { transform: rotateY(0deg)   translateZ(133px); background: rgba(20,24,32,0.82); }
+    .h-f1 { transform: rotateY(120deg) translateZ(133px); background: rgba(20,24,32,0.82); }
+    .h-f2 { transform: rotateY(240deg) translateZ(133px); background: rgba(20,24,32,0.82); }
+
+    /* Стеклянный эффект + обводка с шиммером */
+    .h-face::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      /* Фаска: градиент по углам имитирует скос */
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 30%),
+        linear-gradient(315deg, rgba(255,255,255,0.06) 0%, transparent 30%);
+    }
+
+    /* Шиммер-обводка — бегущий блик по рёбрам */
+    .h-face::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 11;
+      border-radius: inherit;
+      /* SVG-like border через outline + box-shadow */
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.35);
+      /* шиммер — маска движется по периметру */
+      background: linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(255,255,255,0.18) 50%,
+        transparent 60%
+      );
+      background-size: 200% 200%;
+      animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 200%; }
+      100% { background-position: -200% -200%; }
+    }
 
     /* Заголовок грани — с навигацией */
     .face-header {
@@ -102,9 +143,9 @@
       align-items: center;
       justify-content: space-between;
     }
-    .h-f0 .face-header { color: #e87060; }
-    .h-f1 .face-header { color: #6090d0; }
-    .h-f2 .face-header { color: #60c070; }
+    .h-f0 .face-header { color: #e0e8ff; }
+    .h-f1 .face-header { color: #e0e8ff; }
+    .h-f2 .face-header { color: #e0e8ff; }
 
     .face-nav-btn {
       background: rgba(255,255,255,0.07);
@@ -121,7 +162,21 @@
     }
     .face-nav-btn:hover { background: rgba(255,255,255,0.12); }
 
-    /* Скролл внутри грани */
+    /* Фаска — дополнительные CSS 3D грани вдоль рёбер.
+       Каждая фаска: тонкая полоска повёрнутая на 45° от плоскости грани.
+       Генерируется через JS после рендера (нужна реальная высота).
+    */
+    .bevel {
+      position: absolute;
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.22),
+        rgba(255,255,255,0.04)
+      );
+      transform-origin: 0 0;
+      backface-visibility: hidden;
+      pointer-events: none;
+    }
     .face-body {
       flex: 1;
       overflow-y: auto;
@@ -189,6 +244,37 @@
     const R = 133;
     let current = 0;
 
+    // Фаска: добавляет 4 тонких грани по рёбрам (лево/право/верх/низ)
+    function addBevels(face, angleY, r) {
+      const W = face.offsetWidth;
+      const H = face.offsetHeight;
+      const B = 8; // ширина фаски в px
+      const DEG = 45;
+
+      const bevels = [
+        // левое ребро: повёрнуто на -45° вокруг оси Y, прилегает к левому краю
+        { w: B, h: H, orig: '100% 0', tx: 0,   ty: 0, ry: -DEG, rx: 0 },
+        // правое ребро: повёрнуто на +45° вокруг оси Y, прилегает к правому краю
+        { w: B, h: H, orig: '0% 0',   tx: W,   ty: 0, ry:  DEG, rx: 0 },
+        // верхнее ребро: повёрнуто на +45° вокруг оси X
+        { w: W, h: B, orig: '0 100%', tx: 0,   ty: 0, ry: 0, rx:  DEG },
+        // нижнее ребро: повёрнуто на -45° вокруг оси X
+        { w: W, h: B, orig: '0 0%',   tx: 0,   ty: H, ry: 0, rx: -DEG },
+      ];
+
+      bevels.forEach(b => {
+        const el = document.createElement('div');
+        el.className = 'bevel';
+        el.style.cssText = `
+          width:${b.w}px; height:${b.h}px;
+          left:${b.tx}px; top:${b.ty}px;
+          transform-origin: ${b.orig};
+          transform: rotateY(${b.ry}deg) rotateX(${b.rx}deg);
+        `;
+        face.appendChild(el);
+      });
+    }
+
     async function init() {
       const data = await loadCatalog();
       const cats = data.categories;
@@ -245,6 +331,9 @@
 
         face.appendChild(body);
         rotor.appendChild(face);
+
+        // Фаска: добавляем после того как грань в DOM
+        requestAnimationFrame(() => addBevels(face, angles[i], R));
       });
 
       // Навигация
