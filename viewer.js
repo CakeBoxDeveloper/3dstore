@@ -211,10 +211,9 @@ function buildMaterialSlider() {
 }
 
 // ── Валидация украинского номера ─────────────────────────────────────────────
-// Форматы: +380XXXXXXXXX, 0XXXXXXXXX, 380XXXXXXXXX
 function isValidUAPhone(raw) {
   const digits = raw.replace(/[\s\-().+]/g, '');
-  // должно быть 10 цифр начиная с 0, или 12 начиная с 380
+  // 10 цифр с 0, или 12 с 380 — жёсткий лимит символов
   return /^0\d{9}$/.test(digits) || /^380\d{9}$/.test(digits);
 }
 
@@ -226,53 +225,81 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   const faceOrder  = document.getElementById('face-order');
   const facePhone  = document.getElementById('face-phone');
   const phoneInput = document.getElementById('phone-input');
-  const phoneArrow = document.getElementById('phone-arrow');
-  const btnBack    = document.getElementById('btn-back');
-  const btnGo      = document.getElementById('btn-go');
   const toast      = document.getElementById('success-toast');
 
-  // Для вертикальной призмы (rotateX) inradius считается от высоты блока
-  function setPrismRadius() {
-    const H = 52; // фиксированная высота кнопки
-    const r = Math.round(H / (2 * Math.sqrt(3)));
-    block.style.setProperty('--prism-r', r + 'px');
+  // Для вертикальной призмы (rotateX) inradius от высоты 52px
+  const r = Math.round(52 / (2 * Math.sqrt(3)));
+  block.style.setProperty('--prism-r', r + 'px');
+
+  // ── Motion blur при вращении ──
+  function addBlur() {
+    rotor.style.filter = 'blur(3px)';
+    rotor.style.transition = 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), filter 0s';
+    setTimeout(() => {
+      rotor.style.filter = 'blur(0px)';
+      rotor.style.transition = 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), filter 0.15s ease-out';
+    }, 80);
   }
 
-  setPrismRadius();
+  function goToFace(face) {
+    addBlur();
+    rotor.classList.remove('to-phone', 'to-confirm');
+    if (face === 1) rotor.classList.add('to-phone');
+    if (face === 2) rotor.classList.add('to-confirm');
+  }
 
   // Грань 0 → 1
   faceOrder.addEventListener('click', () => {
-    rotor.classList.remove('to-confirm');
-    rotor.classList.add('to-phone');
-    setTimeout(() => phoneInput.focus(), 520);
+    goToFace(1);
+    setTimeout(() => phoneInput.focus(), 460);
   });
 
-  // Переход на грань 2 после валидации
-  function tryAdvance() {
-    const phone = phoneInput.value.trim();
-    if (!isValidUAPhone(phone)) {
-      facePhone.classList.add('invalid');
-      setTimeout(() => facePhone.classList.remove('invalid'), 400);
-      return;
+  // Лимит ввода: max 13 символов (+380XXXXXXXXX)
+  phoneInput.addEventListener('input', () => {
+    const raw = phoneInput.value;
+    if (raw.length > 13) phoneInput.value = raw.slice(0, 13);
+
+    // Автоперелист когда номер валиден
+    if (isValidUAPhone(phoneInput.value.trim())) {
+      sendOrder();
     }
-    rotor.classList.remove('to-phone');
-    rotor.classList.add('to-confirm');
-  }
-
-  phoneArrow.addEventListener('click', tryAdvance);
-  phoneInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryAdvance(); });
-
-  // Грань 2 → назад на грань 1
-  btnBack.addEventListener('click', () => {
-    rotor.classList.remove('to-confirm');
-    rotor.classList.add('to-phone');
-    setTimeout(() => phoneInput.focus(), 520);
   });
 
-  // Грань 2 → подтвердить
-  btnGo.addEventListener('click', async () => {
-    btnGo.disabled = true;
-    btnGo.textContent = '…';
+  // Enter тоже триггерит
+  phoneInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      if (isValidUAPhone(phoneInput.value.trim())) {
+        sendOrder();
+      } else {
+        facePhone.classList.add('invalid');
+        setTimeout(() => facePhone.classList.remove('invalid'), 400);
+      }
+    }
+  });
+
+  // Deselect (blur поля) → возврат на грань 0
+  phoneInput.addEventListener('blur', () => {
+    // Небольшая задержка чтобы click на другие элементы успел обработаться
+    setTimeout(() => {
+      // Если уже на грани 2 (отправлено) — не трогаем
+      if (!rotor.classList.contains('to-confirm')) {
+        goToFace(0);
+        phoneInput.value = '';
+      }
+    }, 200);
+  });
+
+  // Клик вне order-card → убрать фокус
+  document.addEventListener('pointerdown', (e) => {
+    if (!block.contains(e.target)) {
+      phoneInput.blur();
+    }
+  });
+
+  // ── Отправка заказа ───────────────────────────────────────────────────────
+  async function sendOrder() {
+    const phone = phoneInput.value.trim();
+    goToFace(2); // грань 2 = экран успеха (показываем сразу)
 
     const payload = {
       product:     product.name,
@@ -282,34 +309,25 @@ function initFlipOrder(product, categoryName, subcategoryName) {
       material:    `${currentMat.label} · ${currentMat.sublabel}`,
       color:       currentMat.sublabel,
       price:       product.price,
-      phone:       phoneInput.value.trim(),
+      phone,
     };
 
     try {
-      const res = await fetch('/api/order', {
+      await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('server');
-
-      // Успех — возвращаем на грань 0
-      rotor.classList.remove('to-confirm');
-      rotor.classList.remove('to-phone');
-      toast.classList.add('show');
-      phoneInput.value = '';
-      btnGo.disabled = false;
-      btnGo.textContent = 'Подтвердить';
     } catch (err) {
-      btnGo.disabled = false;
-      btnGo.textContent = 'Ошибка, повтор';
-      btnGo.style.background = '#c0392b';
-      setTimeout(() => {
-        btnGo.style.background = '';
-        btnGo.textContent = 'Подтвердить';
-      }, 2000);
+      console.error('Order send failed:', err);
     }
-  });
+
+    // Через 4 секунды возвращаемся на грань 0
+    setTimeout(() => {
+      goToFace(0);
+      phoneInput.value = '';
+    }, 4000);
+  }
 }
 
 // ── Main init ────────────────────────────────────────────────────────────────

@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   const data       = await loadCatalog();
-  const categories = data.categories; // 3 категории
+  const categories = data.categories;
 
   let currentCat = 0;
 
@@ -47,15 +47,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // ── Вычисляем translateZ для правильной призмы ────────────────────────────
-  // Для равносторонней треугольной призмы, вращающейся вокруг центральной оси:
-  // inradius = W / (2 * tan(60°)) = W / (2√3) ≈ W * 0.2887
-  // где W — ширина грани (= ширина stage)
+  // ── Размеры: ширина и высота задаются явно ────────────────────────────────
+  // translateZ = W / (2√3) для правильной треугольной призмы rotateY
 
-  function setPrismRadius() {
-    const W = stage.offsetWidth;
+  function updateLayout() {
+    const stageRect = stage.getBoundingClientRect();
+    const W = stageRect.width;
+    const H = stageRect.height;
     const r = Math.round(W / (2 * Math.sqrt(3)));
+
+    // Задаём размеры ротора явно
+    rotor.style.width  = W + 'px';
+    rotor.style.height = H + 'px';
+
+    // CSS переменная для translateZ граней
     stage.style.setProperty('--cat-r', r + 'px');
+
+    // Каждая грань тоже явного размера
+    rotor.querySelectorAll('.cat-face').forEach(f => {
+      f.style.width  = W + 'px';
+      f.style.height = H + 'px';
+    });
   }
 
   // ── Поворот ───────────────────────────────────────────────────────────────
@@ -71,28 +83,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   btnNext.addEventListener('click', () => rotateTo((currentCat + 1) % 3));
   btnPrev.addEventListener('click', () => rotateTo((currentCat + 2) % 3));
 
-  // Свайп на мобильном
+  // Свайп
   let touchStartX = 0;
   stage.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
   stage.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - touchStartX;
     if (Math.abs(dx) > 40) {
-      dx < 0
-        ? rotateTo((currentCat + 1) % 3)
-        : rotateTo((currentCat + 2) % 3);
+      dx < 0 ? rotateTo((currentCat + 1) % 3) : rotateTo((currentCat + 2) % 3);
     }
   });
 
   window.addEventListener('resize', () => {
-    setPrismRadius();
+    updateLayout();
     rotateTo(currentCat);
   });
 
   // ── Init ──────────────────────────────────────────────────────────────────
 
   buildFaces();
-  setPrismRadius();
-  rotateTo(0);
+  // Ждём следующий frame чтобы stage имел размеры
+  requestAnimationFrame(() => {
+    updateLayout();
+    rotateTo(0);
+  });
 });
 
 function openProduct(productId) {

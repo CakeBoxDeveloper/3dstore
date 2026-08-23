@@ -83,8 +83,7 @@ a { color: inherit; text-decoration: none; }
   min-height: 0;
   display: flex;
   flex-direction: column;
-  /* НЕТ overflow:hidden — иначе убьёт 3D transform */
-  overflow: visible;
+  overflow: visible; /* НЕТ overflow:hidden */
 }
 
 .cat-nav {
@@ -124,9 +123,10 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   perspective: 900px;
   perspective-origin: 50% 50%;
-  /* clip чтобы боковые грани не вылезали за карточку */
-  overflow: hidden;
-  border-radius: 0 0 var(--radius) var(--radius);
+  /* НЕТ overflow:hidden — убивает CSS 3D! */
+  /* Clip через маску чтобы боковые грани не торчали */
+  -webkit-mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
 }
 
 /* Ротор — занимает 100% сцены, крутится */
@@ -136,6 +136,7 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center center;
 }
 
 /* Грань призмы */
@@ -462,25 +463,17 @@ a { color: inherit; text-decoration: none; }
   color: #fff;
   font-size: 16px;
   font-family: inherit;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   min-width: 0;
+  width: 100%;
+  text-align: center;
 }
-.prism-face-1 input::placeholder { color: rgba(255,255,255,0.5); }
+.prism-face-1 input::placeholder { color: rgba(255,255,255,0.45); }
 
 .prism-face-1.invalid {
-  border: 2px solid #e74c3c;
+  outline: 2px solid #e74c3c;
   animation: shake 0.3s ease;
 }
-
-.phone-arrow {
-  font-size: 18px;
-  color: rgba(255,255,255,0.7);
-  cursor: pointer;
-  padding: 8px 0 8px 8px;
-  flex-shrink: 0;
-  transition: color 0.15s;
-}
-.phone-arrow:hover { color: #fff; }
 
 @keyframes shake {
   0%,100% { transform: rotateX(-120deg) translateZ(var(--prism-r,30px)) translateX(0); }
@@ -488,38 +481,16 @@ a { color: inherit; text-decoration: none; }
   75%      { transform: rotateX(-120deg) translateZ(var(--prism-r,30px)) translateX(5px); }
 }
 
-/* Грань 2 — подтвердить/назад (зелёная для отладки) */
+/* Грань 2 — успех (зелёная для отладки) */
 .prism-face-2 {
   transform: rotateX(-240deg) translateZ(var(--prism-r, 30px));
   background: #27ae60;
   border: none;
-  gap: 8px;
-  padding: 0 10px;
-}
-
-.prism-face-2 .btn-back,
-.prism-face-2 .btn-go {
-  flex: 1;
-  height: 36px;
-  border-radius: 8px;
-  border: none;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-  transition: opacity 0.15s;
-}
-.prism-face-2 .btn-back {
-  background: rgba(0,0,0,0.25);
   color: #fff;
+  letter-spacing: 0.01em;
 }
-.prism-face-2 .btn-go {
-  background: rgba(0,0,0,0.35);
-  color: #fff;
-}
-.prism-face-2 .btn-back:hover,
-.prism-face-2 .btn-go:hover { opacity: 0.8; }
-.prism-face-2 .btn-go:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Success toast */
 .order-success-toast {
