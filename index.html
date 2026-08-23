@@ -63,8 +63,8 @@
       background: #161a22;
     }
 
-    /* Шиммер — одна тонкая диагональная полоса, проходит раз в 5 сек */
-    .h-face::before {
+    /* Шиммер — только в области скролла, не на заголовке */
+    .face-scroll-wrap::before {
       content: '';
       position: absolute;
       inset: -100%;

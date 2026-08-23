@@ -157,7 +157,7 @@
     .v-face {
       position: absolute;
       inset: 0;
-      border-radius: 12px;
+      border-radius: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -167,7 +167,6 @@
       -webkit-backface-visibility: hidden;
     }
 
-    /* Грань 0 — Заказати (синяя) */
     .v-f0 {
       transform: rotateX(0deg) translateZ(17px);
       background: #1a5276;
@@ -179,7 +178,6 @@
     }
     .v-f0:hover { background: #1f618d; }
 
-    /* Грань 1 — ввод телефона */
     .v-f1 {
       transform: rotateX(-120deg) translateZ(17px);
       background: #1c2c3e;
@@ -200,7 +198,6 @@
     .v-f1 input::placeholder { color: rgba(255,255,255,0.3); }
     .v-f1.invalid { border-color: #e74c3c; }
 
-    /* Грань 2 — успех */
     .v-f2 {
       transform: rotateX(-240deg) translateZ(17px);
       background: #1a3a28;
@@ -252,7 +249,7 @@
               placeholder="+380XXXXXXXXX"
               autocomplete="tel" inputmode="tel">
           </div>
-          <div class="v-face v-f2" id="face-success">✅ Заявка прийнята!</div>
+          <div class="v-face v-f2" id="face-success">Заявка прийнята!</div>
         </div>
       </div>
     </div>
