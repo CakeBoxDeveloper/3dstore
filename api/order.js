@@ -16,8 +16,8 @@ export default async function handler(req, res) {
   }
 
   // Валидация env
-  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-  const CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
+  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN;
+  const CHAT_ID   = process.env.TELEGRAM_CHAT_ID  || process.env.CHAT_ID;
 
   if (!BOT_TOKEN || !CHAT_ID) {
     console.error('Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID');
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
   // Базовая валидация телефона (только цифры, +, пробелы, тире, скобки)
   const phoneClean = String(phone).replace(/[^\d+\s\-()]/g, '').trim();
-  if (phoneClean.length < 7 || phoneClean.length > 20) {
+  if (phoneClean.length < 5) {
     return res.status(400).json({ error: 'Invalid phone number' });
   }
 

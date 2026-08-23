@@ -14,45 +14,38 @@
   </header>
 
   <main class="product-page">
-    <a href="index.html" class="back-link">← Назад в каталог</a>
+    <a href="index.html" class="back-link">← Назад</a>
 
-    <div class="product-layout">
-
-      <!-- 3D Viewer -->
-      <div class="viewer-col">
-        <div class="viewer-wrap">
-          <canvas id="viewer-canvas"></canvas>
-          <div class="viewer-loader" id="viewer-loader">
-            <div class="spinner"></div> Загрузка модели…
-          </div>
-          <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
-        </div>
-
-        <!-- Material picker -->
-        <div class="material-section">
-          <div class="section-label">Тип материала</div>
-          <div class="material-type-tabs" id="mat-type-tabs"></div>
-
-          <div class="section-label">Цвет</div>
-          <div class="color-swatches" id="color-swatches"></div>
-        </div>
+    <!-- 3D Viewer -->
+    <div class="viewer-wrap">
+      <canvas id="viewer-canvas"></canvas>
+      <div class="viewer-loader" id="viewer-loader">
+        <div class="spinner"></div> Загрузка…
       </div>
+      <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
+    </div>
 
-      <!-- Info -->
-      <div class="info-col">
-        <div class="product-name-big" id="p-name">—</div>
-        <div class="product-category-path" id="p-path">—</div>
-        <div class="product-description" id="p-desc">—</div>
-        <div class="product-price-big" id="p-price">—</div>
+    <!-- Product info -->
+    <div class="product-info-block">
+      <div class="product-name-big" id="p-name">—</div>
+      <div class="product-category-path" id="p-path">—</div>
+      <div class="product-description" id="p-desc">—</div>
+      <div class="product-price-big" id="p-price">—</div>
+    </div>
 
-        <div class="selected-config" id="selected-config">
-          <strong>Материал:</strong> <span id="cfg-material">—</span><br>
-          <strong>Цвет:</strong> <span id="cfg-color">—</span>
-        </div>
-
-        <button class="btn-order" id="btn-order">Заказать</button>
+    <!-- Material slider -->
+    <div class="material-section">
+      <div class="section-label">Материал</div>
+      <div class="material-slider-wrap">
+        <div class="material-slider" id="material-slider"></div>
       </div>
     </div>
+
+    <!-- Order button -->
+    <div class="order-block">
+      <button class="btn-order" id="btn-order">Заказать</button>
+    </div>
+
   </main>
 
 </div>

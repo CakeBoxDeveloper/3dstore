@@ -1,34 +1,42 @@
-// viewer.js — Three.js 3D viewer + material picker + order modal
+// viewer.js — Three.js 3D viewer + combined material slider + order modal
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ── Material presets (процедурные, без PBR текстур) ──────────────────────────
+// ── Материалы = финиш + цвет ─────────────────────────────────────────────────
+// Каждый объект — один вариант в слайдере
 
-const MATERIAL_TYPES = [
-  { id: 'matte',       name: 'Матовый',     roughness: 0.95, metalness: 0.0, transmission: 0.0 },
-  { id: 'gloss',       name: 'Глянец',      roughness: 0.05, metalness: 0.0, transmission: 0.0 },
-  { id: 'silk',        name: 'Шёлк',        roughness: 0.40, metalness: 0.0, transmission: 0.0 },
-  { id: 'transparent', name: 'Прозрачный',  roughness: 0.05, metalness: 0.0, transmission: 1.0 },
-];
-
-const COLORS = [
-  { name: 'Белый',     hex: '#f2f2f2' },
-  { name: 'Чёрный',   hex: '#1a1a1a' },
-  { name: 'Серый',     hex: '#888888' },
-  { name: 'Красный',   hex: '#c0392b' },
-  { name: 'Синий',     hex: '#2980b9' },
-  { name: 'Зелёный',   hex: '#27ae60' },
-  { name: 'Жёлтый',   hex: '#f1c40f' },
-  { name: 'Оранжевый', hex: '#e67e22' },
-  { name: 'Бежевый',   hex: '#d4c5a9' },
+const MATERIALS = [
+  // Матовые
+  { id: 'matte-white',    label: 'Матовый',   sublabel: 'Белый',     hex: '#f2f2f2', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-black',    label: 'Матовый',   sublabel: 'Чёрный',    hex: '#222222', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-gray',     label: 'Матовый',   sublabel: 'Серый',     hex: '#888888', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-red',      label: 'Матовый',   sublabel: 'Красный',   hex: '#c0392b', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-blue',     label: 'Матовый',   sublabel: 'Синий',     hex: '#2980b9', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-green',    label: 'Матовый',   sublabel: 'Зелёный',   hex: '#27ae60', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-beige',    label: 'Матовый',   sublabel: 'Бежевый',   hex: '#d4c5a9', roughness: 0.95, metalness: 0, type: 'standard' },
+  // Глянец
+  { id: 'gloss-white',    label: 'Глянец',    sublabel: 'Белый',     hex: '#f5f5f5', roughness: 0.05, metalness: 0, type: 'standard' },
+  { id: 'gloss-black',    label: 'Глянец',    sublabel: 'Чёрный',    hex: '#111111', roughness: 0.05, metalness: 0, type: 'standard' },
+  { id: 'gloss-red',      label: 'Глянец',    sublabel: 'Красный',   hex: '#e74c3c', roughness: 0.05, metalness: 0, type: 'standard' },
+  { id: 'gloss-blue',     label: 'Глянец',    sublabel: 'Синий',     hex: '#3498db', roughness: 0.05, metalness: 0, type: 'standard' },
+  { id: 'gloss-yellow',   label: 'Глянец',    sublabel: 'Жёлтый',    hex: '#f1c40f', roughness: 0.05, metalness: 0, type: 'standard' },
+  // Шёлк
+  { id: 'silk-white',     label: 'Шёлк',      sublabel: 'Белый',     hex: '#f0ede8', roughness: 0.4,  metalness: 0, type: 'silk' },
+  { id: 'silk-gold',      label: 'Шёлк',      sublabel: 'Золото',    hex: '#c9a84c', roughness: 0.4,  metalness: 0, type: 'silk' },
+  { id: 'silk-rose',      label: 'Шёлк',      sublabel: 'Розовый',   hex: '#e8a0a0', roughness: 0.4,  metalness: 0, type: 'silk' },
+  { id: 'silk-mint',      label: 'Шёлк',      sublabel: 'Мятный',    hex: '#a8d8c0', roughness: 0.4,  metalness: 0, type: 'silk' },
+  // Прозрачный
+  { id: 'clear',          label: 'Прозрачный',sublabel: 'Чистый',    hex: '#e8f4ff', roughness: 0.02, metalness: 0, type: 'clear' },
+  { id: 'clear-smoke',    label: 'Прозрачный',sublabel: 'Дымчатый',  hex: '#555566', roughness: 0.05, metalness: 0, type: 'clear' },
+  { id: 'clear-amber',    label: 'Прозрачный',sublabel: 'Янтарный',  hex: '#d4820a', roughness: 0.02, metalness: 0, type: 'clear' },
+  { id: 'clear-teal',     label: 'Прозрачный',sublabel: 'Бирюза',    hex: '#1abc9c', roughness: 0.02, metalness: 0, type: 'clear' },
 ];
 
 // ── State ────────────────────────────────────────────────────────────────────
 
-let currentMatType = MATERIAL_TYPES[0];
-let currentColor   = COLORS[0];
-let meshObjects    = [];
+let currentMat = MATERIALS[0];
+let meshObjects = [];
 let scene, camera, renderer, controls;
 
 // ── Init scene ───────────────────────────────────────────────────────────────
@@ -44,8 +52,7 @@ function initScene() {
   renderer.toneMappingExposure = 1.2;
 
   const W = wrap.clientWidth;
-  const H = W; // square
-  renderer.setSize(W, H);
+  renderer.setSize(W, W);
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a1a1a);
@@ -54,17 +61,13 @@ function initScene() {
   camera.position.set(0, 0.5, 2.5);
 
   // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-  scene.add(ambient);
-
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
   const key = new THREE.DirectionalLight(0xffffff, 2.0);
   key.position.set(3, 5, 3);
   scene.add(key);
-
   const fill = new THREE.DirectionalLight(0xaaccff, 0.8);
   fill.position.set(-3, 2, -2);
   scene.add(fill);
-
   const rim = new THREE.DirectionalLight(0xffeedd, 0.5);
   rim.position.set(0, -3, -3);
   scene.add(rim);
@@ -76,15 +79,11 @@ function initScene() {
   controls.maxDistance = 10;
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.8;
-
-  // Stop auto-rotate on user interaction
   controls.addEventListener('start', () => { controls.autoRotate = false; });
 
-  // Resize
   const ro = new ResizeObserver(() => {
     const w = wrap.clientWidth;
     renderer.setSize(w, w);
-    camera.aspect = 1;
     camera.updateProjectionMatrix();
   });
   ro.observe(wrap);
@@ -101,57 +100,42 @@ function animate() {
 // ── Load model ───────────────────────────────────────────────────────────────
 
 function loadModel(url) {
-  const loader = new GLTFLoader();
   const loader_el = document.getElementById('viewer-loader');
-
-  // Remove previous model
   meshObjects.forEach(o => scene.remove(o));
   meshObjects = [];
-
   loader_el.style.display = 'flex';
 
-  loader.load(
+  new GLTFLoader().load(
     url,
     (gltf) => {
       const model = gltf.scene;
-
-      // Center and scale
-      const box = new THREE.Box3().setFromObject(model);
+      const box   = new THREE.Box3().setFromObject(model);
       const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const scale = 1.8 / maxDim;
-
+      const size   = box.getSize(new THREE.Vector3());
+      const scale  = 1.8 / Math.max(size.x, size.y, size.z);
       model.position.sub(center.multiplyScalar(scale));
       model.scale.setScalar(scale);
-
-      // Apply material
-      model.traverse(child => {
-        if (child.isMesh) {
-          child.material = buildMaterial();
-        }
-      });
-
+      model.traverse(c => { if (c.isMesh) c.material = buildMaterial(); });
       scene.add(model);
       meshObjects.push(model);
       loader_el.style.display = 'none';
     },
     undefined,
     (err) => {
-      console.warn('GLB load failed, using placeholder geometry:', err);
+      console.warn('GLB failed, using placeholder:', err);
       usePlaceholder();
       loader_el.style.display = 'none';
     }
   );
 }
 
-// Fallback — показываем сферу если модели нет
 function usePlaceholder() {
   meshObjects.forEach(o => scene.remove(o));
   meshObjects = [];
-
-  const geo  = new THREE.TorusKnotGeometry(0.6, 0.22, 128, 32);
-  const mesh = new THREE.Mesh(geo, buildMaterial());
+  const mesh = new THREE.Mesh(
+    new THREE.TorusKnotGeometry(0.6, 0.22, 128, 32),
+    buildMaterial()
+  );
   scene.add(mesh);
   meshObjects.push(mesh);
 }
@@ -159,118 +143,74 @@ function usePlaceholder() {
 // ── Material builder ─────────────────────────────────────────────────────────
 
 function buildMaterial() {
-  const color = new THREE.Color(currentColor.hex);
+  const color = new THREE.Color(currentMat.hex);
 
-  if (currentMatType.id === 'transparent') {
+  if (currentMat.type === 'clear') {
     return new THREE.MeshPhysicalMaterial({
-      color,
-      roughness:      currentMatType.roughness,
-      metalness:      currentMatType.metalness,
-      transmission:   1.0,
-      thickness:      0.5,
-      ior:            1.45,
-      transparent:    true,
-      opacity:        1.0,
+      color, roughness: currentMat.roughness, metalness: 0,
+      transmission: 1.0, thickness: 0.5, ior: 1.45,
+      transparent: true, opacity: 1.0,
     });
   }
-
-  if (currentMatType.id === 'silk') {
+  if (currentMat.type === 'silk') {
     return new THREE.MeshPhysicalMaterial({
-      color,
-      roughness:  currentMatType.roughness,
-      metalness:  currentMatType.metalness,
-      sheen:      0.8,
-      sheenRoughness: 0.3,
+      color, roughness: currentMat.roughness, metalness: 0,
+      sheen: 0.8, sheenRoughness: 0.3,
       sheenColor: new THREE.Color(0xffffff),
     });
   }
-
   return new THREE.MeshStandardMaterial({
-    color,
-    roughness: currentMatType.roughness,
-    metalness: currentMatType.metalness,
+    color, roughness: currentMat.roughness, metalness: currentMat.metalness,
   });
 }
 
 function applyMaterialToAll() {
   meshObjects.forEach(obj => {
-    obj.traverse(child => {
-      if (child.isMesh) {
-        child.material.dispose();
-        child.material = buildMaterial();
-      }
+    obj.traverse(c => {
+      if (c.isMesh) { c.material.dispose(); c.material = buildMaterial(); }
     });
   });
 }
 
-// ── UI: material type tabs ───────────────────────────────────────────────────
+// ── Material slider ───────────────────────────────────────────────────────────
 
-function buildMatTypeTabs() {
-  const container = document.getElementById('mat-type-tabs');
-  container.innerHTML = '';
+function buildMaterialSlider() {
+  const slider = document.getElementById('material-slider');
+  slider.innerHTML = '';
 
-  MATERIAL_TYPES.forEach(mt => {
-    const btn = document.createElement('button');
-    btn.className = 'mat-type-btn' + (mt.id === currentMatType.id ? ' active' : '');
-    btn.textContent = mt.name;
-    btn.addEventListener('click', () => {
-      currentMatType = mt;
-      container.querySelectorAll('.mat-type-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+  MATERIALS.forEach(mat => {
+    const card = document.createElement('button');
+    card.className = 'mat-chip' + (mat.id === currentMat.id ? ' active' : '');
+    card.setAttribute('aria-label', `${mat.label} ${mat.sublabel}`);
+    card.innerHTML = `
+      <span class="mat-chip-swatch" style="background:${mat.hex}"></span>
+      <span class="mat-chip-label">${mat.label}</span>
+      <span class="mat-chip-sub">${mat.sublabel}</span>
+    `;
+    card.addEventListener('click', () => {
+      currentMat = mat;
+      slider.querySelectorAll('.mat-chip').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
       applyMaterialToAll();
-      updateConfigDisplay();
     });
-    container.appendChild(btn);
+    slider.appendChild(card);
   });
-}
-
-// ── UI: color swatches ───────────────────────────────────────────────────────
-
-function buildColorSwatches() {
-  const container = document.getElementById('color-swatches');
-  container.innerHTML = '';
-
-  COLORS.forEach(c => {
-    const sw = document.createElement('div');
-    sw.className = 'color-swatch' + (c.name === currentColor.name ? ' active' : '');
-    sw.style.background = c.hex;
-    sw.title = c.name;
-    sw.setAttribute('aria-label', c.name);
-    sw.setAttribute('role', 'button');
-    sw.addEventListener('click', () => {
-      currentColor = c;
-      container.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-      sw.classList.add('active');
-      applyMaterialToAll();
-      updateConfigDisplay();
-    });
-    container.appendChild(sw);
-  });
-}
-
-// ── Config display ───────────────────────────────────────────────────────────
-
-function updateConfigDisplay() {
-  document.getElementById('cfg-material').textContent = currentMatType.name;
-  document.getElementById('cfg-color').textContent    = currentColor.name;
 }
 
 // ── Order modal ───────────────────────────────────────────────────────────────
 
 function initOrderModal(product, categoryName, subcategoryName) {
-  const overlay   = document.getElementById('modal-overlay');
-  const btnOrder  = document.getElementById('btn-order');
-  const btnCancel = document.getElementById('btn-cancel');
+  const overlay    = document.getElementById('modal-overlay');
+  const btnOrder   = document.getElementById('btn-order');
+  const btnCancel  = document.getElementById('btn-cancel');
   const btnConfirm = document.getElementById('btn-confirm');
   const phoneInput = document.getElementById('phone-input');
 
   btnOrder.addEventListener('click', () => {
-    // Fill summary
     document.getElementById('modal-summary').innerHTML = `
       <strong>${product.name}</strong><br>
       ${categoryName} / ${subcategoryName}<br>
-      Материал: <strong>${currentMatType.name}</strong><br>
-      Цвет: <strong>${currentColor.name}</strong><br>
+      Материал: <strong>${currentMat.label} · ${currentMat.sublabel}</strong><br>
       Цена: <strong>${product.price.toLocaleString('ru-RU')} ₽</strong>
     `;
     phoneInput.value = '';
@@ -278,10 +218,7 @@ function initOrderModal(product, categoryName, subcategoryName) {
   });
 
   btnCancel.addEventListener('click', () => overlay.classList.remove('open'));
-
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) overlay.classList.remove('open');
-  });
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
 
   btnConfirm.addEventListener('click', async () => {
     const phone = phoneInput.value.trim();
@@ -300,8 +237,8 @@ function initOrderModal(product, categoryName, subcategoryName) {
       productId:   product.id,
       category:    categoryName,
       subcategory: subcategoryName,
-      material:    currentMatType.name,
-      color:       currentColor.name,
+      material:    `${currentMat.label} · ${currentMat.sublabel}`,
+      color:       currentMat.sublabel,
       price:       product.price,
       phone,
     };
@@ -312,15 +249,13 @@ function initOrderModal(product, categoryName, subcategoryName) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) throw new Error('Server error');
 
-      // Show success
       document.getElementById('modal-inner').innerHTML = `
         <div class="modal-success">
           <div class="success-icon">✅</div>
           <h3>Заказ отправлен!</h3>
-          <p>Мы свяжемся с вами по номеру <strong>${phone}</strong> в ближайшее время.</p>
+          <p>Свяжемся с вами по номеру <strong>${phone}</strong> в ближайшее время.</p>
           <button class="btn-order" onclick="document.getElementById('modal-overlay').classList.remove('open')">Закрыть</button>
         </div>
       `;
@@ -353,20 +288,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const { product, category, subcategory } = found;
 
-  // Fill info
   document.title = `${product.name} — 3D Store`;
   document.getElementById('p-name').textContent  = product.name;
   document.getElementById('p-path').textContent  = `${category.name} / ${subcategory.name}`;
   document.getElementById('p-desc').textContent  = product.description;
   document.getElementById('p-price').textContent = `${product.price.toLocaleString('ru-RU')} ₽`;
 
-  // Init 3D
   initScene();
-  buildMatTypeTabs();
-  buildColorSwatches();
-  updateConfigDisplay();
+  buildMaterialSlider();
   loadModel(product.model);
-
-  // Order modal
   initOrderModal(product, category.name, subcategory.name);
 });
