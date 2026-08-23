@@ -6,39 +6,29 @@
   <title>3D Store — каталог</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="page-catalog">
-
+<body>
   <div class="site-frame">
 
-    <!-- Хедер — отдельная карточка -->
-    <div class="frame-card header-card">
+    <div class="frame-card">
       <header class="site-header">
         <div class="site-logo">3D Store</div>
       </header>
     </div>
 
-    <!-- Каталог-призма — растягивается на оставшееся место -->
     <div class="frame-card catalog-card">
-
-      <!-- Навигация -->
       <div class="cat-nav">
         <button class="cat-nav-btn" id="cat-prev">←</button>
         <span class="cat-nav-title" id="cat-title">Пластик</span>
         <button class="cat-nav-btn" id="cat-next">→</button>
       </div>
-
-      <!-- Обёртка с perspective — НЕТ overflow:hidden здесь -->
-      <div class="cat-stage" id="cat-stage">
-        <!-- Ротор вращается -->
-        <div class="cat-rotor" id="cat-rotor">
-          <!-- 3 грани генерируются JS -->
+      <div class="cat-viewport">
+        <div class="cat-track" id="cat-track">
+          <!-- грани генерирует JS -->
         </div>
       </div>
-
     </div>
 
   </div>
-
   <script src="catalog.js"></script>
   <script src="main.js"></script>
 </body>

@@ -220,116 +220,75 @@ function isValidUAPhone(raw) {
 // ── 3D Призма-кнопка ─────────────────────────────────────────────────────────
 
 function initFlipOrder(product, categoryName, subcategoryName) {
-  const block      = document.getElementById('order-block');
-  const rotor      = document.getElementById('prism-rotor');
+  const scene      = document.getElementById('order-scene');
+  const rotor      = document.getElementById('order-rotor');
   const faceOrder  = document.getElementById('face-order');
   const facePhone  = document.getElementById('face-phone');
   const phoneInput = document.getElementById('phone-input');
-  const toast      = document.getElementById('success-toast');
 
-  // --prism-r вычисляем от ШИРИНЫ кнопки (это и есть "диаметр" призмы)
-  // inradius правильного треугольника = W / (2√3)
-  function setPrismRadius() {
-    const W = block.offsetWidth;
-    const r = Math.round(W / (2 * Math.sqrt(3)));
-    block.style.setProperty('--prism-r', r + 'px');
+  // translateZ = высота / (2√3) — для вертикальной призмы rotateX
+  // Чем больше значение, тем объёмнее. Берём половину высоты кнопки.
+  const H = 52;
+  const r = Math.round(H / (2 * Math.tan(Math.PI / 3)));
+  scene.style.setProperty('--or', r + 'px');
+
+  function goFace(n) {
+    rotor.style.opacity = '0.5';
+    setTimeout(() => { rotor.style.opacity = '1'; }, 220);
+    rotor.classList.remove('to-phone', 'to-success');
+    if (n === 1) rotor.classList.add('to-phone');
+    if (n === 2) rotor.classList.add('to-success');
   }
 
-  setPrismRadius();
-  window.addEventListener('resize', setPrismRadius);
-
-  // ── Motion blur при вращении — через opacity вместо filter (filter убивает 3D) ──
-  function addBlur() {
-    rotor.style.opacity = '0.6';
-    setTimeout(() => { rotor.style.opacity = '1'; }, 180);
-  }
-
-  function goToFace(face) {
-    addBlur();
-    rotor.classList.remove('to-phone', 'to-confirm');
-    if (face === 1) rotor.classList.add('to-phone');
-    if (face === 2) rotor.classList.add('to-confirm');
-  }
-
-  // Грань 0 → 1
   faceOrder.addEventListener('click', () => {
-    goToFace(1);
-    setTimeout(() => phoneInput.focus(), 460);
+    goFace(1);
+    setTimeout(() => phoneInput.focus(), 520);
   });
 
-  // Лимит ввода: max 13 символов (+380XXXXXXXXX)
   phoneInput.addEventListener('input', () => {
-    const raw = phoneInput.value;
-    if (raw.length > 13) phoneInput.value = raw.slice(0, 13);
-
-    // Автоперелист когда номер валиден
-    if (isValidUAPhone(phoneInput.value.trim())) {
-      sendOrder();
-    }
+    if (phoneInput.value.length > 13) phoneInput.value = phoneInput.value.slice(0, 13);
+    if (isValidUAPhone(phoneInput.value.trim())) sendOrder();
   });
 
-  // Enter тоже триггерит
-  phoneInput.addEventListener('keydown', (e) => {
+  phoneInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
-      if (isValidUAPhone(phoneInput.value.trim())) {
-        sendOrder();
-      } else {
+      if (isValidUAPhone(phoneInput.value.trim())) sendOrder();
+      else {
         facePhone.classList.add('invalid');
         setTimeout(() => facePhone.classList.remove('invalid'), 400);
       }
     }
   });
 
-  // Deselect (blur поля) → возврат на грань 0
   phoneInput.addEventListener('blur', () => {
-    // Небольшая задержка чтобы click на другие элементы успел обработаться
     setTimeout(() => {
-      // Если уже на грани 2 (отправлено) — не трогаем
-      if (!rotor.classList.contains('to-confirm')) {
-        goToFace(0);
+      if (!rotor.classList.contains('to-success')) {
+        goFace(0);
         phoneInput.value = '';
       }
     }, 200);
   });
 
-  // Клик вне order-card → убрать фокус
-  document.addEventListener('pointerdown', (e) => {
-    if (!block.contains(e.target)) {
-      phoneInput.blur();
-    }
+  document.addEventListener('pointerdown', e => {
+    if (!scene.contains(e.target)) phoneInput.blur();
   });
 
-  // ── Отправка заказа ───────────────────────────────────────────────────────
   async function sendOrder() {
     const phone = phoneInput.value.trim();
-    goToFace(2); // грань 2 = экран успеха (показываем сразу)
-
-    const payload = {
-      product:     product.name,
-      productId:   product.id,
-      category:    categoryName,
-      subcategory: subcategoryName,
-      material:    `${currentMat.label} · ${currentMat.sublabel}`,
-      color:       currentMat.sublabel,
-      price:       product.price,
-      phone,
-    };
-
+    goFace(2);
     try {
       await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          product: product.name, productId: product.id,
+          category: categoryName, subcategory: subcategoryName,
+          material: `${currentMat.label} · ${currentMat.sublabel}`,
+          color: currentMat.sublabel, price: product.price, phone,
+        }),
       });
-    } catch (err) {
-      console.error('Order send failed:', err);
-    }
-
-    // Через 4 секунды возвращаемся на грань 0
-    setTimeout(() => {
-      goToFace(0);
-      phoneInput.value = '';
-    }, 4000);
+    } catch (e) { console.error(e); }
+    setTimeout(() => { goFace(0); phoneInput.value = ''; }, 4000);
   }
 }
 
@@ -361,5 +320,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   initScene();
   buildMaterialSlider();
   loadModel(product.model);
-  initFlipOrder(product, category.name, subcategory.name);
-});
+  initFlipOrder(product, category.name, subcategory.name);});

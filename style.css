@@ -21,14 +21,13 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.5;
-  overflow-x: hidden;
 }
 
 a { color: inherit; text-decoration: none; }
 
-/* ═══════════════════════════════════════
+/* ═══════════════════════════
    LAYOUT
-   ═══════════════════════════════════════ */
+═══════════════════════════ */
 
 .site-frame {
   max-width: 480px;
@@ -40,7 +39,6 @@ a { color: inherit; text-decoration: none; }
   padding: var(--gap);
 }
 
-/* Базовая карточка — с overflow:hidden */
 .frame-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -49,31 +47,20 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
 }
 
-/* Карточки с 3D — overflow:visible, иначе preserve-3d не работает */
-.catalog-card,
-.order-card {
-  overflow: visible;
-}
-
-/* ═══════════════════════════════════════
+/* ═══════════════════════════
    HEADER
-   ═══════════════════════════════════════ */
+═══════════════════════════ */
 
 .site-header {
   padding: 12px var(--pad);
   display: flex;
   align-items: center;
 }
+.site-logo { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
 
-.site-logo {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.4px;
-}
-
-/* ═══════════════════════════════════════
-   CATALOG — 3D PRISM (rotateY)
-   ═══════════════════════════════════════ */
+/* ═══════════════════════════
+   CATALOG — horizontal slider
+═══════════════════════════ */
 
 .catalog-card {
   flex: 1;
@@ -88,15 +75,9 @@ a { color: inherit; text-decoration: none; }
   justify-content: space-between;
   padding: 10px var(--pad);
   flex-shrink: 0;
-  background: var(--surface);
-  border-radius: var(--radius) var(--radius) 0 0;
   border-bottom: 1px solid var(--border);
-  /* clip nav отдельно */
-  overflow: hidden;
 }
-
 .cat-nav-title { font-size: 16px; font-weight: 700; }
-
 .cat-nav-btn {
   background: var(--surf2);
   border: 1px solid var(--border);
@@ -108,68 +89,43 @@ a { color: inherit; text-decoration: none; }
   font-family: inherit;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
+  flex-shrink: 0;
 }
 .cat-nav-btn:hover { background: var(--border); }
 
-/*
-  СЦЕНА: perspective здесь, overflow:visible чтобы не убить 3D.
-  Грани выезжают за края при повороте — это нормально, site-frame их клипает.
-*/
-.cat-stage {
+/* Слайдер-вьюпорт */
+.cat-viewport {
   flex: 1;
   min-height: 0;
+  overflow: hidden;
   position: relative;
-  perspective: 900px;
-  perspective-origin: 50% 50%;
-  /* НЕТ overflow — убивает preserve-3d */
 }
 
-/*
-  РОТОР: вращается, preserve-3d.
-  Размеры задаются из JS явно (px), не % — иначе в абсолютно позиционированных
-  дочерних элементах height:100% не работает.
-*/
-.cat-rotor {
-  position: absolute;
-  top: 0; left: 0;
-  transform-style: preserve-3d;
-  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: 50% 50%;
-  /* width/height задаются JS */
-}
-
-/*
-  ГРАНЬ: position:absolute, backface-visibility:hidden.
-  НЕТ overflow на самой грани — убивает preserve-3d.
-  Скролл на .cat-face-inner внутри.
-*/
-.cat-face {
-  position: absolute;
-  top: 0; left: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 0 0 var(--radius) var(--radius);
-  /* width/height задаются JS */
-}
-
-.cat-face[data-index="0"] { transform: rotateY(0deg)   translateZ(var(--cat-r,120px)); background: #1a1a1a; }
-.cat-face[data-index="1"] { transform: rotateY(120deg)  translateZ(var(--cat-r,120px)); background: #1b1f1b; }
-.cat-face[data-index="2"] { transform: rotateY(240deg)  translateZ(var(--cat-r,120px)); background: #1b1b1f; }
-
-/* Скролл на внутреннем контейнере */
-.cat-face-inner {
-  width: 100%;
+/* Трек — все грани в ряд */
+.cat-track {
+  display: flex;
+  width: 300%; /* 3 грани */
   height: 100%;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cat-face {
+  width: calc(100% / 3);
+  height: 100%;
+  flex-shrink: 0;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
   padding: var(--pad);
 }
-.cat-face-inner::-webkit-scrollbar { display: none; }
+.cat-face::-webkit-scrollbar { display: none; }
+
+.cat-face:nth-child(1) { background: #1a1a1a; }
+.cat-face:nth-child(2) { background: #1b1f1b; }
+.cat-face:nth-child(3) { background: #1b1b1f; }
 
 /* Подкатегория */
 .sub-block { margin-bottom: 18px; }
-
 .sub-title {
   font-size: 11px;
   font-weight: 600;
@@ -180,13 +136,11 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 8px;
 }
 
-/* Сетка: строго 3 колонки */
 .sub-products {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
-
 .prod-icon {
   aspect-ratio: 1;
   background: var(--surf2);
@@ -203,15 +157,11 @@ a { color: inherit; text-decoration: none; }
 .prod-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pi-ph { font-size: 20px; opacity: 0.2; }
 
-/* ═══════════════════════════════════════
+/* ═══════════════════════════
    PRODUCT PAGE
-   ═══════════════════════════════════════ */
+═══════════════════════════ */
 
-.content-card {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden; /* здесь 3D нет, clip нужен */
-}
+.content-card { flex: 1; min-height: 0; }
 
 .product-page {
   height: 100%;
@@ -241,166 +191,107 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   margin-bottom: 12px;
 }
-
 #viewer-canvas { width: 100%; aspect-ratio: 1; display: block; }
 
 .product-info-block { margin-bottom: 12px; }
-
 .product-name-price-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
 }
+.product-name-big  { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3; }
+.product-price-big { font-size: 17px; font-weight: 700; color: var(--price); white-space: nowrap; flex-shrink: 0; }
 
-.product-name-big {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  line-height: 1.3;
-}
-
-.product-price-big {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--price);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* ── Слайдер материалов ── */
+/* Слайдер материалов */
 .material-section { margin-bottom: 4px; }
-
-.material-slider-outer {
-  position: relative;
-  margin: 0 calc(-1 * var(--pad));
-}
-
-.material-slider-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 0 var(--pad);
-}
+.material-slider-outer { position: relative; margin: 0 calc(-1 * var(--pad)); }
+.material-slider-wrap  { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 var(--pad); }
 .material-slider-wrap::-webkit-scrollbar { display: none; }
-
-.material-slider {
-  display: flex;
-  gap: 7px;
-  width: max-content;
-  padding-bottom: 4px;
-}
+.material-slider { display: flex; gap: 7px; width: max-content; padding-bottom: 4px; }
 
 .material-slider-outer::before,
 .material-slider-outer::after {
   content: '';
   position: absolute;
   top: 0; bottom: 4px;
-  width: 28px;
-  z-index: 2;
+  width: 28px; z-index: 2;
   pointer-events: none;
   transition: opacity 0.2s;
 }
-.material-slider-outer::before { left: 0;  background: linear-gradient(to right, var(--surface), transparent); }
+.material-slider-outer::before { left:  0; background: linear-gradient(to right, var(--surface), transparent); }
 .material-slider-outer::after  { right: 0; background: linear-gradient(to left,  var(--surface), transparent); }
 .material-slider-outer.at-start::before { opacity: 0; }
 .material-slider-outer.at-end::after    { opacity: 0; }
 
 .mat-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 7px 9px;
-  min-width: 62px;
-  background: var(--surf2);
-  border: 1.5px solid var(--border);
-  border-radius: 9px;
-  cursor: pointer;
-  font-family: inherit;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 7px 9px; min-width: 62px;
+  background: var(--surf2); border: 1.5px solid var(--border); border-radius: 9px;
+  cursor: pointer; font-family: inherit;
   transition: border-color 0.15s, background 0.15s;
   flex-shrink: 0;
 }
 .mat-chip:hover  { border-color: #a0a0a0; }
 .mat-chip.active { border-color: var(--text); background: #2a2a2a; }
+.mat-chip-swatch { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.mat-chip-label  { font-size: 10px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.mat-chip-sub    { font-size: 9px; color: var(--muted); white-space: nowrap; }
 
-.mat-chip-swatch {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.mat-chip-label { font-size: 10px; font-weight: 600; color: var(--text); white-space: nowrap; }
-.mat-chip-sub   { font-size: 9px; color: var(--muted); white-space: nowrap; }
-
-/* ═══════════════════════════════════════
-   ORDER PRISM BUTTON (rotateX — вверх)
-   ═══════════════════════════════════════ */
+/* ═══════════════════════════
+   ORDER BUTTON — 3-face flip
+   Используем CSS 3D напрямую
+   на изолированном элементе
+   без промежуточных stacking
+   context.
+═══════════════════════════ */
 
 .order-card {
   flex-shrink: 0;
-  /* overflow:visible задан выше */
-}
-
-.order-block { padding: 0; }
-
-/*
-  prism-wrap даёт вертикальный зазор — грани при rotateX выезжают
-  по оси Y, нужно место чтобы не клиповались родителем.
-  Отрицательный margin компенсирует отступ в layout.
-*/
-.prism-wrap {
-  padding-top: 36px;
-  padding-bottom: 36px;
-  margin-top: -36px;
-  margin-bottom: -36px;
+  /* overflow:hidden убираем чтобы не клипать 3D */
   overflow: visible;
+  background: transparent;
+  border: none;
 }
 
-.prism-scene {
-  width: 100%;
-  height: 52px;
-  position: relative;
-  perspective: 500px;
+/* Сцена: только perspective, ничего больше */
+.order-scene {
+  perspective: 400px;
   perspective-origin: 50% 50%;
 }
 
-/*
-  РОТОР кнопки: preserve-3d, rotateX.
-  НЕТ filter, overflow — убивают 3D.
-*/
-.prism-rotor {
-  width: 100%;
-  height: 52px;
+/* Ротор: ТОЛЬКО transform-style + transition.
+   Никаких border, background, overflow, filter. */
+.order-rotor {
   position: relative;
+  height: 52px;
   transform-style: preserve-3d;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity  0.18s ease-out;
-  transform-origin: 50% 50%;
+              opacity   0.2s ease-out;
 }
 
-.prism-rotor.to-phone   { transform: rotateX(120deg); }
-.prism-rotor.to-confirm { transform: rotateX(240deg); }
+.order-rotor.to-phone   { transform: rotateX(120deg); }
+.order-rotor.to-success { transform: rotateX(240deg); }
 
-/* Грань кнопки */
-.prism-face {
+/* Грань: position absolute, backface-visibility hidden.
+   Все визуальные стили (bg, border, border-radius) — здесь, не на родителях. */
+.order-face {
   position: absolute;
-  width: 100%; height: 52px;
-  top: 0; left: 0;
+  inset: 0;
   border-radius: var(--radius);
   display: flex;
   align-items: center;
   justify-content: center;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* translateZ задаётся инлайн через style.setProperty */
 }
 
-/* translateZ = W/(2√3) задаётся из JS через --prism-r */
-
-/* Грань 0 — Заказати (красная) */
-.prism-face-0 {
-  transform: rotateX(0deg) translateZ(var(--prism-r, 80px));
-  background: #e74c3c;
-  color: #fff;
+/* Грань 0 — Заказати */
+.order-face-0 {
+  transform: rotateX(0deg) translateZ(var(--or, 30px));
+  background: #e0e0e0;
+  color: #111;
   font-size: 15px;
   font-weight: 700;
   font-family: inherit;
@@ -409,18 +300,19 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   transition: opacity 0.15s;
 }
-.prism-face-0:hover  { opacity: 0.88; }
-.prism-face-0:active { opacity: 0.72; }
+.order-face-0:hover  { opacity: 0.88; }
+.order-face-0:active { opacity: 0.72; }
 
-/* Грань 1 — телефон (синяя) */
-.prism-face-1 {
-  transform: rotateX(-120deg) translateZ(var(--prism-r, 80px));
-  background: #2980b9;
-  border: none;
+/* Грань 1 — ввод телефона */
+.order-face-1 {
+  transform: rotateX(-120deg) translateZ(var(--or, 30px));
+  background: #2c3e50;
+  border: 2px solid #3d5166;
   padding: 0 16px;
+  gap: 8px;
 }
-.prism-face-1 input {
-  width: 100%;
+.order-face-1 input {
+  flex: 1;
   background: transparent;
   border: none;
   outline: none;
@@ -429,30 +321,31 @@ a { color: inherit; text-decoration: none; }
   font-family: inherit;
   letter-spacing: 0.04em;
   text-align: center;
+  min-width: 0;
 }
-.prism-face-1 input::placeholder { color: rgba(255,255,255,0.45); }
-.prism-face-1.invalid { outline: 2px solid #e74c3c; }
+.order-face-1 input::placeholder { color: rgba(255,255,255,0.4); }
+.order-face-1.invalid { border-color: #e74c3c; animation: shake-face 0.3s ease; }
 
-@keyframes shake {
-  0%,100% { transform: rotateX(-120deg) translateZ(var(--prism-r,80px)) translateX(0); }
-  25%      { transform: rotateX(-120deg) translateZ(var(--prism-r,80px)) translateX(-5px); }
-  75%      { transform: rotateX(-120deg) translateZ(var(--prism-r,80px)) translateX(5px); }
+@keyframes shake-face {
+  0%,100% { transform: rotateX(-120deg) translateZ(var(--or,30px)) translateX(0); }
+  25%      { transform: rotateX(-120deg) translateZ(var(--or,30px)) translateX(-6px); }
+  75%      { transform: rotateX(-120deg) translateZ(var(--or,30px)) translateX(6px); }
 }
-.prism-face-1.invalid { animation: shake 0.3s ease; }
 
-/* Грань 2 — успех (зелёная) */
-.prism-face-2 {
-  transform: rotateX(-240deg) translateZ(var(--prism-r, 80px));
-  background: #27ae60;
-  border: none;
+/* Грань 2 — успех */
+.order-face-2 {
+  transform: rotateX(-240deg) translateZ(var(--or, 30px));
+  background: #1e5c35;
+  border: 2px solid #27ae60;
   font-size: 15px;
   font-weight: 700;
-  color: #fff;
+  color: #c8f0a0;
+  letter-spacing: 0.01em;
 }
 
-/* ═══════════════════════════════════════
-   VIEWER LOADER
-   ═══════════════════════════════════════ */
+/* ═══════════════════════════
+   LOADER
+═══════════════════════════ */
 
 .viewer-loader {
   position: absolute;
@@ -464,7 +357,6 @@ a { color: inherit; text-decoration: none; }
   font-size: 13px;
   color: var(--muted);
 }
-
 .spinner {
   width: 26px; height: 26px;
   border: 2px solid var(--border);
@@ -473,5 +365,4 @@ a { color: inherit; text-decoration: none; }
   animation: spin 0.8s linear infinite;
   margin-right: 10px;
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }

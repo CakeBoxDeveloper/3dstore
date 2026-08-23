@@ -6,18 +6,15 @@
   <title>3D Store — товар</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="page-product">
-
+<body>
   <div class="site-frame">
 
-    <!-- Хедер -->
-    <div class="frame-card header-card">
+    <div class="frame-card">
       <header class="site-header">
         <div class="site-logo">3D Store</div>
       </header>
     </div>
 
-    <!-- Контент товара -->
     <div class="frame-card content-card">
       <main class="product-page">
         <a href="index.html" class="back-link">← Назад</a>
@@ -47,21 +44,16 @@
       </main>
     </div>
 
-    <!-- Кнопка заказа — отдельная карточка -->
-    <div class="frame-card order-card">
-      <div class="order-block" id="order-block">
-        <!-- wrapper даёт вертикальный зазор чтобы грани не клипались -->
-        <div class="prism-wrap">
-          <div class="prism-scene">
-            <div class="prism-rotor" id="prism-rotor">
-              <button class="prism-face prism-face-0" id="face-order">Заказати</button>
-              <div class="prism-face prism-face-1" id="face-phone">
-                <input type="tel" id="phone-input" placeholder="+380XXXXXXXXX" autocomplete="tel" inputmode="tel">
-              </div>
-              <div class="prism-face prism-face-2" id="face-success">
-                ✅ Заявка прийнята!
-              </div>
-            </div>
+    <!-- Кнопка заказа — отдельная карточка (overflow:visible для 3D) -->
+    <div class="order-card">
+      <div class="order-scene" id="order-scene">
+        <div class="order-rotor" id="order-rotor">
+          <button class="order-face order-face-0" id="face-order">Заказати</button>
+          <div class="order-face order-face-1" id="face-phone">
+            <input type="tel" id="phone-input" placeholder="+380XXXXXXXXX" autocomplete="tel" inputmode="tel">
+          </div>
+          <div class="order-face order-face-2" id="face-success">
+            ✅ Заявка прийнята!
           </div>
         </div>
       </div>
