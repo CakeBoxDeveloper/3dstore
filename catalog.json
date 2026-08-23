@@ -1,0 +1,230 @@
+{
+  "categories": [
+    {
+      "id": "plastic",
+      "name": "Пластик",
+      "subcategories": [
+        {
+          "id": "lamps",
+          "name": "Лампы",
+          "products": [
+            {
+              "id": "lamp-helix",
+              "name": "Лампа Helix",
+              "description": "Настольная лампа с геометрическим плафоном. Печатается на FDM принтере.",
+              "price": 1200,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/lamp-helix.jpg"
+            },
+            {
+              "id": "lamp-grid",
+              "name": "Лампа Grid",
+              "description": "Потолочный плафон с сетчатой структурой.",
+              "price": 1500,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/lamp-grid.jpg"
+            }
+          ]
+        },
+        {
+          "id": "stands",
+          "name": "Подставки",
+          "products": [
+            {
+              "id": "stand-phone",
+              "name": "Подставка для телефона",
+              "description": "Универсальная подставка для смартфона с регулируемым углом.",
+              "price": 350,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/stand-phone.jpg"
+            },
+            {
+              "id": "stand-monitor",
+              "name": "Подставка под монитор",
+              "description": "Подставка с полкой для клавиатуры.",
+              "price": 800,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/stand-monitor.jpg"
+            }
+          ]
+        },
+        {
+          "id": "shelves",
+          "name": "Полки",
+          "products": [
+            {
+              "id": "shelf-corner",
+              "name": "Угловая полка",
+              "description": "Настенная угловая полка для мелочей.",
+              "price": 600,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/shelf-corner.jpg"
+            }
+          ]
+        },
+        {
+          "id": "clocks",
+          "name": "Часы",
+          "products": [
+            {
+              "id": "clock-wall",
+              "name": "Настенные часы Minimal",
+              "description": "Минималистичные настенные часы с открытым механизмом.",
+              "price": 950,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/clock-wall.jpg"
+            }
+          ]
+        },
+        {
+          "id": "speakers",
+          "name": "Динамики",
+          "products": [
+            {
+              "id": "speaker-mono",
+              "name": "Корпус для моно-динамика",
+              "description": "Акустический корпус под динамик 3 дюйма.",
+              "price": 700,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/speaker-mono.jpg"
+            }
+          ]
+        },
+        {
+          "id": "misc-plastic",
+          "name": "Разное",
+          "products": [
+            {
+              "id": "hook-wall",
+              "name": "Крючок настенный",
+              "description": "Набор настенных крючков с монтажной пластиной.",
+              "price": 200,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/hook-wall.jpg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wax",
+      "name": "Воск",
+      "subcategories": [
+        {
+          "id": "candles",
+          "name": "Свечи",
+          "products": [
+            {
+              "id": "candle-geo",
+              "name": "Свеча Geo",
+              "description": "Геометрическая свеча из натурального воска. Форма печатается, заливается вручную.",
+              "price": 450,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/candle-geo.jpg"
+            },
+            {
+              "id": "candle-pillar",
+              "name": "Свеча Pillar",
+              "description": "Колонна из воска с рельефным орнаментом.",
+              "price": 380,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/candle-pillar.jpg"
+            },
+            {
+              "id": "candle-moon",
+              "name": "Свеча Moon",
+              "description": "Свеча в форме луны с кратерами.",
+              "price": 520,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/candle-moon.jpg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "epoxy",
+      "name": "Эпоксидка",
+      "subcategories": [
+        {
+          "id": "tabletops",
+          "name": "Столешницы",
+          "products": [
+            {
+              "id": "table-river",
+              "name": "Столешница River",
+              "description": "Столешница с эффектом реки из прозрачной эпоксидной смолы.",
+              "price": 12000,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/table-river.jpg"
+            }
+          ]
+        },
+        {
+          "id": "jewelry",
+          "name": "Украшения",
+          "products": [
+            {
+              "id": "ring-epoxy",
+              "name": "Кольцо с цветком",
+              "description": "Кольцо из эпоксидной смолы с сухоцветом внутри.",
+              "price": 650,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/ring-epoxy.jpg"
+            },
+            {
+              "id": "pendant-ocean",
+              "name": "Кулон Ocean",
+              "description": "Кулон с эффектом морской волны.",
+              "price": 800,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/pendant-ocean.jpg"
+            }
+          ]
+        },
+        {
+          "id": "nightlights",
+          "name": "Ночники",
+          "products": [
+            {
+              "id": "nightlight-river",
+              "name": "Ночник River",
+              "description": "Светящийся ночник с эффектом реки. LED подсветка с пультом.",
+              "price": 3500,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/nightlight-river.jpg"
+            }
+          ]
+        },
+        {
+          "id": "trays",
+          "name": "Подносы и тарелки",
+          "products": [
+            {
+              "id": "tray-marble",
+              "name": "Поднос Marble",
+              "description": "Декоративный поднос с эффектом мрамора.",
+              "price": 1800,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/tray-marble.jpg"
+            }
+          ]
+        },
+        {
+          "id": "panels",
+          "name": "Декоративные панели",
+          "products": [
+            {
+              "id": "panel-wave",
+              "name": "Панель Wave",
+              "description": "Настенная декоративная панель с волновым рельефом и заливкой смолой.",
+              "price": 4500,
+              "model": "/models/placeholder.glb",
+              "thumbnail": "/thumbnails/panel-wave.jpg"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

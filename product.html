@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Store — товар</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="site-logo">3D Store</div>
+  </header>
+
+  <main class="product-page">
+    <a href="index.html" class="back-link">← Назад в каталог</a>
+
+    <div class="product-layout">
+
+      <!-- 3D Viewer -->
+      <div class="viewer-col">
+        <div class="viewer-wrap">
+          <canvas id="viewer-canvas"></canvas>
+          <div class="viewer-loader" id="viewer-loader">
+            <div class="spinner"></div> Загрузка модели…
+          </div>
+          <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
+        </div>
+
+        <!-- Material picker -->
+        <div class="material-section">
+          <div class="section-label">Тип материала</div>
+          <div class="material-type-tabs" id="mat-type-tabs"></div>
+
+          <div class="section-label">Цвет</div>
+          <div class="color-swatches" id="color-swatches"></div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="info-col">
+        <div class="product-name-big" id="p-name">—</div>
+        <div class="product-category-path" id="p-path">—</div>
+        <div class="product-description" id="p-desc">—</div>
+        <div class="product-price-big" id="p-price">—</div>
+
+        <div class="selected-config" id="selected-config">
+          <strong>Материал:</strong> <span id="cfg-material">—</span><br>
+          <strong>Цвет:</strong> <span id="cfg-color">—</span>
+        </div>
+
+        <button class="btn-order" id="btn-order">Заказать</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Order modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal-inner">
+      <h3>Оформить заказ</h3>
+      <p class="modal-sub">Введите номер телефона — мы свяжемся с вами</p>
+
+      <div class="order-summary" id="modal-summary"></div>
+
+      <label for="phone-input">Номер телефона</label>
+      <input type="tel" id="phone-input" placeholder="+7 999 000 00 00" autocomplete="tel">
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btn-cancel">Отмена</button>
+        <button class="btn-confirm" id="btn-confirm">Отправить заказ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script src="catalog.js"></script>
+  <script type="module" src="viewer.js"></script>
+</body>
+</html>
