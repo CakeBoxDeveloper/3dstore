@@ -4,72 +4,127 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3D Store — товар</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: #080808; }
+    body { font-family: system-ui, sans-serif; color: #f0f0f0; }
+
+    .page {
+      max-width: 480px;
+      height: 100dvh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .card-header {
+      background: #1a1a1a;
+      border: 1px solid #2e2e2e;
+      border-radius: 14px;
+      overflow: hidden;
+      flex-shrink: 0;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
+    .back-link { font-size: 14px; color: #888; text-decoration: none; }
+    .back-link:hover { color: #f0f0f0; }
+
+    .card-content {
+      background: #1a1a1a;
+      border: 1px solid #2e2e2e;
+      border-radius: 14px;
+      overflow: hidden;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #444;
+      font-size: 14px;
+    }
+
+    /* Прозрачный placeholder — размер задаёт, фон не рисует */
+    .card-order {
+      overflow: visible;
+      flex-shrink: 0;
+      height: 60px;
+      cursor: pointer;
+    }
+
+    /* ══ ВЕРТИКАЛЬНАЯ ПРИЗМА (ось X) ══ */
+
+    .v-scene {
+      width: 100%;
+      height: 100%;
+      perspective: 300px;
+      perspective-origin: 50% 50%;
+    }
+
+    .v-rotor {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: translateZ(-17px) rotateX(0deg);
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .v-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      user-select: none;
+    }
+
+    .v-f0 { transform: rotateX(0deg)    translateZ(17px); background: #c0392b; color: #fff; }
+    .v-f1 { transform: rotateX(-120deg) translateZ(17px); background: #2471a3; color: #fff; }
+    .v-f2 { transform: rotateX(-240deg) translateZ(17px); background: #1e8449; color: #fff; }
+  </style>
 </head>
 <body>
-  <div class="site-frame">
+  <div class="page">
 
-    <div class="frame-card">
-      <header class="site-header">
-        <div class="site-logo">3D Store</div>
-      </header>
+    <div class="card-header">
+      <span class="logo">3D Store</span>
+      <a href="index.html" class="back-link">← Назад</a>
     </div>
 
-    <div class="frame-card content-card">
-      <main class="product-page">
-        <a href="index.html" class="back-link">← Назад</a>
-
-        <div class="viewer-wrap">
-          <canvas id="viewer-canvas"></canvas>
-          <div class="viewer-loader" id="viewer-loader">
-            <div class="spinner"></div> Загрузка…
-          </div>
-        </div>
-
-        <div class="product-info-block">
-          <div class="product-name-price-row">
-            <div class="product-name-big" id="p-name">—</div>
-            <div class="product-price-big" id="p-price">—</div>
-          </div>
-        </div>
-
-        <div class="material-section">
-          <div class="material-slider-outer" id="slider-outer">
-            <div class="material-slider-wrap" id="slider-wrap">
-              <div class="material-slider" id="material-slider"></div>
-            </div>
-          </div>
-        </div>
-
-      </main>
+    <div class="card-content">
+      товар
     </div>
 
-    <!-- Кнопка заказа — отдельная карточка (overflow:visible для 3D) -->
-    <div class="order-card">
-      <div class="order-scene" id="order-scene">
-        <div class="order-rotor" id="order-rotor">
-          <button class="order-face order-face-0" id="face-order">Заказати</button>
-          <div class="order-face order-face-1" id="face-phone">
-            <input type="tel" id="phone-input" placeholder="+380XXXXXXXXX" autocomplete="tel" inputmode="tel">
-          </div>
-          <div class="order-face order-face-2" id="face-success">
-            ✅ Заявка прийнята!
-          </div>
+    <div class="card-order" id="order">
+      <div class="v-scene">
+        <div class="v-rotor" id="v-rotor">
+          <div class="v-face v-f0">Заказати</div>
+          <div class="v-face v-f1">+380...</div>
+          <div class="v-face v-f2">✅ Прийнято!</div>
         </div>
       </div>
     </div>
 
   </div>
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
-    }
-  }
+  <script>
+    const rotor = document.getElementById('v-rotor');
+    const r = 17;
+    let current = 0;
+
+    document.getElementById('order').addEventListener('click', () => {
+      current += 1;
+      rotor.style.transform = `translateZ(-${r}px) rotateX(${current * 120}deg)`;
+    });
   </script>
-  <script src="catalog.js"></script>
-  <script type="module" src="viewer.js"></script>
 </body>
 </html>

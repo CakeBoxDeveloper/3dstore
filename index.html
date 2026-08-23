@@ -4,32 +4,267 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3D Store — каталог</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: #080808; }
+    body { font-family: system-ui, sans-serif; color: #f0f0f0; }
+
+    .page {
+      max-width: 480px;
+      height: 100dvh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px;
+    }
+
+    /* Хедер */
+    .card-header {
+      background: #1a1a1a;
+      border: 1px solid #2e2e2e;
+      border-radius: 14px;
+      overflow: hidden;
+      flex-shrink: 0;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
+
+    /* Кнопки навигации */
+    .cat-nav { display: flex; align-items: center; gap: 12px; }
+    .cat-nav-btn {
+      background: #242424;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      color: #f0f0f0;
+      font-size: 16px;
+      width: 32px; height: 32px;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .cat-nav-btn:hover { background: #2e2e2e; }
+    .cat-title { font-size: 15px; font-weight: 600; min-width: 80px; text-align: center; }
+
+    /* Прозрачный контейнер — размер задаёт, фон не рисует */
+    .card-catalog {
+      overflow: visible;
+      flex: 1;
+      min-height: 0;
+      cursor: pointer;
+    }
+
+    /* ══ ПРИЗМА (ось Y) ══ */
+    .h-scene {
+      width: 100%;
+      height: 100%;
+      perspective: 900px;
+      perspective-origin: 50% 50%;
+    }
+
+    .h-rotor {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: translateZ(-133px) rotateY(0deg);
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .h-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden; /* clip контента грани, не ломает 3D т.к. грань — лист */
+    }
+
+    .h-f0 { transform: rotateY(0deg)   translateZ(133px); background: #1a0e0d; }
+    .h-f1 { transform: rotateY(120deg) translateZ(133px); background: #0d1219; }
+    .h-f2 { transform: rotateY(240deg) translateZ(133px); background: #0d1a10; }
+
+    /* Заголовок грани — с навигацией */
+    .face-header {
+      padding: 12px 14px;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .h-f0 .face-header { color: #e87060; }
+    .h-f1 .face-header { color: #6090d0; }
+    .h-f2 .face-header { color: #60c070; }
+
+    .face-nav-btn {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #f0f0f0;
+      font-size: 15px;
+      width: 30px; height: 30px;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .face-nav-btn:hover { background: rgba(255,255,255,0.12); }
+
+    /* Скролл внутри грани */
+    .face-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+      padding: 12px 16px 16px;
+    }
+    .face-body::-webkit-scrollbar { display: none; }
+
+    /* Подкатегория */
+    .sub-block { margin-bottom: 20px; }
+    .sub-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #666;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    /* Сетка: 3 иконки в ряд */
+    .sub-products {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .prod-icon {
+      aspect-ratio: 1;
+      background: #242424;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s;
+    }
+    .prod-icon:hover { border-color: #666; }
+    .prod-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pi-ph { font-size: 18px; opacity: 0.15; }
+  </style>
 </head>
 <body>
-  <div class="site-frame">
+  <div class="page">
 
-    <div class="frame-card">
-      <header class="site-header">
-        <div class="site-logo">3D Store</div>
-      </header>
+    <div class="card-header">
+      <span class="logo">3D Store</span>
     </div>
 
-    <div class="frame-card catalog-card">
-      <div class="cat-nav">
-        <button class="cat-nav-btn" id="cat-prev">←</button>
-        <span class="cat-nav-title" id="cat-title">Пластик</span>
-        <button class="cat-nav-btn" id="cat-next">→</button>
-      </div>
-      <div class="cat-viewport">
-        <div class="cat-track" id="cat-track">
-          <!-- грани генерирует JS -->
+    <div class="card-catalog">
+      <div class="h-scene">
+        <div class="h-rotor" id="h-rotor">
+          <!-- грани генерируются JS -->
         </div>
       </div>
     </div>
 
   </div>
+
   <script src="catalog.js"></script>
-  <script src="main.js"></script>
+  <script>
+    const COLORS = ['#c0392b', '#2471a3', '#1e8449'];
+    const R = 133;
+    let current = 0;
+
+    async function init() {
+      const data = await loadCatalog();
+      const cats = data.categories;
+      const rotor = document.getElementById('h-rotor');
+      const titleEl = document.getElementById('cat-title');
+
+      // Строим 3 грани
+      const angles = [0, 120, 240];
+      cats.forEach((cat, i) => {
+        const face = document.createElement('div');
+        face.className = `h-face h-f${i}`;
+        face.style.transform = `rotateY(${angles[i]}deg) translateZ(${R}px)`;
+
+        const header = document.createElement('div');
+        header.className = 'face-header';
+        header.textContent = cat.name;
+        face.appendChild(header);
+
+        const body = document.createElement('div');
+        body.className = 'face-body';
+
+        cat.subcategories.forEach(sub => {
+          const block = document.createElement('div');
+          block.className = 'sub-block';
+          block.innerHTML = `<div class="sub-title">${sub.name}</div>`;
+
+          const grid = document.createElement('div');
+          grid.className = 'sub-products';
+
+          sub.products.forEach(p => {
+            const icon = document.createElement('div');
+            icon.className = 'prod-icon';
+            icon.onclick = () => location.href = `product.html?id=${p.id}`;
+            icon.innerHTML = p.thumbnail
+              ? `<img src="${p.thumbnail}" alt="${p.name}" loading="lazy" onerror="this.parentElement.innerHTML='<span class=pi-ph>⬡</span>'">`
+              : `<span class="pi-ph">⬡</span>`;
+            grid.appendChild(icon);
+          });
+
+          block.appendChild(grid);
+          body.appendChild(block);
+        });
+
+        face.appendChild(body);
+        rotor.appendChild(face);
+      });
+
+      // Навигация
+      function goTo(idx) {
+        current = ((idx % 3) + 3) % 3;
+        rotor.style.transform = `translateZ(-${R}px) rotateY(${-current * 120}deg)`;
+        titleEl.textContent = cats[current].name;
+      }
+
+      document.getElementById('btn-next').addEventListener('click', e => {
+        e.stopPropagation();
+        goTo(current + 1);
+      });
+      document.getElementById('btn-prev').addEventListener('click', e => {
+        e.stopPropagation();
+        goTo(current - 1);
+      });
+
+      // Свайп
+      let tx = 0;
+      const stage = document.querySelector('.card-catalog');
+      stage.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+      stage.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - tx;
+        if (Math.abs(dx) > 40) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+      });
+
+      goTo(0);
+    }
+
+    init();
+  </script>
 </body>
 </html>
