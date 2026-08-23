@@ -226,11 +226,14 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   const facePhone  = document.getElementById('face-phone');
   const phoneInput = document.getElementById('phone-input');
 
-  let orderAngle = 0;
+  // Базовый угол — кратен 360 чтобы всегда крутить вперёд
+  let base = 0; // увеличивается на 360 каждый полный цикл
 
-  function spinTo(deg) {
-    orderAngle = deg;
-    rotor.style.transform = `translateZ(-17px) rotateX(${orderAngle}deg)`;
+  function spinTo(face) {
+    // face: 0=заказати, 1=телефон, 2=успех
+    // Каждая грань = +120° от предыдущей
+    const target = base + face * 120;
+    rotor.style.transform = `translateZ(-17px) rotateX(${target}deg)`;
   }
 
   function isValid(raw) {
@@ -238,11 +241,13 @@ function initFlipOrder(product, categoryName, subcategoryName) {
     return /^0\d{9}$/.test(d) || /^380\d{9}$/.test(d);
   }
 
+  // Грань 0 → 1
   faceOrder.addEventListener('click', () => {
-    spinTo(orderAngle + 120);
+    spinTo(1);
     setTimeout(() => phoneInput.focus(), 500);
   });
 
+  // Автопроверка при вводе
   phoneInput.addEventListener('input', () => {
     if (phoneInput.value.length > 13) phoneInput.value = phoneInput.value.slice(0, 13);
     if (isValid(phoneInput.value.trim())) sendOrder();
@@ -258,12 +263,19 @@ function initFlipOrder(product, categoryName, subcategoryName) {
     }
   });
 
+  // Потеря фокуса → возврат на грань 0
   phoneInput.addEventListener('blur', () => {
     setTimeout(() => {
-      const mod = ((orderAngle % 360) + 360) % 360;
-      if (mod === 120) { // на грани ввода, не успех
-        spinTo(orderAngle - 120);
-        phoneInput.value = '';
+      const cur = rotor.style.transform;
+      // Если на грани 1 (телефон) — возвращаем на 0
+      const match = cur.match(/rotateX\((-?\d+)deg\)/);
+      if (match) {
+        const deg = parseInt(match[1]);
+        const face = ((deg % 360) + 360) % 360;
+        if (face === 120) {
+          spinTo(0);
+          phoneInput.value = '';
+        }
       }
     }, 200);
   });
@@ -274,7 +286,7 @@ function initFlipOrder(product, categoryName, subcategoryName) {
 
   async function sendOrder() {
     const phone = phoneInput.value.trim();
-    spinTo(orderAngle + 120); // → успех
+    spinTo(2); // → грань успеха
     try {
       await fetch('/api/order', {
         method: 'POST',
@@ -287,9 +299,11 @@ function initFlipOrder(product, categoryName, subcategoryName) {
         }),
       });
     } catch (e) { console.error(e); }
-    // Через 4с → назад на грань 0
+
+    // Через 4с → грань 0 нового цикла
     setTimeout(() => {
-      spinTo(orderAngle + 120);
+      base += 360; // следующий цикл
+      spinTo(0);
       phoneInput.value = '';
     }, 4000);
   }

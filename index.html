@@ -63,28 +63,25 @@
       background: #161a22;
     }
 
-    /* Шиммер — диагональный блик, z-index ниже fade */
+    /* Шиммер — одна тонкая диагональная полоса, проходит раз в 5 сек */
     .h-face::before {
       content: '';
       position: absolute;
-      inset: 0;
-      z-index: 1; /* ПОД fade (z-index 2) */
+      inset: -100%;
+      z-index: 1;
       pointer-events: none;
       background: linear-gradient(
-        118deg,
-        transparent 20%,
-        rgba(255,255,255,0.035) 48%,
-        rgba(255,255,255,0.055) 50%,
-        rgba(255,255,255,0.035) 52%,
-        transparent 80%
+        105deg,
+        transparent 45%,
+        rgba(255,255,255,0.04) 50%,
+        transparent 55%
       );
-      background-size: 200% 200%;
-      animation: shimmer-diag 6s ease-in-out infinite;
+      animation: shimmer-diag 5s ease-in-out infinite;
     }
 
     @keyframes shimmer-diag {
-      0%   { background-position: 160% 160%; }
-      100% { background-position: -60% -60%; }
+      0%   { transform: translateX(-60%) translateY(-60%); }
+      100% { transform: translateX(60%) translateY(60%); }
     }
 
     .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
