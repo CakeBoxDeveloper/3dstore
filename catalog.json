@@ -5,47 +5,18 @@
       "name": "Пластик",
       "subcategories": [
         {
-          "id": "lamps",
-          "name": "Лампы",
-          "products": [
-            { "id": "lamp-helix", "name": "Лампа Helix", "sizes": "⌀120 × 220 мм", "description": "Настольная лампа с геометрическим плафоном.", "price": 1200, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/lamp-helix.jpg" },
-            { "id": "lamp-grid",  "name": "Лампа Grid",  "sizes": "⌀160 × 180 мм", "description": "Потолочный плафон с сетчатой структурой.",    "price": 1500, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/lamp-grid.jpg" }
-          ]
-        },
-        {
           "id": "stands",
-          "name": "Подставки",
+          "name": "Підставки",
           "products": [
-            { "id": "stand-phone",   "name": "Подставка для телефона", "sizes": "80 × 60 × 90 мм",  "description": "Универсальная подставка для смартфона.", "price": 350, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/stand-phone.jpg" },
-            { "id": "stand-monitor", "name": "Подставка под монитор",  "sizes": "500 × 200 × 80 мм", "description": "Подставка с полкой для клавиатуры.",    "price": 800, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/stand-monitor.jpg" }
-          ]
-        },
-        {
-          "id": "shelves",
-          "name": "Полки",
-          "products": [
-            { "id": "shelf-corner", "name": "Угловая полка", "sizes": "150 × 150 × 30 мм", "description": "Настенная угловая полка для мелочей.", "price": 600, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/shelf-corner.jpg" }
-          ]
-        },
-        {
-          "id": "clocks",
-          "name": "Часы",
-          "products": [
-            { "id": "clock-wall", "name": "Настенные часы Minimal", "sizes": "⌀280 × 18 мм", "description": "Минималистичные настенные часы.", "price": 950, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/clock-wall.jpg" }
-          ]
-        },
-        {
-          "id": "speakers",
-          "name": "Динамики",
-          "products": [
-            { "id": "speaker-mono", "name": "Корпус для моно-динамика", "sizes": "120 × 120 × 100 мм", "description": "Акустический корпус под динамик 3 дюйма.", "price": 700, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/speaker-mono.jpg" }
-          ]
-        },
-        {
-          "id": "misc-plastic",
-          "name": "Разное",
-          "products": [
-            { "id": "hook-wall", "name": "Крючок настенный", "sizes": "60 × 40 × 25 мм", "description": "Набор настенных крючков.", "price": 200, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/hook-wall.jpg" }
+            {
+              "id": "stand-monstera",
+              "name": "Підставка Monstera",
+              "sizes": "120 × 90 × 85 мм",
+              "description": "Підставка для телефону у формі листа монстери.",
+              "price": 350,
+              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraPhoneSupport.glb",
+              "thumbnail": "/thumbnails/stand-monstera.jpg"
+            }
           ]
         }
       ]
@@ -80,8 +51,8 @@
           "id": "jewelry",
           "name": "Украшения",
           "products": [
-            { "id": "ring-epoxy",     "name": "Кольцо с цветком", "sizes": "р. 16–20",         "description": "Кольцо из эпоксидной смолы с сухоцветом.", "price": 650,  "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/ring-epoxy.jpg" },
-            { "id": "pendant-ocean",  "name": "Кулон Ocean",      "sizes": "35 × 25 × 8 мм",   "description": "Кулон с эффектом морской волны.",         "price": 800,  "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/pendant-ocean.jpg" }
+            { "id": "ring-epoxy",    "name": "Кольцо с цветком", "sizes": "р. 16–20",       "description": "Кольцо из эпоксидной смолы с сухоцветом.", "price": 650,  "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/ring-epoxy.jpg" },
+            { "id": "pendant-ocean", "name": "Кулон Ocean",      "sizes": "35 × 25 × 8 мм", "description": "Кулон с эффектом морской волны.",         "price": 800,  "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/pendant-ocean.jpg" }
           ]
         },
         {
