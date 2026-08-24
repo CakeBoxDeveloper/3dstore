@@ -269,7 +269,6 @@ function buildMaterialSlider() {
       <span class="mat-chip-color" style="background:${mat.hex}">
         <span class="mat-chip-type">${getMatTypeLabel(mat)}</span>
       </span>
-      <span class="mat-chip-sub">${mat.sublabel}</span>
     `;
     card.addEventListener('click', () => {
       currentMat = mat;

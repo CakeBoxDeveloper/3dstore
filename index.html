@@ -56,7 +56,7 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Грань призмы */
+    /* Грань призмы — дисперсионное стекло */
     .h-face {
       position: absolute;
       inset: 0;
@@ -65,12 +65,56 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       overflow: hidden;
-      background: #161a22;
+      /* Тёмный центр + радужные края через conic-gradient */
+      background:
+        radial-gradient(ellipse at 50% 50%, #0a0c10 40%, transparent 100%),
+        conic-gradient(
+          from var(--hue, 0deg) at 50% 50%,
+          #ff0040 0deg,
+          #ff6600 40deg,
+          #ffdd00 80deg,
+          #00ff88 120deg,
+          #00cfff 160deg,
+          #7040ff 200deg,
+          #ff00cc 240deg,
+          #ff0040 360deg
+        );
       box-shadow: none;
     }
-    .h-face::after { display: none; }
 
-    /* Шиммер убран */
+    @property --hue {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+
+    .h-f0, .h-f1, .h-f2 { animation: hue-spin 8s linear infinite; }
+    .h-f1 { animation-delay: -2.67s; }
+    .h-f2 { animation-delay: -5.33s; }
+
+    @keyframes hue-spin {
+      to { --hue: 360deg; }
+    }
+
+    /* Тёмное матовое перекрытие поверх — только края светятся */
+    .h-face::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      /* виньетка: центр чёрный, края прозрачны → видна радуга */
+      background: radial-gradient(
+        ellipse 85% 80% at 50% 50%,
+        rgba(5,7,12,0.96) 0%,
+        rgba(5,7,12,0.85) 55%,
+        rgba(5,7,12,0.3)  80%,
+        transparent       100%
+      );
+      pointer-events: none;
+    }
+
+    /* Весь контент грани поверх оверлея */
+    .face-header, .face-scroll-wrap { position: relative; z-index: 1; }
 
     .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
     .h-f1 { transform: rotateY(120deg) translateZ(133px); }
