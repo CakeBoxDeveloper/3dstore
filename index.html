@@ -250,7 +250,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      /* нет border-bottom */
+      position: relative;
+      z-index: 3; /* поверх fade-top */
+      background: #1c1e22; /* перекрывает fade если тот вылезает */
     }
 
     .face-title {
