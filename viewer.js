@@ -45,42 +45,8 @@ let scene, camera, renderer, controls;
 // ── Grid background (ShaderMaterial) ─────────────────────────────────────────
 
 function createGridBackground() {
-  const geo = new THREE.PlaneGeometry(20, 20);
-  const mat = new THREE.ShaderMaterial({
-    uniforms: {
-      uColor1: { value: new THREE.Color(0x111418) }, // тёмный фон
-      uColor2: { value: new THREE.Color(0x303840) }, // заметные линии
-      uScale:  { value: 14.0 },
-      uWidth:  { value: 0.03 },
-    },
-    vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform vec3 uColor1;
-      uniform vec3 uColor2;
-      uniform float uScale;
-      uniform float uWidth;
-      varying vec2 vUv;
-      void main() {
-        vec2 grid = fract(vUv * uScale);
-        float line = step(1.0 - uWidth, grid.x) + step(1.0 - uWidth, grid.y);
-        line = clamp(line, 0.0, 1.0);
-        vec3 col = mix(uColor1, uColor2, line);
-        gl_FragColor = vec4(col, 1.0);
-      }
-    `,
-    depthWrite: false,
-    side: THREE.FrontSide,
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.z = -3.5;
-  mesh.renderOrder = -1;
-  return mesh;
+  // Убрана — фон вьювера полностью прозрачный
+  return null;
 }
 
 // ── HDR environment ───────────────────────────────────────────────────────────
@@ -110,7 +76,7 @@ function initScene() {
   const wrap   = canvas.parentElement;
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setClearColor(0x000000, 0); // прозрачный фон — видна только сетка
+  renderer.setClearColor(0x000000, 0); // полностью прозрачный фон
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -120,23 +86,19 @@ function initScene() {
   renderer.setSize(W, W);
 
   scene = new THREE.Scene();
-  // Фон — только сетка, без scene.background
-  scene.add(createGridBackground());
+  // Нет фона, нет сетки — чистый прозрачный канвас
+  const bg = createGridBackground();
+  if (bg) scene.add(bg);
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
   camera.position.set(0, 0.5, 2.5);
 
-  // Lights
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-  const key = new THREE.DirectionalLight(0xffffff, 2.0);
-  key.position.set(3, 5, 3);
-  scene.add(key);
-  const fill = new THREE.DirectionalLight(0xaaccff, 0.8);
-  fill.position.set(-3, 2, -2);
-  scene.add(fill);
-  const rim = new THREE.DirectionalLight(0xffeedd, 0.5);
-  rim.position.set(0, -3, -3);
-  scene.add(rim);
+  // Освещение: источник строго сверху + равномерный ambient
+  // MeshLambertMaterial без бликов — освещение плоское
+  scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+  const top = new THREE.DirectionalLight(0xffffff, 1.2);
+  top.position.set(0, 10, 2);
+  scene.add(top);
 
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -214,21 +176,20 @@ function buildMaterial() {
 
   if (currentMat.type === 'clear') {
     return new THREE.MeshPhysicalMaterial({
-      color, roughness: currentMat.roughness, metalness: 0,
+      color, roughness: 0.0, metalness: 0,
       transmission: 1.0, thickness: 0.5, ior: 1.45,
       transparent: true, opacity: 1.0,
     });
   }
   if (currentMat.type === 'silk') {
     return new THREE.MeshPhysicalMaterial({
-      color, roughness: currentMat.roughness, metalness: 0,
-      sheen: 0.8, sheenRoughness: 0.3,
+      color, roughness: 0.4, metalness: 0,
+      sheen: 0.6, sheenRoughness: 0.4,
       sheenColor: new THREE.Color(0xffffff),
     });
   }
-  return new THREE.MeshStandardMaterial({
-    color, roughness: currentMat.roughness, metalness: currentMat.metalness,
-  });
+  // Плоский без бликов — MeshLambertMaterial
+  return new THREE.MeshLambertMaterial({ color });
 }
 
 function applyMaterialToAll() {
@@ -413,7 +374,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnPrice) btnPrice.textContent = `за ${priceStr}`;
 
   initScene();
-  loadHDR();
   buildMaterialSlider();
   loadModel(product.model);
   initFlipOrder(product, category.name, subcategory.name);
