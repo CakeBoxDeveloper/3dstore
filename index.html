@@ -34,7 +34,7 @@
       flex-shrink: 0;
       display: grid;
       grid-template-columns: 3fr 7fr;
-      gap: 8px;
+      gap: 0;
       height: 44px;
     }
     .card-header::after { display: none; }
@@ -44,7 +44,7 @@
       align-items: center;
       justify-content: center;
       padding: 0 12px;
-      /* убрана border-right */
+      border-right: 1px solid rgba(255,255,255,0.06);
     }
     .logo {
       font-family: 'Ageta', system-ui, sans-serif;
@@ -97,7 +97,7 @@
       flex-shrink: 0;
       display: grid;
       grid-template-columns: 7fr 3fr;
-      gap: 8px;
+      gap: 0;
       height: 44px;
     }
 
@@ -147,11 +147,11 @@
     .fin-f1-text { font-size: 12px; color: #888; }
     .fin-f2-text { font-size: 12px; color: #a8f0c0; line-height: 1.4; }
 
-    /* Кнопка отправки */
     .footer-btn-wrap {
       overflow: visible;
       position: relative;
       height: 44px;
+      border-left: 1px solid rgba(255,255,255,0.06);
     }
     .footer-scene {
       width: 100%;
@@ -514,35 +514,41 @@
     // ── Логика футера (чат с оператором) ──────────────────────────────────
     (function() {
       const finRotor   = document.getElementById('fin-rotor');
-      const btnRotor   = document.getElementById('footer-rotor');
       const input      = document.getElementById('footer-input');
       const sendBtn    = document.getElementById('footer-send');
       const replyFace  = document.getElementById('fin-reply');
       const replyText  = document.getElementById('fin-reply-text');
 
-      let finBase = 0; // база для поля ввода
-      let btnBase = 0; // база для кнопки
+      let finAngle = 0; // угол призмы поля ввода
+      let chatFace = 0; // 0=ввод, 1=ожидание, 2=ответ
 
-      function spinFin(face) {
-        finBase = Math.round(finBase / 360) * 360 + face * 120;
-        finRotor.style.transform = `translateZ(-15px) rotateX(${finBase}deg)`;
-      }
-      function spinBtn(face) {
-        btnBase = Math.round(btnBase / 360) * 360 + face * 120;
-        btnRotor.style.transform = `translateZ(-15px) rotateX(${btnBase}deg)`;
+      function spinField(face) {
+        chatFace  = face;
+        finAngle  = Math.round(finAngle / 360) * 360 + face * 120;
+        finRotor.style.transform = `translateZ(-15px) rotateX(${finAngle}deg)`;
       }
 
       // Отправка
       sendBtn.addEventListener('click', async () => {
+        if (chatFace === 2) {
+          // "Відповісти" — возврат к полю ввода
+          spinField(0);
+          sendBtn.textContent = 'Відправити';
+          sendBtn.disabled = false;
+          setTimeout(() => input.focus(), 520);
+          return;
+        }
+
         const msg = input.value.trim();
         if (!msg) return;
 
-        // Кнопка и поле → грань 1
-        spinFin(1);
-        spinBtn(1);
+        // Поле → грань 1 (ожидание)
+        spinField(1);
+        sendBtn.disabled = true;
+        sendBtn.style.opacity = '0.4';
         input.value = '';
 
-        // Отправляем в Telegram через api/order (переиспользуем эндпоинт)
+        // Отправляем
         try {
           await fetch('/api/order', {
             method: 'POST',
@@ -551,21 +557,14 @@
           });
         } catch(e) { console.error(e); }
 
-        // Имитация ответа оператора через 3 сек (заменить на реальный polling/webhook)
-        // Пока показываем заглушку
+        // Имитация ответа через 3 сек
         setTimeout(() => {
           replyText.textContent = 'Дякуємо! Оператор зв\'яжеться з вами найближчим часом.';
-          spinFin(2);
+          spinField(2);
+          sendBtn.textContent = 'Відповісти';
+          sendBtn.disabled = false;
+          sendBtn.style.opacity = '1';
         }, 3000);
-      });
-
-      // Клик на ответ оператора → вернуться к полю ввода
-      replyFace.addEventListener('click', () => {
-        finBase += 360; // полный оборот вперёд
-        finRotor.style.transform = `translateZ(-15px) rotateX(${finBase}deg)`;
-        btnBase += 360;
-        btnRotor.style.transform = `translateZ(-15px) rotateX(${btnBase}deg)`;
-        setTimeout(() => input.focus(), 520);
       });
 
       // Enter в поле — отправить
