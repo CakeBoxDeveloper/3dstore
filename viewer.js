@@ -145,6 +145,7 @@ function initScene() {
   controls.maxDistance = 10;
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.8;
+  controls.enablePan = false;   // запрет перемещения
   controls.addEventListener('start', () => { controls.autoRotate = false; });
 
   const ro = new ResizeObserver(() => {

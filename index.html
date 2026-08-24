@@ -56,7 +56,7 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Грань призмы — дисперсионное стекло */
+    /* Грань призмы — тёмная, дисперсия по периметру через ::after */
     .h-face {
       position: absolute;
       inset: 0;
@@ -65,22 +65,29 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       overflow: hidden;
-      /* Тёмный центр + радужные края через conic-gradient */
-      background:
-        radial-gradient(ellipse at 50% 50%, #0a0c10 40%, transparent 100%),
-        conic-gradient(
-          from var(--hue, 0deg) at 50% 50%,
-          #ff0040 0deg,
-          #ff6600 40deg,
-          #ffdd00 80deg,
-          #00ff88 120deg,
-          #00cfff 160deg,
-          #7040ff 200deg,
-          #ff00cc 240deg,
-          #ff0040 360deg
-        );
+      background: #050710;
       box-shadow: none;
     }
+
+    /* Дисперсионная обводка — один conic-gradient по краям */
+    .h-face::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background:
+        linear-gradient(#050710, #050710) padding-box,
+        conic-gradient(
+          from var(--hue, 0deg),
+          #ff0040, #ff6600, #ffdd00, #00ff88, #00cfff, #7040ff, #ff00cc, #ff0040
+        ) border-box;
+      border: 2px solid transparent;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
+      pointer-events: none;
+    }
+
+    /* Весь контент грани поверх оверлея */
+    .face-header, .face-scroll-wrap { position: relative; z-index: 1; }
 
     @property --hue {
       syntax: '<angle>';
@@ -88,36 +95,11 @@
       initial-value: 0deg;
     }
 
-    .h-f0, .h-f1, .h-f2 { animation: hue-spin 8s linear infinite; }
-    .h-f1 { animation-delay: -2.67s; }
-    .h-f2 { animation-delay: -5.33s; }
+    .h-f0 { transform: rotateY(0deg)   translateZ(133px); animation: hue-spin 8s linear infinite; }
+    .h-f1 { transform: rotateY(120deg) translateZ(133px); animation: hue-spin 8s linear infinite; animation-delay: -2.67s; }
+    .h-f2 { transform: rotateY(240deg) translateZ(133px); animation: hue-spin 8s linear infinite; animation-delay: -5.33s; }
 
-    @keyframes hue-spin {
-      to { --hue: 360deg; }
-    }
-
-    /* Виньетка поверх — прямоугольная тёмная зона в центре, края светятся */
-    .h-face::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      /* Прямоугольная виньетка: тёмный центр, радуга по краям ~20px */
-      background:
-        linear-gradient(to right,  transparent 14%, rgba(5,7,12,0.97) 22%, rgba(5,7,12,0.97) 78%, transparent 86%),
-        linear-gradient(to bottom, transparent 8%,  rgba(5,7,12,0.97) 15%, rgba(5,7,12,0.97) 85%, transparent 92%);
-      /* box-shadow имитирует край стекла */
-      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.22);
-      pointer-events: none;
-      border-radius: inherit;
-    }
-
-    /* Весь контент грани поверх оверлея */
-    .face-header, .face-scroll-wrap { position: relative; z-index: 1; }
-
-    .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
-    .h-f1 { transform: rotateY(120deg) translateZ(133px); }
-    .h-f2 { transform: rotateY(240deg) translateZ(133px); }
+    @keyframes hue-spin { to { --hue: 360deg; } }
 
     /* Заголовок — без разделителя, название по центру, стрелки без обводки */
     .face-header {
