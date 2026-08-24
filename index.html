@@ -19,9 +19,14 @@
       padding: 8px;
     }
 
-    /* ══ Стеклянный стиль блоков (по мотивам 3d.html) ══ */
+    /* Хедер — лого по центру, шрифт Ageta */
+    @font-face {
+      font-family: 'Ageta';
+      src: url('https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/ageta-chubby-demo.italic.otf') format('opentype');
+      font-weight: normal;
+      font-style: italic;
+    }
 
-    /* Хедер */
     .card-header {
       background: #1a1a1a;
       border: 1px solid #2e2e2e;
@@ -29,9 +34,19 @@
       overflow: hidden;
       flex-shrink: 0;
       padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .card-header::after { display: none; }
-    .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
+    .logo {
+      font-family: 'Ageta', system-ui, sans-serif;
+      font-style: italic;
+      font-size: 22px;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+      text-align: center;
+    }
 
     .card-catalog {
       overflow: visible;
@@ -157,11 +172,12 @@
     }
     .face-nav-btn:hover { color: #fff; }
 
-    /* Скролл-область грани с fade сверху и снизу */
+    /* Скролл-область грани */
     .face-scroll-wrap {
       flex: 1;
       min-height: 0;
       position: relative;
+      overflow: hidden; /* clip fade-div-ов чтобы не вылезали за рамку */
     }
 
     /* fade-out сверху и снизу — отдельные div .fade-top / .fade-bottom */

@@ -90,15 +90,38 @@ function initScene() {
   const bg = createGridBackground();
   if (bg) scene.add(bg);
 
-  // Пластина-стол под моделью
-  const tableGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.04, 64);
-  const tableMat = new THREE.MeshLambertMaterial({
-    color: 0x222428,
-    transparent: true,
-    opacity: 0.85,
+  // Стол — квадратная зелёная пластина с белой сеткой (крафт/нарезка)
+  const tableGeo = new THREE.PlaneGeometry(2.4, 2.4);
+  const tableMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uBase:  { value: new THREE.Color(0x2d6a2d) }, // тёмно-зелёный
+      uGrid:  { value: new THREE.Color(0xffffff) },
+      uScale: { value: 10.0 },  // кол-во ячеек
+      uWidth: { value: 0.02 },  // толщина линий
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }
+    `,
+    fragmentShader: `
+      uniform vec3 uBase;
+      uniform vec3 uGrid;
+      uniform float uScale;
+      uniform float uWidth;
+      varying vec2 vUv;
+      void main() {
+        vec2 g = fract(vUv * uScale);
+        float line = step(1.0 - uWidth, g.x) + step(1.0 - uWidth, g.y);
+        line = clamp(line, 0.0, 1.0);
+        vec3 col = mix(uBase, uGrid, line * 0.35);
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+    side: THREE.FrontSide,
   });
   const table = new THREE.Mesh(tableGeo, tableMat);
-  table.position.y = -0.82; // чуть ниже модели
+  table.rotation.x = -Math.PI / 2; // горизонтально
+  table.position.y = -0.82;
   scene.add(table);
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
