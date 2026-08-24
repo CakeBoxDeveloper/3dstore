@@ -34,7 +34,7 @@
       flex-shrink: 0;
       display: grid;
       grid-template-columns: 3fr 7fr;
-      gap: 0;
+      gap: 8px;
       height: 44px;
     }
     .card-header::after { display: none; }
@@ -44,8 +44,7 @@
       align-items: center;
       justify-content: center;
       padding: 0 12px;
-      border-right: 1px solid #2e2e2e;
-      flex-shrink: 0;
+      /* убрана border-right */
     }
     .logo {
       font-family: 'Ageta', system-ui, sans-serif;
@@ -98,28 +97,57 @@
       flex-shrink: 0;
       display: grid;
       grid-template-columns: 7fr 3fr;
-      gap: 0;
+      gap: 8px;
       height: 44px;
     }
 
-    .footer-input-wrap {
+    /* Поле ввода — призма с тремя гранями rotateX */
+    .footer-prism-wrap {
+      overflow: visible;
+      position: relative;
+      height: 44px;
+    }
+    .footer-input-scene {
+      width: 100%;
+      height: 44px;
+      perspective: 300px;
+      perspective-origin: 50% 50%;
+    }
+    .footer-input-rotor {
+      width: 100%;
+      height: 44px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: translateZ(-15px) rotateX(0deg);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .footer-input-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px 0 0 4px;
       display: flex;
       align-items: center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background: #1c1e22;
       padding: 0 12px;
-      border-right: 1px solid #2e2e2e;
-    }
-    .footer-input-wrap input {
-      width: 100%;
-      background: transparent;
       border: none;
-      outline: none;
-      color: #f0f0f0;
-      font-size: 13px;
       font-family: inherit;
     }
-    .footer-input-wrap input::placeholder { color: #444; }
+    .fin-f0 { transform: rotateX(0deg)    translateZ(15px); }
+    .fin-f1 { transform: rotateX(-120deg) translateZ(15px); justify-content: center; }
+    .fin-f2 { transform: rotateX(-240deg) translateZ(15px); cursor: pointer; }
 
-    /* Призма кнопки футера (ось X, вращается вверх) */
+    .footer-input-face input {
+      width: 100%; background: transparent; border: none; outline: none;
+      color: #f0f0f0; font-size: 13px; font-family: inherit;
+    }
+    .footer-input-face input::placeholder { color: #444; }
+
+    .fin-f1-text { font-size: 12px; color: #888; }
+    .fin-f2-text { font-size: 12px; color: #a8f0c0; line-height: 1.4; }
+
+    /* Кнопка отправки */
     .footer-btn-wrap {
       overflow: visible;
       position: relative;
@@ -154,6 +182,7 @@
       cursor: pointer;
       border: none;
       font-family: inherit;
+      outline: none;
     }
     .footer-f0 { transform: rotateX(0deg)    translateZ(15px); color: #888; }
     .footer-f0:hover { color: #f0f0f0; }
@@ -342,16 +371,33 @@
       </div>
     </div>
 
-    <!-- Футер: поле сообщения + кнопка отправки -->
+    <!-- Футер: призма поля ввода + кнопка отправки -->
     <div class="card-footer">
-      <div class="footer-input-wrap">
-        <input type="text" id="footer-input" placeholder="Напишіть нам…" autocomplete="off">
+      <!-- Поле ввода — призма 3 грани -->
+      <div class="footer-prism-wrap">
+        <div class="footer-input-scene">
+          <div class="footer-input-rotor" id="fin-rotor">
+            <!-- Грань 0: поле ввода -->
+            <div class="footer-input-face fin-f0">
+              <input type="text" id="footer-input" placeholder="Напишіть нам…" autocomplete="off">
+            </div>
+            <!-- Грань 1: ожидание ответа -->
+            <div class="footer-input-face fin-f1">
+              <span class="fin-f1-text">Очікування відповіді оператора…</span>
+            </div>
+            <!-- Грань 2: ответ оператора -->
+            <div class="footer-input-face fin-f2" id="fin-reply">
+              <span class="fin-f2-text" id="fin-reply-text"></span>
+            </div>
+          </div>
+        </div>
       </div>
+      <!-- Кнопка отправки — призма -->
       <div class="footer-btn-wrap">
         <div class="footer-scene">
           <div class="footer-rotor" id="footer-rotor">
             <button class="footer-face footer-f0" id="footer-send">Відправити</button>
-            <div class="footer-face footer-f1" id="footer-done">Відправлено ✓</div>
+            <div class="footer-face footer-f1">✓</div>
           </div>
         </div>
       </div>
@@ -464,6 +510,69 @@
     }
 
     init();
+
+    // ── Логика футера (чат с оператором) ──────────────────────────────────
+    (function() {
+      const finRotor   = document.getElementById('fin-rotor');
+      const btnRotor   = document.getElementById('footer-rotor');
+      const input      = document.getElementById('footer-input');
+      const sendBtn    = document.getElementById('footer-send');
+      const replyFace  = document.getElementById('fin-reply');
+      const replyText  = document.getElementById('fin-reply-text');
+
+      let finBase = 0; // база для поля ввода
+      let btnBase = 0; // база для кнопки
+
+      function spinFin(face) {
+        finBase = Math.round(finBase / 360) * 360 + face * 120;
+        finRotor.style.transform = `translateZ(-15px) rotateX(${finBase}deg)`;
+      }
+      function spinBtn(face) {
+        btnBase = Math.round(btnBase / 360) * 360 + face * 120;
+        btnRotor.style.transform = `translateZ(-15px) rotateX(${btnBase}deg)`;
+      }
+
+      // Отправка
+      sendBtn.addEventListener('click', async () => {
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        // Кнопка и поле → грань 1
+        spinFin(1);
+        spinBtn(1);
+        input.value = '';
+
+        // Отправляем в Telegram через api/order (переиспользуем эндпоинт)
+        try {
+          await fetch('/api/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg, type: 'chat' }),
+          });
+        } catch(e) { console.error(e); }
+
+        // Имитация ответа оператора через 3 сек (заменить на реальный polling/webhook)
+        // Пока показываем заглушку
+        setTimeout(() => {
+          replyText.textContent = 'Дякуємо! Оператор зв\'яжеться з вами найближчим часом.';
+          spinFin(2);
+        }, 3000);
+      });
+
+      // Клик на ответ оператора → вернуться к полю ввода
+      replyFace.addEventListener('click', () => {
+        finBase += 360; // полный оборот вперёд
+        finRotor.style.transform = `translateZ(-15px) rotateX(${finBase}deg)`;
+        btnBase += 360;
+        btnRotor.style.transform = `translateZ(-15px) rotateX(${btnBase}deg)`;
+        setTimeout(() => input.focus(), 520);
+      });
+
+      // Enter в поле — отправить
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') sendBtn.click();
+      });
+    })();
   </script>
 </body>
 </html>
