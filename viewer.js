@@ -240,6 +240,20 @@ function applyMaterialToAll() {
 
 // ── Material slider + fade edges ─────────────────────────────────────────────
 
+// Типы материалов для подписи на чипе
+const MAT_TYPE_LABEL = {
+  'standard': { roughness_hi: 'PLA',  roughness_lo: 'PETG' },
+  'silk':     'TPU',
+  'clear':    'PETG-T',
+};
+
+function getMatTypeLabel(mat) {
+  if (mat.type === 'silk')  return 'TPU';
+  if (mat.type === 'clear') return 'PETG-T';
+  // standard: матовый = PLA, глянец = PETG
+  return mat.roughness > 0.5 ? 'PLA' : 'PETG';
+}
+
 function buildMaterialSlider() {
   const slider = document.getElementById('material-slider');
   const wrap   = document.getElementById('slider-wrap');
@@ -250,9 +264,11 @@ function buildMaterialSlider() {
     const card = document.createElement('button');
     card.className = 'mat-chip' + (mat.id === currentMat.id ? ' active' : '');
     card.setAttribute('aria-label', `${mat.label} ${mat.sublabel}`);
+    // Новый стиль: сплошной цвет + подпись типа по центру
     card.innerHTML = `
-      <span class="mat-chip-swatch" style="background:${mat.hex}"></span>
-      <span class="mat-chip-label">${mat.label}</span>
+      <span class="mat-chip-color" style="background:${mat.hex}">
+        <span class="mat-chip-type">${getMatTypeLabel(mat)}</span>
+      </span>
       <span class="mat-chip-sub">${mat.sublabel}</span>
     `;
     card.addEventListener('click', () => {
@@ -264,7 +280,6 @@ function buildMaterialSlider() {
     slider.appendChild(card);
   });
 
-  // fade-out по краям
   function updateFade() {
     const { scrollLeft, scrollWidth, clientWidth } = wrap;
     outer.classList.toggle('at-start', scrollLeft < 8);
@@ -272,8 +287,6 @@ function buildMaterialSlider() {
   }
 
   wrap.addEventListener('scroll', updateFade, { passive: true });
-
-  // Скроллим к середине при инициализации
   requestAnimationFrame(() => {
     const mid = (wrap.scrollWidth - wrap.clientWidth) / 2;
     wrap.scrollLeft = mid;

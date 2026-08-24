@@ -70,30 +70,7 @@
     }
     .h-face::after { display: none; }
 
-    /* Шиммер — отдельный div .face-shimmer внутри грани (добавляется JS) */
-    .face-shimmer {
-      position: absolute;
-      top: -50%;
-      left: -150%;
-      width: 80%;
-      height: 200%;
-      z-index: 1;
-      pointer-events: none;
-      background: linear-gradient(
-        105deg,
-        transparent 35%,
-        rgba(255,255,255,0.025) 48%,
-        rgba(255,255,255,0.04)  50%,
-        rgba(255,255,255,0.025) 52%,
-        transparent 65%
-      );
-      animation: shimmer-diag 7s ease-in-out infinite;
-    }
-
-    @keyframes shimmer-diag {
-      0%   { transform: translateX(0%); }
-      100% { transform: translateX(340%); }
-    }
+    /* Шиммер убран */
 
     .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
     .h-f1 { transform: rotateY(120deg) translateZ(133px); }
@@ -257,12 +234,7 @@
         const scrollWrap = document.createElement('div');
         scrollWrap.className = 'face-scroll-wrap';
 
-        // Шиммер (под fade)
-        const shimmer = document.createElement('div');
-        shimmer.className = 'face-shimmer';
-        scrollWrap.appendChild(shimmer);
-
-        // Fade-элементы поверх шиммера
+        // Fade-элементы
         const fadeTop = document.createElement('div');
         fadeTop.className = 'fade-top';
         const fadeBot = document.createElement('div');
@@ -310,9 +282,9 @@
         requestAnimationFrame(updateFade);
       });
 
-      // Вращаем в нужную сторону, накапливая угол
+      // Вращаем в нужную сторону, накапливая угол (инвертировано)
       function spin(dir) {
-        angle += dir * 120;
+        angle -= dir * 120;
         rotor.style.transform = `translateZ(-${R}px) rotateY(${angle}deg)`;
       }
 

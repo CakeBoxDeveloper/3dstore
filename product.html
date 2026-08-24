@@ -19,14 +19,13 @@
       padding: 8px;
     }
 
-    /* ── Хедер ── */
+    /* ── Хедер — одна строка ── */
     .card-header {
       flex-shrink: 0;
       padding: 12px 16px;
       border-radius: 4px;
       overflow: hidden;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      display: flex;
       align-items: center;
       background: #1a1a1a;
       border: 1px solid #2e2e2e;
@@ -116,16 +115,24 @@
 
     .mat-chip {
       display: flex; flex-direction: column; align-items: center; gap: 3px;
-      padding: 6px 8px; min-width: 58px;
-      background: #242424; border: 1.5px solid #2e2e2e; border-radius: 4px;
+      padding: 4px 4px 5px;
+      min-width: 48px;
+      background: transparent; border: 1.5px solid #2e2e2e; border-radius: 4px;
       cursor: pointer; font-family: inherit;
       transition: border-color 0.15s; flex-shrink: 0;
     }
     .mat-chip:hover  { border-color: #666; }
-    .mat-chip.active { border-color: #f0f0f0; background: #2a2a2a; }
-    .mat-chip-swatch { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
-    .mat-chip-label  { font-size: 10px; font-weight: 600; color: #f0f0f0; white-space: nowrap; }
-    .mat-chip-sub    { font-size: 9px; color: #888; white-space: nowrap; }
+    .mat-chip.active { border-color: #f0f0f0; }
+    .mat-chip-color {
+      width: 40px; height: 26px; border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mat-chip-type {
+      font-size: 8px; font-weight: 800; letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.75);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    }
+    .mat-chip-sub { font-size: 9px; color: #888; white-space: nowrap; }
 
     /* ── Тумблер ── */
     .procedural-toggle {
@@ -214,12 +221,12 @@
       cursor: pointer;
       width: 100%;
       font-family: inherit;
-      flex-direction: column;
-      gap: 2px;
+      flex-direction: row;
+      gap: 5px;
     }
     .v-f0:hover { background: #1f618d; }
-    .v-f0-top { font-size: 13px; font-weight: 700; }
-    .v-f0-sub { font-size: 11px; font-weight: 400; color: #c8f0a0; }
+    .v-f0-top { font-size: 14px; font-weight: 700; white-space: nowrap; }
+    .v-f0-sub { font-size: 14px; font-weight: 700; color: #c8f0a0; white-space: nowrap; }
 
     .v-f1 {
       transform: rotateX(-120deg) translateZ(17px);
@@ -250,9 +257,7 @@
   <div class="page">
 
     <div class="card-header">
-      <a href="index.html" class="back-link">← Назад</a>
-      <span class="logo">3D Store</span>
-      <span></span>
+      <a href="index.html" class="back-link">← Назад в каталог</a>
     </div>
 
     <div class="card-content">
