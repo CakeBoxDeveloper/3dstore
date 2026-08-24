@@ -336,50 +336,78 @@ function isValidUAPhone(raw) {
   return /^0\d{9}$/.test(digits) || /^380\d{9}$/.test(digits);
 }
 
-// ── Голографическая кнопка заказа ────────────────────────────────────────────
+// ── 3D Призма-кнопка ─────────────────────────────────────────────────────────
 
-async function initPrismButton(product, categoryName, subcategoryName) {
-  const { PrismButton } = await import('./prism-button.js');
-  const wrap = document.getElementById('order-btn-wrap');
-  if (!wrap) return;
+function initFlipOrder(product, categoryName, subcategoryName) {
+  const sceneEl    = document.getElementById('order-scene');
+  const rotor      = document.getElementById('order-rotor');
+  const faceOrder  = document.getElementById('face-order');
+  const facePhone  = document.getElementById('face-phone');
+  const phoneInput = document.getElementById('phone-input');
+  const btnLabel   = document.getElementById('btn-order-label');
+  const btnPrice   = document.getElementById('btn-order-price');
 
-  const priceStr = product.price.toLocaleString('uk-UA') + ' ₴';
+  // Заполняем текст кнопки
+  if (btnLabel) btnLabel.textContent = 'Заказати';
+  if (btnPrice) btnPrice.textContent = `за ${product.price.toLocaleString('uk-UA')} ₴`;
 
-  const btn = new PrismButton(wrap, {
-    onFace0: () => {
-      btn.spinTo(1);
-    },
-    onPhoneInput: (val) => {
-      if (isValidUAPhone(val.trim())) {
-        sendOrderWithBtn(btn, val.trim(), product, categoryName, subcategoryName);
-      }
-    },
-    onPhoneEnter: (val) => {
-      if (isValidUAPhone(val.trim())) {
-        sendOrderWithBtn(btn, val.trim(), product, categoryName, subcategoryName);
-      }
-    },
+  let base = 0;
+
+  function spinTo(face) {
+    const target = base + face * 120;
+    rotor.style.transform = `translateZ(-17px) rotateX(${target}deg)`;
+  }
+
+  function isValid(raw) {
+    const d = raw.replace(/[\s\-().+]/g, '');
+    return /^0\d{9}$/.test(d) || /^380\d{9}$/.test(d);
+  }
+
+  faceOrder.addEventListener('click', () => {
+    spinTo(1);
+    setTimeout(() => phoneInput.focus(), 500);
   });
 
-  btn.setFace0Text('Заказати', `за ${priceStr}`);
-}
+  phoneInput.addEventListener('input', () => {
+    if (phoneInput.value.length > 13) phoneInput.value = phoneInput.value.slice(0, 13);
+    if (isValid(phoneInput.value.trim())) sendOrder();
+  });
 
-async function sendOrderWithBtn(btn, phone, product, categoryName, subcategoryName) {
-  btn.spinTo(2);
-  try {
-    await fetch('/api/order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        product: product.name, productId: product.id,
-        category: categoryName, subcategory: subcategoryName,
-        material: `${currentMat.label} · ${currentMat.sublabel}`,
-        color: currentMat.sublabel, price: product.price, phone,
-        procedural: proceduralMode,
-      }),
-    });
-  } catch(e) { console.error(e); }
-  setTimeout(() => { btn.baseAngle += 360; btn.spinTo(0); }, 4000);
+  phoneInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && isValid(phoneInput.value.trim())) sendOrder();
+  });
+
+  phoneInput.addEventListener('blur', () => {
+    setTimeout(() => {
+      const match = rotor.style.transform.match(/rotateX\((-?\d+)deg\)/);
+      if (match && ((parseInt(match[1]) % 360 + 360) % 360) === 120) {
+        spinTo(0); phoneInput.value = '';
+      }
+    }, 200);
+  });
+
+  document.addEventListener('pointerdown', e => {
+    if (!sceneEl.contains(e.target)) phoneInput.blur();
+  });
+
+  async function sendOrder() {
+    const phone = phoneInput.value.trim();
+    spinTo(2);
+    try {
+      await fetch('/api/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product: product.name, productId: product.id,
+          category: categoryName, subcategory: subcategoryName,
+          material: `${currentMat.label} · ${currentMat.sublabel}`,
+          color: currentMat.sublabel, price: product.price, phone,
+          procedural: proceduralMode,
+        }),
+      });
+    } catch(e) { console.error(e); }
+    setTimeout(() => { base += 360; spinTo(0); phoneInput.value = ''; }, 4000);
+  }
 }
 
 // ── Main init ────────────────────────────────────────────────────────────────
@@ -433,7 +461,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initScene();
   buildMaterialSlider();
   loadModel(product.model);
-  initPrismButton(product, category.name, subcategory.name);
+  initFlipOrder(product, category.name, subcategory.name);
 
   const procToggle = document.getElementById('proc-toggle');
   if (procToggle) {

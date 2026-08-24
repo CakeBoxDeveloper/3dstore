@@ -55,11 +55,12 @@
       background: #1c1e22;
       border-radius: 4px;
     }
-    .logo-img {
-      height: 24px;
-      width: auto;
-      display: block;
-      filter: brightness(0) invert(1); /* делает SVG полностью белым */
+    .logo {
+      font-family: 'Ageta', system-ui, sans-serif;
+      font-size: 20px;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
     }
 
     .header-ticker {
@@ -347,8 +348,7 @@
 
     <div class="card-header">
       <div class="header-logo">
-        <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/PrismLogo.svg"
-             alt="PRISM" class="logo-img">
+        <span class="logo">PRISM</span>
       </div>
       <div class="header-ticker">
         <a href="https://t.me/prism3dstore" target="_blank" class="tg-link">

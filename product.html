@@ -229,15 +229,96 @@
       background: #fff;
     }
 
-    /* ── WebGL кнопка заказа ── */
+    /* ── Призма-кнопка — CSS с двухслойным фоном ── */
     .card-order {
-      flex-shrink: 0;
-      height: 52px;
-      position: relative;
       overflow: visible;
       background: transparent;
       border: none;
+      flex-shrink: 0;
+      height: 52px;
     }
+
+    .v-scene {
+      width: 100%;
+      height: 52px;
+      perspective: 400px;
+      perspective-origin: 50% 50%;
+    }
+
+    .v-rotor {
+      width: 100%;
+      height: 52px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: translateZ(-17px) rotateX(0deg);
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Грань: слой 1 — conic-gradient (радуга), слой 2 — чёрная маска */
+    .v-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      gap: 6px;
+      overflow: hidden;
+      /* Слой 1: анимированная радуга */
+      background:
+        radial-gradient(
+          ellipse 75% 200% at 50% 50%,
+          #0a0b10 0%,
+          #0a0b10 55%,
+          transparent 100%
+        ),
+        conic-gradient(
+          from var(--face-hue, 0deg),
+          #ff0040, #ff6600, #ffdd00, #00ff88,
+          #00cfff, #7040ff, #ff00cc, #ff0040
+        );
+    }
+
+    @property --face-hue {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+
+    .v-face { animation: face-hue-spin 6s linear infinite; }
+    @keyframes face-hue-spin { to { --face-hue: 360deg; } }
+
+    /* Тонкая белая обводка */
+    .v-face::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+      pointer-events: none;
+    }
+
+    .v-face > * { position: relative; z-index: 1; }
+
+    .v-f0 { transform: rotateX(0deg)    translateZ(17px); cursor: pointer; width: 100%; font-family: inherit; flex-direction: row; gap: 5px; outline: none; border: none; }
+    .v-f1 { transform: rotateX(-120deg) translateZ(17px); padding: 0 16px; }
+    .v-f2 { transform: rotateX(-240deg) translateZ(17px); }
+
+    .v-f0-top { font-size: 14px; font-weight: 700; white-space: nowrap; }
+    .v-f0-sub { font-size: 12px; font-weight: 400; white-space: nowrap; color: rgba(255,255,255,0.6); }
+
+    .v-f1 input {
+      width: 100%; background: transparent; border: none; outline: none;
+      color: #fff; font-size: 16px; font-family: inherit;
+      text-align: center; letter-spacing: 0.04em;
+    }
+    .v-f1 input::placeholder { color: rgba(255,255,255,0.35); }
+    .v-f2 { color: #a8f0c0; font-size: 14px; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -286,8 +367,21 @@
       </main>
     </div>
 
-    <!-- WebGL кнопка заказа с голографическим шейдером -->
-    <div class="card-order" id="order-btn-wrap"></div>
+    <!-- Кнопка заказа — CSS призма -->
+    <div class="card-order">
+      <div class="v-scene" id="order-scene">
+        <div class="v-rotor" id="order-rotor">
+          <button class="v-face v-f0" id="face-order">
+            <span class="v-f0-top" id="btn-order-label">Заказати</span>
+            <span class="v-f0-sub" id="btn-order-price"></span>
+          </button>
+          <div class="v-face v-f1" id="face-phone">
+            <input type="tel" id="phone-input" placeholder="+380XXXXXXXXX" autocomplete="tel" inputmode="tel">
+          </div>
+          <div class="v-face v-f2" id="face-success">Заявка прийнята!</div>
+        </div>
+      </div>
+    </div>
 
   </div>
 

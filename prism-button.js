@@ -23,10 +23,9 @@ const FRAG = `
 uniform float uTime;
 uniform float uAlpha;
 uniform sampler2D uTex;
+uniform float uAspect;  // W/H
 
 varying vec2 vUv;
-varying vec3 vNormal;
-varying vec3 vViewPos;
 
 vec3 hue2rgb(float h) {
   h = mod(h, 1.0);
@@ -35,26 +34,27 @@ vec3 hue2rgb(float h) {
 }
 
 void main() {
-  // Расстояние от края (0=центр, 1=край)
-  vec2 fromEdge = min(vUv, 1.0 - vUv); // расстояние до ближайшего края по X и Y
-  float edgeDist = min(fromEdge.x, fromEdge.y); // минимальное расстояние до края
-  float rim = 1.0 - smoothstep(0.0, 0.18, edgeDist); // 1=край, 0=центр
+  // Расстояние от края с учётом aspect ratio
+  // Нормализуем X на aspect чтобы порог был одинаковым в пикселях
+  vec2 fromEdge = min(vUv, 1.0 - vUv);
+  fromEdge.x *= uAspect;          // X-дистанция в "квадратных" единицах
+  float edgePx  = 0.12;           // ширина радуги = 12% высоты кнопки
+  float edgeDist = min(fromEdge.x, fromEdge.y * uAspect);
+  float rim = 1.0 - smoothstep(0.0, edgePx * uAspect, edgeDist);
 
-  // Радуга только по краям
-  float hue = mod(vUv.x * 0.6 + vUv.y * 0.4 + uTime * 0.1, 1.0);
+  // Радуга по краям
+  float hue = mod(vUv.x * 0.5 + vUv.y * 0.3 + uTime * 0.1, 1.0);
   vec3 rainbow = hue2rgb(hue);
 
-  // Тёмная основа в центре
+  // Тёмная основа
   vec3 base = vec3(0.07, 0.08, 0.11);
-
-  // Смешиваем: центр тёмный, края радужные
-  vec3 col = mix(base, rainbow, rim * 0.85);
+  vec3 col  = mix(base, rainbow, rim * 0.88);
 
   // Тонкая белая обводка по самому краю
-  float border = 1.0 - smoothstep(0.0, 0.04, edgeDist);
-  col = mix(col, vec3(0.9), border * 0.4);
+  float border = 1.0 - smoothstep(0.0, edgePx * 0.25 * uAspect, edgeDist);
+  col = mix(col, vec3(0.85), border * 0.45);
 
-  // Текст поверх
+  // Текст
   vec4 tex = texture2D(uTex, vUv);
   col = mix(col, tex.rgb, tex.a * uAlpha);
 
