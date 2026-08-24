@@ -35,28 +35,26 @@ vec3 hue2rgb(float h) {
 }
 
 void main() {
-  vec3 N = normalize(vNormal);
-  vec3 V = normalize(vViewPos);
+  // Расстояние от края (0=центр, 1=край)
+  vec2 fromEdge = min(vUv, 1.0 - vUv); // расстояние до ближайшего края по X и Y
+  float edgeDist = min(fromEdge.x, fromEdge.y); // минимальное расстояние до края
+  float rim = 1.0 - smoothstep(0.0, 0.18, edgeDist); // 1=край, 0=центр
 
-  // Fresnel — интенсивность по краям
-  float fresnel = 1.0 - max(dot(N, V), 0.0);
-  fresnel = pow(fresnel, 1.8);
-
-  // Дисперсия — радуга зависит от угла нормали + времени
-  float hue = mod(N.x * 0.4 + N.y * 0.3 + uTime * 0.12, 1.0);
+  // Радуга только по краям
+  float hue = mod(vUv.x * 0.6 + vUv.y * 0.4 + uTime * 0.1, 1.0);
   vec3 rainbow = hue2rgb(hue);
 
-  // Тёмная стеклянная основа
-  vec3 base = vec3(0.06, 0.07, 0.10);
+  // Тёмная основа в центре
+  vec3 base = vec3(0.07, 0.08, 0.11);
 
-  // Дисперсия проявляется по Fresnel
-  vec3 col = mix(base, rainbow, fresnel * 0.75);
+  // Смешиваем: центр тёмный, края радужные
+  vec3 col = mix(base, rainbow, rim * 0.85);
 
-  // Тонкий блик — имитация отражения
-  float shine = pow(max(dot(reflect(-V, N), vec3(0.0, 0.0, 1.0)), 0.0), 12.0);
-  col += vec3(shine * 0.3);
+  // Тонкая белая обводка по самому краю
+  float border = 1.0 - smoothstep(0.0, 0.04, edgeDist);
+  col = mix(col, vec3(0.9), border * 0.4);
 
-  // Текстура с надписью поверх
+  // Текст поверх
   vec4 tex = texture2D(uTex, vUv);
   col = mix(col, tex.rgb, tex.a * uAlpha);
 
@@ -150,7 +148,7 @@ export class PrismButton {
       uniforms: {
         uTime:  { value: 0 },
         uAlpha: { value: 1 },
-        uTex:   { value: this.glTextures[0] },
+        uTex:   { value: null }, // заполнится после _initTextures
       },
     });
 
@@ -161,6 +159,10 @@ export class PrismButton {
     const geo    = new THREE.PlaneGeometry(planeW, planeH);
     this.mesh    = new THREE.Mesh(geo, this.mat);
     this.scene.add(this.mesh);
+
+    // Начальное состояние — грань 0, текст сразу виден
+    this.mat.uniforms.uTex.value   = this.glTextures[0];
+    this.mat.uniforms.uAlpha.value = 1;
 
     // Клик
     this.canvas.addEventListener('click', () => this._onClick());
