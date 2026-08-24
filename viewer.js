@@ -90,6 +90,17 @@ function initScene() {
   const bg = createGridBackground();
   if (bg) scene.add(bg);
 
+  // Пластина-стол под моделью
+  const tableGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.04, 64);
+  const tableMat = new THREE.MeshLambertMaterial({
+    color: 0x222428,
+    transparent: true,
+    opacity: 0.85,
+  });
+  const table = new THREE.Mesh(tableGeo, tableMat);
+  table.position.y = -0.82; // чуть ниже модели
+  scene.add(table);
+
   camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
   camera.position.set(0, 0.5, 2.5);
 
@@ -107,7 +118,10 @@ function initScene() {
   controls.maxDistance = 10;
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.8;
-  controls.enablePan = false;   // запрет перемещения
+  controls.enablePan = false;
+  // Ограничение по вертикали: сверху до горизонта (не ниже стола)
+  controls.minPolarAngle = 0;
+  controls.maxPolarAngle = Math.PI / 2;
   controls.addEventListener('start', () => { controls.autoRotate = false; });
 
   const ro = new ResizeObserver(() => {
