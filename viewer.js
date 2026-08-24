@@ -336,8 +336,6 @@ function isValidUAPhone(raw) {
   return /^0\d{9}$/.test(digits) || /^380\d{9}$/.test(digits);
 }
 
-// ── 3D Призма-кнопка ─────────────────────────────────────────────────────────
-
 function initFlipOrder(product, categoryName, subcategoryName) {
   const sceneEl    = document.getElementById('order-scene');
   const rotor      = document.getElementById('order-rotor');
@@ -347,15 +345,19 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   const btnLabel   = document.getElementById('btn-order-label');
   const btnPrice   = document.getElementById('btn-order-price');
 
-  // Заполняем текст кнопки
   if (btnLabel) btnLabel.textContent = 'Заказати';
   if (btnPrice) btnPrice.textContent = `за ${product.price.toLocaleString('uk-UA')} ₴`;
 
-  let base = 0;
+  // Текущее состояние: 0=заказати, 1=телефон, 2=успех
+  let currentFace = 0;
+  let totalAngle  = 0; // накопленный угол
 
   function spinTo(face) {
-    const target = base + face * 120;
-    rotor.style.transform = `translateZ(-17px) rotateX(${target}deg)`;
+    // Всегда крутим вперёд к нужной грани
+    const targetAngle = totalAngle + ((face - currentFace + 3) % 3) * 120;
+    totalAngle  = targetAngle;
+    currentFace = face;
+    rotor.style.transform = `translateZ(-17px) rotateX(${totalAngle}deg)`;
   }
 
   function isValid(raw) {
@@ -363,26 +365,26 @@ function initFlipOrder(product, categoryName, subcategoryName) {
     return /^0\d{9}$/.test(d) || /^380\d{9}$/.test(d);
   }
 
+  let sending = false; // блокируем двойную отправку
+
   faceOrder.addEventListener('click', () => {
+    if (currentFace !== 0) return;
     spinTo(1);
     setTimeout(() => phoneInput.focus(), 500);
   });
 
   phoneInput.addEventListener('input', () => {
     if (phoneInput.value.length > 13) phoneInput.value = phoneInput.value.slice(0, 13);
-    if (isValid(phoneInput.value.trim())) sendOrder();
+    if (!sending && isValid(phoneInput.value.trim())) sendOrder();
   });
 
   phoneInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && isValid(phoneInput.value.trim())) sendOrder();
+    if (e.key === 'Enter' && !sending && isValid(phoneInput.value.trim())) sendOrder();
   });
 
   phoneInput.addEventListener('blur', () => {
     setTimeout(() => {
-      const match = rotor.style.transform.match(/rotateX\((-?\d+)deg\)/);
-      if (match && ((parseInt(match[1]) % 360 + 360) % 360) === 120) {
-        spinTo(0); phoneInput.value = '';
-      }
+      if (currentFace === 1) { spinTo(0); phoneInput.value = ''; }
     }, 200);
   });
 
@@ -391,6 +393,8 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   });
 
   async function sendOrder() {
+    if (sending) return;
+    sending = true;
     const phone = phoneInput.value.trim();
     spinTo(2);
     try {
@@ -406,7 +410,11 @@ function initFlipOrder(product, categoryName, subcategoryName) {
         }),
       });
     } catch(e) { console.error(e); }
-    setTimeout(() => { base += 360; spinTo(0); phoneInput.value = ''; }, 4000);
+    setTimeout(() => {
+      phoneInput.value = '';
+      spinTo(0);
+      sending = false;
+    }, 4000);
   }
 }
 

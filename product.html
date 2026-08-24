@@ -6,8 +6,17 @@
   <title>3D Store — товар</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; background: #080808; }
-    body { font-family: system-ui, sans-serif; color: #f0f0f0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: system-ui, sans-serif; color: #f0f0f0;
+      background: url('https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/flowers.jpg') center center;
+      background-size: 400px;
+      animation: moveBackground 60s linear infinite;
+    }
+    @keyframes moveBackground {
+      from { background-position: 0% 0%; }
+      to   { background-position: 0% -1000%; }
+    }
 
     .page {
       max-width: 480px;
@@ -33,7 +42,14 @@
       grid-template-columns: 3fr 7fr;
       gap: 8px;
       height: 44px;
-      background: transparent; /* фон убран, у детей свой */
+      background: transparent;
+    }
+
+    .header-back, .header-next, .back-link, .next-model-btn {
+      backdrop-filter: blur(12px) saturate(1.4);
+      -webkit-backdrop-filter: blur(12px) saturate(1.4);
+      background: rgba(10,10,15,0.55);
+      border-radius: 4px;
     }
     .back-link {
       display: flex;
@@ -75,7 +91,10 @@
 
     /* ── Контент — фиксированный, не растягивается ── */
     .card-content {
-      background: #1c1e22;
+      backdrop-filter: blur(14px) saturate(1.5);
+      -webkit-backdrop-filter: blur(14px) saturate(1.5);
+      background: rgba(8,8,12,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 4px;
       overflow: hidden;
       flex: 1;
@@ -254,7 +273,7 @@
       transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Грань: слой 1 — conic-gradient (радуга), слой 2 — чёрная маска */
+    /* Грань: жидкое стекло через SVG filter */
     .v-face {
       position: absolute;
       inset: 0;
@@ -268,44 +287,42 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       gap: 6px;
-      overflow: hidden;
-      /* Слой 1: анимированная радуга */
-      background:
-        radial-gradient(
-          ellipse 75% 200% at 50% 50%,
-          #0a0b10 0%,
-          #0a0b10 55%,
-          transparent 100%
-        ),
-        conic-gradient(
-          from var(--face-hue, 0deg),
-          #ff0040, #ff6600, #ffdd00, #00ff88,
-          #00cfff, #7040ff, #ff00cc, #ff0040
-        );
+      background: transparent;
+      outline: none;
+      border: none;
     }
 
-    @property --face-hue {
-      syntax: '<angle>';
-      inherits: false;
-      initial-value: 0deg;
+    /* Слой 1: белая обводка + полупрозрачный фон */
+    .v-face::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      box-shadow:
+        inset 2px 2px 0px -2px rgba(255,255,255,0.7),
+        inset 0 0 3px 1px rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.06);
+      z-index: 0;
     }
 
-    .v-face { animation: face-hue-spin 6s linear infinite; }
-    @keyframes face-hue-spin { to { --face-hue: 360deg; } }
-
-    /* Тонкая белая обводка */
+    /* Слой 2: жидкое стекло через SVG filter */
     .v-face::after {
       content: '';
       position: absolute;
       inset: 0;
       border-radius: 4px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
-      pointer-events: none;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      filter: url(#btn-glass);
+      -webkit-filter: url(#btn-glass);
+      overflow: hidden;
+      isolation: isolate;
+      z-index: -1;
     }
 
     .v-face > * { position: relative; z-index: 1; }
 
-    .v-f0 { transform: rotateX(0deg)    translateZ(17px); cursor: pointer; width: 100%; font-family: inherit; flex-direction: row; gap: 5px; outline: none; border: none; }
+    .v-f0 { transform: rotateX(0deg)    translateZ(17px); cursor: pointer; width: 100%; font-family: inherit; flex-direction: row; gap: 5px; }
     .v-f1 { transform: rotateX(-120deg) translateZ(17px); padding: 0 16px; }
     .v-f2 { transform: rotateX(-240deg) translateZ(17px); }
 
@@ -395,6 +412,17 @@
     }
   }
   </script>
+  <!-- SVG фильтр для жидкого стекла -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0">
+    <defs>
+      <filter id="btn-glass" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" seed="1" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+        <feGaussianBlur in="displaced" stdDeviation="1.5"/>
+      </filter>
+    </defs>
+  </svg>
+
   <script src="catalog.js"></script>
   <script type="module" src="viewer.js"></script>
   <script type="module" src="button-gl.js"></script>
