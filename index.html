@@ -516,28 +516,60 @@
 
     // ── Логика футера (чат с оператором) ──────────────────────────────────
     (function() {
-      const finRotor   = document.getElementById('fin-rotor');
-      const input      = document.getElementById('footer-input');
-      const sendBtn    = document.getElementById('footer-send');
-      const replyFace  = document.getElementById('fin-reply');
-      const replyText  = document.getElementById('fin-reply-text');
+      const finRotor  = document.getElementById('fin-rotor');
+      const input     = document.getElementById('footer-input');
+      const sendBtn   = document.getElementById('footer-send');
+      const replyText = document.getElementById('fin-reply-text');
 
-      let finAngle = 0; // угол призмы поля ввода
-      let chatFace = 0; // 0=ввод, 1=ожидание, 2=ответ
+      let finAngle = 0;
+      let chatFace = 0;
+      let pollTimer = null;
+
+      // session_id — уникальный для каждой сессии браузера
+      let session = sessionStorage.getItem('chat_session');
+      if (!session) {
+        session = Math.random().toString(36).slice(2) + Date.now().toString(36);
+        sessionStorage.setItem('chat_session', session);
+      }
 
       function spinField(face) {
-        chatFace  = face;
-        finAngle  = Math.round(finAngle / 360) * 360 + face * 120;
+        chatFace = face;
+        finAngle = Math.round(finAngle / 360) * 360 + face * 120;
         finRotor.style.transform = `translateZ(-15px) rotateX(${finAngle}deg)`;
       }
 
-      // Отправка
+      function startPolling() {
+        if (pollTimer) return;
+        pollTimer = setInterval(async () => {
+          try {
+            const r    = await fetch(`/api/chat-poll?s=${session}`);
+            const data = await r.json();
+            if (data.reply) {
+              stopPolling();
+              replyText.textContent = data.reply;
+              spinField(2);
+              sendBtn.textContent  = 'Відповісти';
+              sendBtn.disabled     = false;
+              sendBtn.style.opacity = '1';
+            }
+          } catch(e) {}
+        }, 2000);
+      }
+
+      function stopPolling() {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+
       sendBtn.addEventListener('click', async () => {
         if (chatFace === 2) {
-          // "Відповісти" — возврат к полю ввода
-          spinField(0);
+          // Новая сессия + возврат к полю
+          session = Math.random().toString(36).slice(2) + Date.now().toString(36);
+          sessionStorage.setItem('chat_session', session);
+          finAngle += 360;
+          finRotor.style.transform = `translateZ(-15px) rotateX(${finAngle}deg)`;
+          chatFace = 0;
           sendBtn.textContent = 'Відправити';
-          sendBtn.disabled = false;
           setTimeout(() => input.focus(), 520);
           return;
         }
@@ -545,32 +577,22 @@
         const msg = input.value.trim();
         if (!msg) return;
 
-        // Поле → грань 1 (ожидание)
         spinField(1);
         sendBtn.disabled = true;
         sendBtn.style.opacity = '0.4';
         input.value = '';
 
-        // Отправляем
         try {
-          await fetch('/api/order', {
+          await fetch('/api/chat-send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: msg, type: 'chat' }),
+            body: JSON.stringify({ message: msg, session }),
           });
         } catch(e) { console.error(e); }
 
-        // Имитация ответа через 3 сек
-        setTimeout(() => {
-          replyText.textContent = 'Дякуємо! Оператор зв\'яжеться з вами найближчим часом.';
-          spinField(2);
-          sendBtn.textContent = 'Відповісти';
-          sendBtn.disabled = false;
-          sendBtn.style.opacity = '1';
-        }, 3000);
+        startPolling();
       });
 
-      // Enter в поле — отправить
       input.addEventListener('keydown', e => {
         if (e.key === 'Enter') sendBtn.click();
       });
