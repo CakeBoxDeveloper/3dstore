@@ -415,6 +415,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadModel(product.model);
   initFlipOrder(product, category.name, subcategory.name);
 
+  // ── Кнопка скриншота ──────────────────────────────────────────────────────
+  const btnShot = document.getElementById('btn-screenshot');
+  if (btnShot) {
+    btnShot.addEventListener('click', () => {
+      // Ставим камеру под 45° (изометрический ракурс)
+      const dist = camera.position.length();
+      camera.position.set(dist * 0.6, dist * 0.6, dist * 0.6);
+      camera.lookAt(0, 0, 0);
+      controls.update();
+
+      // Рендерим один кадр и делаем снимок
+      requestAnimationFrame(() => {
+        renderer.render(scene, camera);
+        const canvas = document.getElementById('viewer-canvas');
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a   = document.createElement('a');
+          a.href     = url;
+          a.download = `${product.id}.webp`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }, 'image/webp', 0.92);
+      });
+    });
+  }
+
   const procToggle = document.getElementById('proc-toggle');
   if (procToggle) {
     procToggle.addEventListener('change', () => {
