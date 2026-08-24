@@ -403,19 +403,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const { product, category, subcategory } = found;
 
-  document.title = `${product.name} — 3D Store`;
+  document.title = `${product.name} — PRISM`;
   document.getElementById('p-name').textContent = product.name;
 
   // Размеры рядом с названием
   const sizesEl = document.getElementById('p-sizes');
   if (sizesEl && product.sizes) sizesEl.textContent = product.sizes;
 
-  // Кнопка: "Заказати" + "за *цена* ₴"
+  // Кнопка "следующая модель" — находим следующий товар в той же подкатегории
+  const btnNext = document.getElementById('btn-next-model');
+  if (btnNext) {
+    // Собираем все товары из той же категории
+    const allProducts = [];
+    for (const cat of window.CatalogData.categories) {
+      for (const sub of cat.subcategories) {
+        for (const p of sub.products) allProducts.push(p.id);
+      }
+    }
+    const currentIdx = allProducts.indexOf(product.id);
+    const nextId     = allProducts[(currentIdx + 1) % allProducts.length];
+    btnNext.addEventListener('click', () => {
+      location.href = `product.html?id=${nextId}`;
+    });
+  }
+
+  // Кнопка: текст передаётся в PrismButton через initPrismButton
   const priceStr = product.price.toLocaleString('uk-UA') + ' ₴';
-  const btnLabel = document.getElementById('btn-order-label');
-  const btnPrice = document.getElementById('btn-order-price');
-  if (btnLabel) btnLabel.textContent = 'Заказати';
-  if (btnPrice) btnPrice.textContent = `за ${priceStr}`;
 
   initScene();
   buildMaterialSlider();

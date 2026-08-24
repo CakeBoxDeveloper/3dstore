@@ -62,33 +62,23 @@
       filter: brightness(0) invert(1); /* делает SVG полностью белым */
     }
 
-    .header-ticker::before,
-    .header-ticker::after {
-      content: '';
-      position: absolute;
-      top: 0; bottom: 0;
-      width: 28px;
-      z-index: 2;
-      pointer-events: none;
-    }
-    .header-ticker::before { left: 0;  background: linear-gradient(to right, #1c1e22, transparent); }
-    .header-ticker::after  { right: 0; background: linear-gradient(to left,  #1c1e22, transparent); }
-
-    .ticker-track {
+    .header-ticker {
       display: flex;
-      white-space: nowrap;
-      animation: ticker-scroll 18s linear infinite;
+      align-items: center;
+      justify-content: center;
+      background: #1c1e22;
+      border-radius: 4px;
+      overflow: hidden;
     }
-    .ticker-track span {
-      font-size: 12px;
+
+    .tg-link {
+      font-size: 13px;
       color: #888;
-      padding-right: 48px;
-      letter-spacing: 0.03em;
+      text-decoration: none;
+      transition: color 0.15s;
+      white-space: nowrap;
     }
-    @keyframes ticker-scroll {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
+    .tg-link:hover { color: #f0f0f0; }
 
     /* ── Футер: сообщение ── */
     .card-footer {
@@ -361,10 +351,9 @@
              alt="PRISM" class="logo-img">
       </div>
       <div class="header-ticker">
-        <div class="ticker-track">
-          <span>Друк 3D моделей будь-якої складності · Пластик · Віск · Епоксидка · Унікальні вироби під замовлення · Швидко і якісно ·</span>
-          <span>Друк 3D моделей будь-якої складності · Пластик · Віск · Епоксидка · Унікальні вироби під замовлення · Швидко і якісно ·</span>
-        </div>
+        <a href="https://t.me/prism3dstore" target="_blank" class="tg-link">
+          наш телеграм →
+        </a>
       </div>
     </div>
 
