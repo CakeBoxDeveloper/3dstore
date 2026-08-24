@@ -301,97 +301,37 @@ function isValidUAPhone(raw) {
   return /^0\d{9}$/.test(digits) || /^380\d{9}$/.test(digits);
 }
 
-// ── 3D Призма-кнопка ─────────────────────────────────────────────────────────
+// ── WebGL GlassButton ─────────────────────────────────────────────────────────
 
-function initFlipOrder(product, categoryName, subcategoryName) {
-  const sceneEl    = document.getElementById('order-scene');
-  const rotor      = document.getElementById('order-rotor');
-  const faceOrder  = document.getElementById('face-order');
-  const facePhone  = document.getElementById('face-phone');
-  const phoneInput = document.getElementById('phone-input');
+async function initGlassButton(product, categoryName, subcategoryName) {
+  const { GlassButton } = await import('./button-gl.js');
 
-  // Базовый угол — кратен 360 чтобы всегда крутить вперёд
-  let base = 0; // увеличивается на 360 каждый полный цикл
+  const container = document.getElementById('order-btn-container');
+  if (!container) return;
 
-  function spinTo(face) {
-    // face: 0=заказати, 1=телефон, 2=успех
-    // Каждая грань = +120° от предыдущей
-    const target = base + face * 120;
-    rotor.style.transform = `translateZ(-17px) rotateX(${target}deg)`;
-  }
+  const priceStr = product.price.toLocaleString('uk-UA') + ' ₴';
 
-  function isValid(raw) {
-    const d = raw.replace(/[\s\-().+]/g, '');
-    return /^0\d{9}$/.test(d) || /^380\d{9}$/.test(d);
-  }
-
-  // Грань 0 → 1
-  faceOrder.addEventListener('click', () => {
-    spinTo(1);
-    setTimeout(() => phoneInput.focus(), 500);
-  });
-
-  // Автопроверка при вводе
-  phoneInput.addEventListener('input', () => {
-    if (phoneInput.value.length > 13) phoneInput.value = phoneInput.value.slice(0, 13);
-    if (isValid(phoneInput.value.trim())) sendOrder();
-  });
-
-  phoneInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      if (isValid(phoneInput.value.trim())) sendOrder();
-      else {
-        facePhone.classList.add('invalid');
-        setTimeout(() => facePhone.classList.remove('invalid'), 400);
-      }
+  const btn = new GlassButton(container, {
+    onPhoneSubmit: async (phone) => {
+      btn.goToSuccess();
+      try {
+        await fetch('/api/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product: product.name, productId: product.id,
+            category: categoryName, subcategory: subcategoryName,
+            material: `${currentMat.label} · ${currentMat.sublabel}`,
+            color: currentMat.sublabel, price: product.price, phone,
+            procedural: proceduralMode,
+          }),
+        });
+      } catch (e) { console.error(e); }
+      setTimeout(() => btn.goToOrder(), 4000);
     }
   });
 
-  // Потеря фокуса → возврат на грань 0
-  phoneInput.addEventListener('blur', () => {
-    setTimeout(() => {
-      const cur = rotor.style.transform;
-      // Если на грани 1 (телефон) — возвращаем на 0
-      const match = cur.match(/rotateX\((-?\d+)deg\)/);
-      if (match) {
-        const deg = parseInt(match[1]);
-        const face = ((deg % 360) + 360) % 360;
-        if (face === 120) {
-          spinTo(0);
-          phoneInput.value = '';
-        }
-      }
-    }, 200);
-  });
-
-  document.addEventListener('pointerdown', e => {
-    if (!sceneEl.contains(e.target)) phoneInput.blur();
-  });
-
-  async function sendOrder() {
-    const phone = phoneInput.value.trim();
-    spinTo(2); // → грань успеха
-    try {
-      await fetch('/api/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product: product.name, productId: product.id,
-          category: categoryName, subcategory: subcategoryName,
-          material: `${currentMat.label} · ${currentMat.sublabel}`,
-          color: currentMat.sublabel, price: product.price, phone,
-          procedural: proceduralMode,
-        }),
-      });
-    } catch (e) { console.error(e); }
-
-    // Через 4с → грань 0 нового цикла
-    setTimeout(() => {
-      base += 360; // следующий цикл
-      spinTo(0);
-      phoneInput.value = '';
-    }, 4000);
-  }
+  btn.setLabel('Заказати', `за ${priceStr}`);
 }
 
 // ── Main init ────────────────────────────────────────────────────────────────
@@ -433,7 +373,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadHDR();
   buildMaterialSlider();
   loadModel(product.model);
-  initFlipOrder(product, category.name, subcategory.name);
+  initGlassButton(product, category.name, subcategory.name);
 
   const procToggle = document.getElementById('proc-toggle');
   if (procToggle) {

@@ -176,120 +176,13 @@
       background: #fff;
     }
 
-    /* ── Призма-кнопка ── */
+    /* ── WebGL-кнопка заказа ── */
     .card-order {
-      overflow: visible;
-      background: transparent;
-      border: none;
       flex-shrink: 0;
       height: 52px;
-    }
-
-    .v-scene {
-      width: 100%;
-      height: 52px;
-      perspective: 400px;
-      perspective-origin: 50% 50%;
-    }
-
-    .v-rotor {
-      width: 100%;
-      height: 52px;
       position: relative;
-      transform-style: preserve-3d;
-      transform: translateZ(-17px) rotateX(0deg);
-      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .v-face {
-      position: absolute;
-      inset: 0;
       border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      gap: 6px;
-      background: #050710;
-      border: none;
       overflow: hidden;
-    }
-
-    @property --btn-hue {
-      syntax: '<angle>';
-      inherits: false;
-      initial-value: 0deg;
-    }
-
-    .v-face { animation: btn-hue-spin 6s linear infinite; }
-
-    @keyframes btn-hue-spin {
-      to { --btn-hue: 360deg; }
-    }
-
-    /* Дисперсия по периметру: один conic-gradient + тёмная маска центра */
-    .v-face::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 4px;
-      /* Тёмная маска: центр непрозрачный, края прозрачные */
-      background:
-        linear-gradient(#050710, #050710) padding-box,
-        conic-gradient(
-          from var(--btn-hue, 0deg),
-          #ff0040, #ff6600, #ffdd00, #00ff88, #00cfff, #7040ff, #ff00cc, #ff0040
-        ) border-box;
-      border: 2px solid transparent;
-      /* Небольшая белая обводка поверх */
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Текст поверх виньетки */
-    .v-face > * { position: relative; z-index: 1; }
-
-    .v-f0 {
-      transform: rotateX(0deg) translateZ(17px);
-      color: #fff;
-      cursor: pointer;
-      width: 100%;
-      font-family: inherit;
-      flex-direction: row;
-      gap: 5px;
-    }
-    .v-f0:hover::after { opacity: 0.85; }
-    .v-f0-top { font-size: 14px; font-weight: 700; white-space: nowrap; color: #fff; }
-    .v-f0-sub { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; }
-
-    .v-f1 {
-      transform: rotateX(-120deg) translateZ(17px);
-      color: #fff;
-      padding: 0 16px;
-    }
-    .v-f1 input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #fff;
-      font-size: 16px;
-      font-family: inherit;
-      text-align: center;
-      letter-spacing: 0.04em;
-      position: relative;
-      z-index: 1;
-    }
-    .v-f1 input::placeholder { color: rgba(255,255,255,0.45); }
-    .v-f1.invalid::after { box-shadow: inset 0 0 0 1.5px #e74c3c; }
-
-    .v-f2 {
-      transform: rotateX(-240deg) translateZ(17px);
-      color: #fff;
     }
   </style>
 </head>
@@ -335,23 +228,8 @@
       </main>
     </div>
 
-    <!-- Кнопка заказа — отдельная карточка с ценой внутри -->
-    <div class="card-order">
-      <div class="v-scene" id="order-scene">
-        <div class="v-rotor" id="order-rotor">
-          <button class="v-face v-f0" id="face-order">
-            <span class="v-f0-top" id="btn-order-label">Заказати</span>
-            <span class="v-f0-sub" id="btn-order-price"></span>
-          </button>
-          <div class="v-face v-f1" id="face-phone">
-            <input type="tel" id="phone-input"
-              placeholder="+380XXXXXXXXX"
-              autocomplete="tel" inputmode="tel">
-          </div>
-          <div class="v-face v-f2" id="face-success">Заявка прийнята!</div>
-        </div>
-      </div>
-    </div>
+    <!-- WebGL кнопка заказа -->
+    <div class="card-order" id="order-btn-container"></div>
 
   </div>
 
@@ -366,5 +244,6 @@
   </script>
   <script src="catalog.js"></script>
   <script type="module" src="viewer.js"></script>
+  <script type="module" src="button-gl.js"></script>
 </body>
 </html>
