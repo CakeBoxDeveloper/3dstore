@@ -5,17 +5,53 @@
       "name": "Пластик",
       "subcategories": [
         {
-          "id": "stands",
-          "name": "Підставки",
+          "id": "monstera",
+          "name": "Серія Монстера",
           "products": [
             {
-              "id": "stand-monstera",
+              "id": "monstera-phone",
               "name": "Підставка Monstera",
               "sizes": "120 × 90 × 85 мм",
               "description": "Підставка для телефону у формі листа монстери.",
               "price": 350,
-              "model": "https://github.com/CakeBoxDeveloper/3dstore/blob/main/Catalog/Plastic/MonsteraPhoneSupport.glb",
-              "thumbnail": "/thumbnails/stand-monstera.jpg"
+              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraPhoneSupport.glb",
+              "thumbnail": "/thumbnails/monstera-phone.webp"
+            },
+            {
+              "id": "monstera-shelf",
+              "name": "Полиця Monstera",
+              "sizes": "200 × 80 × 40 мм",
+              "description": "Настінна полиця у формі листа монстери.",
+              "price": 480,
+              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraBench.glb",
+              "thumbnail": "/thumbnails/monstera-shelf.webp"
+            },
+            {
+              "id": "monstera-pot",
+              "name": "Кашпо Monstera",
+              "sizes": "⌀120 × 110 мм",
+              "description": "Кашпо для квітів у формі листа монстери.",
+              "price": 420,
+              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraPot.glb",
+              "thumbnail": "/thumbnails/monstera-pot.webp"
+            },
+            {
+              "id": "monstera-bowl",
+              "name": "Миска Monstera",
+              "sizes": "⌀160 × 60 мм",
+              "description": "Декоративна миска з рельєфом листа монстери.",
+              "price": 390,
+              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraBowl.glb",
+              "thumbnail": "/thumbnails/monstera-bowl.webp"
+            },
+            {
+              "id": "monstera-plate",
+              "name": "Котел Monstera",
+              "sizes": "⌀140 × 90 мм",
+              "description": "Котел з рельєфом листа монстери.",
+              "price": 450,
+              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraPlate.glb",
+              "thumbnail": "/thumbnails/monstera-plate.webp"
             }
           ]
         }

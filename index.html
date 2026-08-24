@@ -28,23 +28,32 @@
 
     /* ── Хедер: две колонки 30/70 ── */
     .card-header {
-      background: #1c1e22;
-      border-radius: 4px;
-      overflow: hidden;
       flex-shrink: 0;
       display: grid;
       grid-template-columns: 3fr 7fr;
-      gap: 0;
+      gap: 8px;
       height: 44px;
+      background: transparent; /* фон убран — дочерние блоки имеют свой */
     }
     .card-header::after { display: none; }
 
+    /* Каждая половина хедера — отдельная карточка */
     .header-logo {
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 12px;
-      border-right: 1px solid rgba(255,255,255,0.06);
+      background: #1c1e22;
+      border-radius: 4px;
+    }
+
+    .header-ticker {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      background: #1c1e22;
+      border-radius: 4px;
     }
     .logo {
       font-family: 'Ageta', system-ui, sans-serif;
@@ -54,13 +63,6 @@
       white-space: nowrap;
     }
 
-    /* Бегущая строка */
-    .header-ticker {
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-    }
     .header-ticker::before,
     .header-ticker::after {
       content: '';
@@ -91,14 +93,13 @@
 
     /* ── Футер: сообщение ── */
     .card-footer {
-      background: #1c1e22;
-      border-radius: 4px;
-      overflow: visible;
       flex-shrink: 0;
       display: grid;
       grid-template-columns: 7fr 3fr;
-      gap: 0;
+      gap: 8px;
       height: 44px;
+      background: transparent;
+      overflow: visible;
     }
 
     /* Поле ввода — призма с тремя гранями rotateX */
@@ -106,6 +107,7 @@
       overflow: visible;
       position: relative;
       height: 44px;
+      background: transparent;
     }
     .footer-input-scene {
       width: 100%;
@@ -124,7 +126,7 @@
     .footer-input-face {
       position: absolute;
       inset: 0;
-      border-radius: 4px 0 0 4px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       backface-visibility: hidden;
@@ -151,7 +153,6 @@
       overflow: visible;
       position: relative;
       height: 44px;
-      border-left: 1px solid rgba(255,255,255,0.06);
     }
     .footer-scene {
       width: 100%;
