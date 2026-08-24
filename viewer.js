@@ -94,7 +94,7 @@ function initScene() {
   const tableGeo = new THREE.PlaneGeometry(2.4, 2.4);
   const tableMat = new THREE.ShaderMaterial({
     uniforms: {
-      uBase:  { value: new THREE.Color(0x2d6a2d) }, // тёмно-зелёный
+      uBase:  { value: new THREE.Color(0x1a5c5c) }, // тёмно-бирюзовый
       uGrid:  { value: new THREE.Color(0xffffff) },
       uScale: { value: 10.0 },  // кол-во ячеек
       uWidth: { value: 0.02 },  // толщина линий
