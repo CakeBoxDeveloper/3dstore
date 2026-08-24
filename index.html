@@ -26,25 +26,138 @@
       font-style: normal;
     }
 
+    /* ── Хедер: две колонки 30/70 ── */
     .card-header {
       background: #1c1e22;
       border-radius: 4px;
       overflow: hidden;
       flex-shrink: 0;
-      padding: 12px 16px;
+      display: grid;
+      grid-template-columns: 3fr 7fr;
+      gap: 0;
+      height: 44px;
+    }
+    .card-header::after { display: none; }
+
+    .header-logo {
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 0 12px;
+      border-right: 1px solid #2e2e2e;
+      flex-shrink: 0;
     }
-    .card-header::after { display: none; }
     .logo {
       font-family: 'Ageta', system-ui, sans-serif;
-      font-style: italic;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: normal;
       letter-spacing: 0.02em;
-      text-align: center;
+      white-space: nowrap;
     }
+
+    /* Бегущая строка */
+    .header-ticker {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .header-ticker::before,
+    .header-ticker::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 28px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .header-ticker::before { left: 0;  background: linear-gradient(to right, #1c1e22, transparent); }
+    .header-ticker::after  { right: 0; background: linear-gradient(to left,  #1c1e22, transparent); }
+
+    .ticker-track {
+      display: flex;
+      white-space: nowrap;
+      animation: ticker-scroll 18s linear infinite;
+    }
+    .ticker-track span {
+      font-size: 12px;
+      color: #888;
+      padding-right: 48px;
+      letter-spacing: 0.03em;
+    }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── Футер: сообщение ── */
+    .card-footer {
+      background: #1c1e22;
+      border-radius: 4px;
+      overflow: visible;
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 7fr 3fr;
+      gap: 0;
+      height: 44px;
+    }
+
+    .footer-input-wrap {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border-right: 1px solid #2e2e2e;
+    }
+    .footer-input-wrap input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f0f0f0;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .footer-input-wrap input::placeholder { color: #444; }
+
+    /* Призма кнопки футера (ось X, вращается вверх) */
+    .footer-btn-wrap {
+      overflow: visible;
+      position: relative;
+      height: 44px;
+    }
+    .footer-scene {
+      width: 100%;
+      height: 44px;
+      perspective: 300px;
+      perspective-origin: 50% 50%;
+    }
+    .footer-rotor {
+      width: 100%;
+      height: 44px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: translateZ(-15px) rotateX(0deg);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .footer-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 0 4px 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background: #1c1e22;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+    .footer-f0 { transform: rotateX(0deg)    translateZ(15px); color: #888; }
+    .footer-f0:hover { color: #f0f0f0; }
+    .footer-f1 { transform: rotateX(-120deg) translateZ(15px); color: #a8f0c0; font-size: 11px; }
 
     .card-catalog {
       overflow: visible;
@@ -212,12 +325,35 @@
   <div class="page">
 
     <div class="card-header">
-      <span class="logo">PRISM</span>
+      <div class="header-logo">
+        <span class="logo">PRISM</span>
+      </div>
+      <div class="header-ticker">
+        <div class="ticker-track">
+          <span>Друк 3D моделей будь-якої складності · Пластик · Віск · Епоксидка · Унікальні вироби під замовлення · Швидко і якісно ·</span>
+          <span>Друк 3D моделей будь-якої складності · Пластик · Віск · Епоксидка · Унікальні вироби під замовлення · Швидко і якісно ·</span>
+        </div>
+      </div>
     </div>
 
     <div class="card-catalog">
       <div class="h-scene">
         <div class="h-rotor" id="h-rotor"></div>
+      </div>
+    </div>
+
+    <!-- Футер: поле сообщения + кнопка отправки -->
+    <div class="card-footer">
+      <div class="footer-input-wrap">
+        <input type="text" id="footer-input" placeholder="Напишіть нам…" autocomplete="off">
+      </div>
+      <div class="footer-btn-wrap">
+        <div class="footer-scene">
+          <div class="footer-rotor" id="footer-rotor">
+            <button class="footer-face footer-f0" id="footer-send">Відправити</button>
+            <div class="footer-face footer-f1" id="footer-done">Відправлено ✓</div>
+          </div>
+        </div>
       </div>
     </div>
 
