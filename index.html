@@ -56,7 +56,7 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Грань призмы — тёмная, дисперсия по периметру через ::after */
+    /* Грань призмы — тёмно-серое стекло */
     .h-face {
       position: absolute;
       inset: 0;
@@ -65,41 +65,31 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       overflow: hidden;
-      background: #050710;
-      box-shadow: none;
+      background: #1c1e22;
+      /* Белый контур — имитация граней стекла */
+      box-shadow:
+        inset 0 0 0 1.5px rgba(255,255,255,0.16),
+        inset 0 1px 0   rgba(255,255,255,0.28);
     }
 
-    /* Дисперсионная обводка — один conic-gradient по краям */
-    .h-face::after {
+    /* Зернистость */
+    .h-face::before {
       content: '';
       position: absolute;
       inset: 0;
       z-index: 0;
-      background:
-        linear-gradient(#050710, #050710) padding-box,
-        conic-gradient(
-          from var(--hue, 0deg),
-          #ff0040, #ff6600, #ffdd00, #00ff88, #00cfff, #7040ff, #ff00cc, #ff0040
-        ) border-box;
-      border: 2px solid transparent;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
       pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
     }
 
-    /* Весь контент грани поверх оверлея */
+    /* Контент поверх зерна */
     .face-header, .face-scroll-wrap { position: relative; z-index: 1; }
 
-    @property --hue {
-      syntax: '<angle>';
-      inherits: false;
-      initial-value: 0deg;
-    }
-
-    .h-f0 { transform: rotateY(0deg)   translateZ(133px); animation: hue-spin 8s linear infinite; }
-    .h-f1 { transform: rotateY(120deg) translateZ(133px); animation: hue-spin 8s linear infinite; animation-delay: -2.67s; }
-    .h-f2 { transform: rotateY(240deg) translateZ(133px); animation: hue-spin 8s linear infinite; animation-delay: -5.33s; }
-
-    @keyframes hue-spin { to { --hue: 360deg; } }
+    .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
+    .h-f1 { transform: rotateY(120deg) translateZ(133px); }
+    .h-f2 { transform: rotateY(240deg) translateZ(133px); }
 
     /* Заголовок — без разделителя, название по центру, стрелки без обводки */
     .face-header {

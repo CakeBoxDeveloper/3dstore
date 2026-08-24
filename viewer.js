@@ -301,37 +301,80 @@ function isValidUAPhone(raw) {
   return /^0\d{9}$/.test(digits) || /^380\d{9}$/.test(digits);
 }
 
-// ── WebGL GlassButton ─────────────────────────────────────────────────────────
+// ── 3D Призма-кнопка ─────────────────────────────────────────────────────────
 
-async function initGlassButton(product, categoryName, subcategoryName) {
-  const { GlassButton } = await import('./button-gl.js');
+function initFlipOrder(product, categoryName, subcategoryName) {
+  const sceneEl    = document.getElementById('order-scene');
+  const rotor      = document.getElementById('order-rotor');
+  const faceOrder  = document.getElementById('face-order');
+  const facePhone  = document.getElementById('face-phone');
+  const phoneInput = document.getElementById('phone-input');
 
-  const container = document.getElementById('order-btn-container');
-  if (!container) return;
+  let base = 0;
 
-  const priceStr = product.price.toLocaleString('uk-UA') + ' ₴';
+  function spinTo(face) {
+    const target = base + face * 120;
+    rotor.style.transform = `translateZ(-17px) rotateX(${target}deg)`;
+  }
 
-  const btn = new GlassButton(container, {
-    onPhoneSubmit: async (phone) => {
-      btn.goToSuccess();
-      try {
-        await fetch('/api/order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            product: product.name, productId: product.id,
-            category: categoryName, subcategory: subcategoryName,
-            material: `${currentMat.label} · ${currentMat.sublabel}`,
-            color: currentMat.sublabel, price: product.price, phone,
-            procedural: proceduralMode,
-          }),
-        });
-      } catch (e) { console.error(e); }
-      setTimeout(() => btn.goToOrder(), 4000);
+  function isValid(raw) {
+    const d = raw.replace(/[\s\-().+]/g, '');
+    return /^0\d{9}$/.test(d) || /^380\d{9}$/.test(d);
+  }
+
+  faceOrder.addEventListener('click', () => {
+    spinTo(1);
+    setTimeout(() => phoneInput.focus(), 500);
+  });
+
+  phoneInput.addEventListener('input', () => {
+    if (phoneInput.value.length > 13) phoneInput.value = phoneInput.value.slice(0, 13);
+    if (isValid(phoneInput.value.trim())) sendOrder();
+  });
+
+  phoneInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (isValid(phoneInput.value.trim())) sendOrder();
+      else {
+        facePhone.classList.add('invalid');
+        setTimeout(() => facePhone.classList.remove('invalid'), 400);
+      }
     }
   });
 
-  btn.setLabel('Заказати', `за ${priceStr}`);
+  phoneInput.addEventListener('blur', () => {
+    setTimeout(() => {
+      const cur = rotor.style.transform;
+      const match = cur.match(/rotateX\((-?\d+)deg\)/);
+      if (match) {
+        const face = ((parseInt(match[1]) % 360) + 360) % 360;
+        if (face === 120) { spinTo(0); phoneInput.value = ''; }
+      }
+    }, 200);
+  });
+
+  document.addEventListener('pointerdown', e => {
+    if (!sceneEl.contains(e.target)) phoneInput.blur();
+  });
+
+  async function sendOrder() {
+    const phone = phoneInput.value.trim();
+    spinTo(2);
+    try {
+      await fetch('/api/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product: product.name, productId: product.id,
+          category: categoryName, subcategory: subcategoryName,
+          material: `${currentMat.label} · ${currentMat.sublabel}`,
+          color: currentMat.sublabel, price: product.price, phone,
+          procedural: proceduralMode,
+        }),
+      });
+    } catch (e) { console.error(e); }
+    setTimeout(() => { base += 360; spinTo(0); phoneInput.value = ''; }, 4000);
+  }
 }
 
 // ── Main init ────────────────────────────────────────────────────────────────
@@ -373,7 +416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadHDR();
   buildMaterialSlider();
   loadModel(product.model);
-  initGlassButton(product, category.name, subcategory.name);
+  initFlipOrder(product, category.name, subcategory.name);
 
   const procToggle = document.getElementById('proc-toggle');
   if (procToggle) {

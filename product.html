@@ -176,14 +176,82 @@
       background: #fff;
     }
 
-    /* ── WebGL-кнопка заказа ── */
+    /* ── Призма-кнопка ── */
     .card-order {
+      overflow: visible;
+      background: transparent;
+      border: none;
       flex-shrink: 0;
       height: 52px;
+    }
+
+    .v-scene {
+      width: 100%;
+      height: 52px;
+      perspective: 400px;
+      perspective-origin: 50% 50%;
+    }
+
+    .v-rotor {
+      width: 100%;
+      height: 52px;
       position: relative;
+      transform-style: preserve-3d;
+      transform: translateZ(-17px) rotateX(0deg);
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .v-face {
+      position: absolute;
+      inset: 0;
       border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      gap: 6px;
+      /* Тёмно-серое стекло */
+      background: #1c1e22;
+      /* Белый контур 2px — имитация грани стекла */
+      box-shadow:
+        inset 0 0 0 1.5px rgba(255,255,255,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.30);
       overflow: hidden;
     }
+
+    /* Зернистость — SVG шум поверх */
+    .v-face::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+    }
+
+    /* Весь контент поверх зерна */
+    .v-face > * { position: relative; z-index: 1; }
+
+    .v-f0 { transform: rotateX(0deg)    translateZ(17px); cursor: pointer; width: 100%; font-family: inherit; flex-direction: row; gap: 5px; }
+    .v-f1 { transform: rotateX(-120deg) translateZ(17px); padding: 0 16px; }
+    .v-f2 { transform: rotateX(-240deg) translateZ(17px); color: #a8f0c0; }
+
+    .v-f0-top { font-size: 14px; font-weight: 700; white-space: nowrap; }
+    .v-f0-sub { font-size: 14px; font-weight: 700; white-space: nowrap; color: rgba(255,255,255,0.7); }
+
+    .v-f1 input {
+      width: 100%; background: transparent; border: none; outline: none;
+      color: #fff; font-size: 16px; font-family: inherit;
+      text-align: center; letter-spacing: 0.04em;
+    }
+    .v-f1 input::placeholder { color: rgba(255,255,255,0.35); }
+    .v-f1.invalid { border-color: #e74c3c; }
   </style>
 </head>
 <body>
@@ -228,8 +296,21 @@
       </main>
     </div>
 
-    <!-- WebGL кнопка заказа -->
-    <div class="card-order" id="order-btn-container"></div>
+    <!-- Кнопка заказа -->
+    <div class="card-order">
+      <div class="v-scene" id="order-scene">
+        <div class="v-rotor" id="order-rotor">
+          <button class="v-face v-f0" id="face-order">
+            <span class="v-f0-top" id="btn-order-label">Заказати</span>
+            <span class="v-f0-sub" id="btn-order-price"></span>
+          </button>
+          <div class="v-face v-f1" id="face-phone">
+            <input type="tel" id="phone-input" placeholder="+380XXXXXXXXX" autocomplete="tel" inputmode="tel">
+          </div>
+          <div class="v-face v-f2" id="face-success">Заявка прийнята!</div>
+        </div>
+      </div>
+    </div>
 
   </div>
 
