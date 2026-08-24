@@ -110,6 +110,7 @@ function initScene() {
   const wrap   = canvas.parentElement;
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setClearColor(0x000000, 0); // прозрачный фон — видна только сетка
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -119,7 +120,7 @@ function initScene() {
   renderer.setSize(W, W);
 
   scene = new THREE.Scene();
-  // фон — процедурная сетка через ShaderMaterial
+  // Фон — только сетка, без scene.background
   scene.add(createGridBackground());
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
@@ -404,11 +405,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.title = `${product.name} — 3D Store`;
   document.getElementById('p-name').textContent = product.name;
 
-  // Цена и название на кнопке
+  // Размеры рядом с названием
+  const sizesEl = document.getElementById('p-sizes');
+  if (sizesEl && product.sizes) sizesEl.textContent = product.sizes;
+
+  // Кнопка: "Заказати" + "за *цена* ₴"
   const priceStr = product.price.toLocaleString('uk-UA') + ' ₴';
   const btnLabel = document.getElementById('btn-order-label');
   const btnPrice = document.getElementById('btn-order-price');
-  if (btnLabel) btnLabel.textContent = `Заказати ${product.name}`;
+  if (btnLabel) btnLabel.textContent = 'Заказати';
   if (btnPrice) btnPrice.textContent = `за ${priceStr}`;
 
   initScene();
