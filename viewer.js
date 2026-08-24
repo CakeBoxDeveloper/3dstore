@@ -82,6 +82,8 @@ function initScene() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.2;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
 
   const W = wrap.clientWidth;
   renderer.setSize(W, W);
@@ -91,14 +93,14 @@ function initScene() {
   const bg = createGridBackground();
   if (bg) scene.add(bg);
 
-  // Стол — квадратная зелёная пластина с белой сеткой (крафт/нарезка)
-  const tableGeo = new THREE.PlaneGeometry(2.4, 2.4);
+  // Стол — большая плоскость, края растворяются, принимает тени
+  const tableGeo = new THREE.PlaneGeometry(12, 12);
   const tableMat = new THREE.ShaderMaterial({
     uniforms: {
-      uBase:  { value: new THREE.Color(0x1a5c5c) }, // тёмно-бирюзовый
+      uBase:  { value: new THREE.Color(0x1a5c5c) },
       uGrid:  { value: new THREE.Color(0xffffff) },
-      uScale: { value: 10.0 },  // кол-во ячеек
-      uWidth: { value: 0.02 },  // толщина линий
+      uScale: { value: 10.0 },
+      uWidth: { value: 0.025 },
     },
     vertexShader: `
       varying vec2 vUv;
@@ -111,28 +113,41 @@ function initScene() {
       uniform float uWidth;
       varying vec2 vUv;
       void main() {
-        vec2 g = fract(vUv * uScale);
-        float line = step(1.0 - uWidth, g.x) + step(1.0 - uWidth, g.y);
-        line = clamp(line, 0.0, 1.0);
-        vec3 col = mix(uBase, uGrid, line * 0.35);
-        gl_FragColor = vec4(col, 1.0);
+        vec2 g     = fract(vUv * uScale);
+        float line = clamp(step(1.0-uWidth,g.x)+step(1.0-uWidth,g.y),0.0,1.0);
+        vec3 col   = mix(uBase, mix(uBase,uGrid,0.28), line);
+        float d    = length(vUv - 0.5) * 2.0;
+        float alpha = 1.0 - smoothstep(0.45, 1.0, d);
+        gl_FragColor = vec4(col, alpha);
       }
     `,
     side: THREE.FrontSide,
+    transparent: true,
+    depthWrite: false,
   });
   const table = new THREE.Mesh(tableGeo, tableMat);
-  table.rotation.x = -Math.PI / 2; // горизонтально
-  table.position.y = -0.82;
+  table.rotation.x  = -Math.PI / 2;
+  table.position.y  = -0.82;
+  table.receiveShadow = true;
   scene.add(table);
 
   camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
   camera.position.set(0, 0.5, 2.5);
 
   // Освещение: источник строго сверху + равномерный ambient
-  // MeshLambertMaterial без бликов — освещение плоское
-  scene.add(new THREE.AmbientLight(0xffffff, 0.85));
-  const top = new THREE.DirectionalLight(0xffffff, 1.2);
-  top.position.set(0, 10, 2);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+  const top = new THREE.DirectionalLight(0xffffff, 1.4);
+  top.position.set(1, 8, 3);
+  top.castShadow = true;
+  top.shadow.mapSize.width  = 1024;
+  top.shadow.mapSize.height = 1024;
+  top.shadow.camera.near = 0.5;
+  top.shadow.camera.far  = 20;
+  top.shadow.camera.left   = -3;
+  top.shadow.camera.right  =  3;
+  top.shadow.camera.top    =  3;
+  top.shadow.camera.bottom = -3;
+  top.shadow.bias = -0.001;
   scene.add(top);
 
   controls = new OrbitControls(camera, renderer.domElement);
@@ -188,7 +203,18 @@ function loadModel(url) {
       const scale  = 1.2 / Math.max(size.x, size.y, size.z);
       model.position.sub(center.multiplyScalar(scale));
       model.scale.setScalar(scale);
-      model.traverse(c => { if (c.isMesh) c.material = buildMaterial(); });
+      model.traverse(c => {
+        if (c.isMesh) {
+          c.material    = buildMaterial();
+          c.castShadow  = true;
+          c.receiveShadow = true;
+        }
+      });
+
+      // Ставим модель на стол: нижняя точка bbox = y стола (-0.82)
+      const box2   = new THREE.Box3().setFromObject(model);
+      const bottom = box2.min.y;
+      model.position.y += (-0.82 - bottom);
       scene.add(model);
       meshObjects.push(model);
       loader_el.style.display = 'none';
@@ -209,6 +235,9 @@ function usePlaceholder() {
     new THREE.TorusKnotGeometry(0.45, 0.16, 128, 32),
     buildMaterial()
   );
+  mesh.castShadow    = true;
+  mesh.receiveShadow = true;
+  mesh.position.y    = -0.82 + 0.45; // стоит на столе
   scene.add(mesh);
   meshObjects.push(mesh);
 }
