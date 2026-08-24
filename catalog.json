@@ -14,7 +14,7 @@
               "sizes": "120 × 90 × 85 мм",
               "description": "Підставка для телефону у формі листа монстери.",
               "price": 350,
-              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraPhoneSupport.glb",
+              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/refs/heads/main/Catalog/Plastic/MonsteraPhoneSupport.glb",
               "thumbnail": "/thumbnails/stand-monstera.jpg"
             }
           ]
