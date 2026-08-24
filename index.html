@@ -563,10 +563,12 @@
 
       sendBtn.addEventListener('click', async () => {
         if (chatFace === 2) {
-          // Новая сессия + возврат к полю
+          // Новая сессия + переход на грань 0 следующего цикла (вперёд, не назад)
           session = Math.random().toString(36).slice(2) + Date.now().toString(36);
           sessionStorage.setItem('chat_session', session);
-          finAngle += 360;
+          // Текущий угол = base + 240. Грань 0 следующего цикла = base + 360.
+          // Значит крутим на +120 вперёд
+          finAngle += 120;
           finRotor.style.transform = `translateZ(-15px) rotateX(${finAngle}deg)`;
           chatFace = 0;
           sendBtn.textContent = 'Відправити';
