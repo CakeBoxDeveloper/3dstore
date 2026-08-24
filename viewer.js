@@ -99,7 +99,7 @@ function initScene() {
     uniforms: {
       uBase:  { value: new THREE.Color(0x1a5c5c) },
       uGrid:  { value: new THREE.Color(0xffffff) },
-      uScale: { value: 10.0 },
+      uScale: { value: 20.0 },
       uWidth: { value: 0.025 },
     },
     vertexShader: `
@@ -139,15 +139,16 @@ function initScene() {
   const top = new THREE.DirectionalLight(0xffffff, 1.4);
   top.position.set(1, 8, 3);
   top.castShadow = true;
-  top.shadow.mapSize.width  = 1024;
-  top.shadow.mapSize.height = 1024;
-  top.shadow.camera.near = 0.5;
-  top.shadow.camera.far  = 20;
-  top.shadow.camera.left   = -3;
-  top.shadow.camera.right  =  3;
-  top.shadow.camera.top    =  3;
-  top.shadow.camera.bottom = -3;
-  top.shadow.bias = -0.001;
+  top.shadow.mapSize.width  = 2048;
+  top.shadow.mapSize.height = 2048;
+  top.shadow.camera.near = 0.1;
+  top.shadow.camera.far  = 30;
+  top.shadow.camera.left   = -5;
+  top.shadow.camera.right  =  5;
+  top.shadow.camera.top    =  5;
+  top.shadow.camera.bottom = -5;
+  top.shadow.bias           = -0.0005;
+  top.shadow.normalBias     =  0.02;
   scene.add(top);
 
   controls = new OrbitControls(camera, renderer.domElement);
