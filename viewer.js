@@ -345,7 +345,7 @@ function initFlipOrder(product, categoryName, subcategoryName) {
   const btnLabel   = document.getElementById('btn-order-label');
   const btnPrice   = document.getElementById('btn-order-price');
 
-  if (btnLabel) btnLabel.textContent = 'Заказати';
+  if (btnLabel) btnLabel.textContent = 'Замовити';
   if (btnPrice) btnPrice.textContent = `за ${product.price.toLocaleString('uk-UA')} ₴`;
 
   // Текущее состояние: 0=заказати, 1=телефон, 2=успех
