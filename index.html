@@ -355,7 +355,7 @@
       overflow: visible;
       flex: 1;
       min-height: 0;
-      background: #000;
+      background: transparent;
       border-radius: 4px;
       position: relative;
       z-index: 3;
@@ -386,7 +386,9 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       overflow: hidden;
-      background: #000;
+      background: rgba(0, 0, 0, 0.60);
+      -webkit-backdrop-filter: url(#catalog-glass);
+      backdrop-filter: url(#catalog-glass);
       border-radius: 4px;
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,0.06),
@@ -394,6 +396,7 @@
         inset 0 0 20px 2px rgba(255,60,120,0.06),
         inset 0 0 20px 2px rgba(255,160,0,0.05);
     }
+    /* убираем пустой before */
 
     /* Анимированная дисперсия — паттерн движется, элемент статичен */
     @property --ca {
@@ -710,6 +713,9 @@
   </style>
 </head>
 <body>
+  <!-- Анимированные точки в узлах сетки -->
+  <canvas id="grid-dots" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+
   <div class="page">
 
     <div class="card-header">
@@ -1051,6 +1057,107 @@
         if (e.key === 'Enter') sendBtn.click();
       });
     })();
+  </script>
+  <!-- SVG фильтр: квадратная линза — центр ровный, края искажены -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
+    <defs>
+      <filter id="catalog-glass" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.010" numOctaves="2" seed="4" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="40" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <script>
+  // ── Анимированные точки в узлах сетки ──
+  (function() {
+    const canvas = document.getElementById('grid-dots');
+    const ctx    = canvas.getContext('2d');
+    const GRID   = 40; // совпадает с background-size
+    const MAX_DOTS = 55; // сколько точек одновременно живёт
+
+    let W, H, cols, rows, dots = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      cols = Math.floor(W / GRID) + 1;
+      rows = Math.floor(H / GRID) + 1;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function randInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+
+    function spawnDot() {
+      return {
+        col:      randInt(0, cols),
+        row:      randInt(0, rows),
+        alpha:    0,
+        maxAlpha: 0.55 + Math.random() * 0.45,
+        radius:   0.35 + Math.random() * 0.42,
+        // случайная фаза: fade-in, hold, fade-out
+        phase:    'in',
+        speed:    0.012 + Math.random() * 0.018,
+        hold:     0,
+        maxHold:  randInt(18, 80),
+      };
+    }
+
+    // Заполняем начальный пул с разными фазами
+    for (let i = 0; i < MAX_DOTS; i++) {
+      const d = spawnDot();
+      d.alpha = Math.random() * d.maxAlpha;
+      d.phase = ['in','hold','out'][randInt(0,2)];
+      dots.push(d);
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+
+      dots.forEach((d, idx) => {
+        // Обновляем состояние
+        if (d.phase === 'in') {
+          d.alpha += d.speed;
+          if (d.alpha >= d.maxAlpha) { d.alpha = d.maxAlpha; d.phase = 'hold'; }
+        } else if (d.phase === 'hold') {
+          d.hold++;
+          if (d.hold >= d.maxHold) d.phase = 'out';
+        } else {
+          d.alpha -= d.speed * 0.7;
+          if (d.alpha <= 0) {
+            dots[idx] = spawnDot(); // рождается новая точка
+            return;
+          }
+        }
+
+        // Рисуем точку с мягким свечением
+        const x = d.col * GRID;
+        const y = d.row * GRID;
+
+        ctx.save();
+        // Внешнее свечение
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, d.radius * 4);
+        glow.addColorStop(0,   `rgba(180,180,180,${d.alpha * 0.5})`);
+        glow.addColorStop(0.5, `rgba(140,140,140,${d.alpha * 0.15})`);
+        glow.addColorStop(1,   `rgba(0,0,0,0)`);
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(x, y, d.radius * 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ядро — серое
+        ctx.fillStyle = `rgba(200,200,200,${d.alpha * 0.7})`;
+        ctx.beginPath();
+        ctx.arc(x, y, d.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      requestAnimationFrame(tick);
+    }
+    tick();
+  })();
   </script>
 </body>
 </html>
