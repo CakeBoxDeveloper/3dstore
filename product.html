@@ -50,34 +50,26 @@
       border-radius: 4px;
     }
     .back-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 12px;
-      font-size: 13px;
-      color: #888;
-      text-decoration: none;
-      transition: color 0.15s;
-      background: #1c1e22;
-      border-radius: 4px;
-      white-space: nowrap;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 12px; font-size: 13px; color: #888;
+      text-decoration: none; transition: color 0.15s;
+      background: #000; border-radius: 4px; white-space: nowrap;
+      position: relative;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 0 0 16px 2px rgba(80,100,255,0.10),
+        inset 0 0 16px 2px rgba(255,60,120,0.06);
     }
     .back-link:hover { color: #f0f0f0; }
 
     .next-model-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 12px;
-      font-size: 12px;
-      color: #666;
-      background: #1c1e22;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: color 0.15s;
-      text-align: center;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 12px; font-size: 12px; color: #666;
+      background: #000; border: none; border-radius: 4px;
+      cursor: pointer; font-family: inherit; transition: color 0.15s;
+      text-align: center; position: relative;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 0 0 16px 2px rgba(80,100,255,0.10),
+        inset 0 0 16px 2px rgba(255,160,0,0.06);
     }
     .next-model-btn:hover { color: #f0f0f0; }
     .logo {
@@ -89,39 +81,33 @@
 
     /* ── Контент — фиксированный, не растягивается ── */
     .card-content {
-      backdrop-filter: blur(14px) saturate(1.5);
-      -webkit-backdrop-filter: blur(14px) saturate(1.5);
-      background: rgba(8,8,12,0.6);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: #000;
+      border: none;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 0 0 24px 4px rgba(80,100,255,0.10),
+        inset 0 0 24px 4px rgba(255,60,120,0.06),
+        inset 0 0 24px 4px rgba(255,160,0,0.05);
       border-radius: 4px;
       overflow: hidden;
       flex: 1;
       min-height: 0;
+      position: relative;
     }
 
-    .product-page {
-      height: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: none;
-      padding: 10px 14px 14px;
-      display: flex;
-      flex-direction: column;
-      background: #1c1e22;
-    }
-    .product-page::-webkit-scrollbar { display: none; }
-
-    /* Вьювер — уменьшен (4:3 вместо 1:1) */
+    /* Вьювер — -10% по ширине и высоте */
     .viewer-wrap {
-      background: transparent;
-      border: 1px solid #2e2e2e;
+      background: #000;
       border-radius: 4px;
       overflow: hidden;
       position: relative;
-      margin-bottom: 10px;
+      margin: 0 5% 10px;
       flex-shrink: 0;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 0 0 20px 2px rgba(80,100,255,0.10),
+        inset 0 0 20px 2px rgba(255,60,120,0.06);
     }
-    #viewer-canvas { width: 100%; aspect-ratio: 4 / 3; display: block; }
+    #viewer-canvas { width: 100%; aspect-ratio: 16 / 10; display: block; }
 
     .viewer-loader {
       position: absolute; inset: 0;
@@ -142,14 +128,25 @@
       align-items: baseline;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 8px;
+      margin: 0 5% 8px;
       flex-shrink: 0;
     }
+
+    /* ── Слайдер материалов ── */
+    .material-section { margin: 0 5% 8px; flex-shrink: 0; }
     .product-name-big { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3; }
     .product-sizes    { font-size: 11px; color: #666; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── Слайдер материалов ── */
-    .material-section { margin-bottom: 8px; flex-shrink: 0; }
+    .product-page {
+      height: 100%;
+      overflow-y: auto; overflow-x: hidden;
+      scrollbar-width: none;
+      padding: 10px 14px 14px;
+      display: flex; flex-direction: column;
+      background: #000;
+    }
+    .product-page::-webkit-scrollbar { display: none; }
+
     .material-slider-outer { position: relative; }
     .material-slider-wrap  { overflow-x: auto; scrollbar-width: none; }
     .material-slider-wrap::-webkit-scrollbar { display: none; }
@@ -160,8 +157,8 @@
       content: ''; position: absolute; top: 0; bottom: 4px;
       width: 24px; z-index: 2; pointer-events: none; transition: opacity 0.2s;
     }
-    .material-slider-outer::before { left: 0;  background: linear-gradient(to right, #1c1e22, transparent); }
-    .material-slider-outer::after  { right: 0; background: linear-gradient(to left,  #1c1e22, transparent); }
+    .material-slider-outer::before { left: 0;  background: linear-gradient(to right, #000, transparent); z-index: 1; }
+    .material-slider-outer::after  { right: 0; background: linear-gradient(to left,  #000, transparent); z-index: 1; }
     .material-slider-outer.at-start::before { opacity: 0; }
     .material-slider-outer.at-end::after    { opacity: 0; }
 
@@ -290,16 +287,15 @@
       border: none;
     }
 
-    /* Слой 1: белая обводка + полупрозрачный фон */
+    /* Слой 1: glow + контур */
     .v-face::before {
       content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 4px;
+      position: absolute; inset: 0; border-radius: 4px;
       box-shadow:
-        inset 2px 2px 0px -2px rgba(255,255,255,0.7),
-        inset 0 0 3px 1px rgba(255,255,255,0.5);
-      background: rgba(255,255,255,0.06);
+        inset 0 0 0 1px rgba(255,255,255,0.10),
+        inset 0 0 20px 3px rgba(80,100,255,0.12),
+        inset 0 0 20px 3px rgba(255,60,120,0.07);
+      background: #000;
       z-index: 0;
     }
 
@@ -334,6 +330,43 @@
     }
     .v-f1 input::placeholder { color: rgba(255,255,255,0.35); }
     .v-f2 { color: #a8f0c0; font-size: 14px; font-weight: 600; }
+
+    /* ── Анимированный контур (из index.html) ── */
+    @property --ca {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    .border-glow-wrap {
+      position: absolute; inset: 0; border-radius: 4px;
+      pointer-events: none; z-index: 5; overflow: hidden;
+    }
+    .border-glow-sm {
+      position: absolute; inset: 0; border-radius: 4px;
+      padding: 0.8px; pointer-events: none;
+      background: conic-gradient(
+        from var(--ca) at 50% 50%,
+        hsla(300,20%,55%,0.35), hsla(275,20%,40%,0.30),
+        hsla(240,20%,55%,0.35), hsla(180,20%,55%,0.30),
+        hsla(0,0%,100%,0.65),  hsla(120,20%,50%,0.30),
+        hsla(60,20%,55%,0.35), hsla(30,20%,55%,0.30),
+        hsla(0,20%,55%,0.35),  hsla(300,20%,55%,0.35)
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      animation: ca-spin 40s linear infinite;
+    }
+    @keyframes ca-spin { from{--ca:0deg} to{--ca:360deg} }
+
+    /* Инset glow для всех блоков */
+    .card-glow {
+      background: #000 !important;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 0 0 20px 2px rgba(80,100,255,0.10),
+        inset 0 0 20px 2px rgba(255,60,120,0.06),
+        inset 0 0 20px 2px rgba(255,160,0,0.05) !important;
+    }
   </style>
 </head>
 <body>
@@ -422,6 +455,24 @@
   </svg>
 
   <script src="catalog.js"></script>
+  <script>
+    // Анимированные контуры на блоки
+    [
+      ['.viewer-wrap', '-0s'],
+      ['.back-link', '-8s'],
+      ['.next-model-btn', '-16s'],
+      ['.card-content', '-24s'],
+      ['#order-rotor .v-face', '-32s'],
+    ].forEach(([sel, delay]) => {
+      document.querySelectorAll(sel).forEach(el => {
+        el.style.position = 'relative';
+        const wrap = document.createElement('div'); wrap.className = 'border-glow-wrap';
+        const g = document.createElement('div'); g.className = 'border-glow-sm';
+        g.style.animationDelay = delay;
+        wrap.appendChild(g); el.appendChild(wrap);
+      });
+    });
+  </script>
   <script type="module" src="viewer.js"></script>
   <script type="module" src="button-gl.js"></script>
 </body>
