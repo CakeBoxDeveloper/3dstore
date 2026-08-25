@@ -48,11 +48,13 @@
       border-radius: 4px;
     }
 
-    /* ── Единый стиль блоков: чёрный фон + inset glow ── */
+    /* ── Единый стиль блоков: полупрозрачный фон + искажение + inset glow ── */
     .header-logo,
     .footer-input-face,
     .footer-face {
-      background: #000;
+      background: rgba(0, 0, 0, 0.60);
+      -webkit-backdrop-filter: url(#catalog-glass);
+      backdrop-filter: url(#catalog-glass);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,0.08),
         inset 0 0 20px 2px rgba(80,100,255,0.10),
@@ -315,11 +317,12 @@
       font-weight: 800;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      background: #000;
+      background: rgba(0, 0, 0, 0.60);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 1px 1px 0 rgba(255,255,255,0.12),
-        inset 0 0 12px 2px rgba(80,100,255,0.07);
+        inset 0 0 20px 2px rgba(80,100,255,0.12),
+        inset 0 0 20px 2px rgba(255,60,120,0.07),
+        inset 0 0 20px 2px rgba(255,160,0,0.05);
       cursor: pointer;
       border: none;
       font-family: inherit;
@@ -377,6 +380,7 @@
       transform: translateZ(-133px) rotateY(0deg);
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    /* Направленный blur — убран */
 
     .h-face {
       position: absolute;
@@ -1059,17 +1063,120 @@
     })();
   </script>
   <!-- SVG фильтр: квадратная линза — центр ровный, края искажены -->
+  <!-- SVG фильтр для преломления + motion blur при вращении -->
   <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
     <defs>
       <filter id="catalog-glass" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
         <feTurbulence type="fractalNoise" baseFrequency="0.008 0.010" numOctaves="2" seed="4" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="40" xChannelSelector="R" yChannelSelector="G"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
+      <!-- Motion blur — убран -->
     </defs>
   </svg>
 
   <script>
-  // ── Анимированные точки в узлах сетки ──
+  // ── Рёбра задних граней призмы ──
+  (function() {
+    const canvas = document.getElementById('prism-edges');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const R = 133; // радиус вписанной окружности (translateZ)
+    const perspective = 900;
+
+    // Синхронизируемся с текущим углом h-rotor через CSS transform
+    let currentAngle = 0; // в градусах, совпадает с angle в init()
+
+    function project(x, y, z) {
+      // Точно как CSS perspective: 900px, perspective-origin: 50% 50%
+      // h-rotor: translateZ(-133px), грань: translateZ(+133px) → суммарно z=0 для передней
+      // Добавляем translateZ(-133px) ротора к z грани
+      const d = 900; // perspective
+      const zTotal = z - R; // translateZ(-R) от ротора + translateZ(z) грани
+      const scale = d / (d - zTotal);
+      return {
+        x: canvas.width  / 2 + x * scale,
+        y: canvas.height / 2 + y * scale,
+      };
+    }
+
+    function drawEdges(angleDeg) {
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const H = canvas.height;
+      const yTop    = -H / 2;
+      const yBottom =  H / 2;
+
+      // 3 вершины треугольной призмы (x, z)
+      const verts = [0, 1, 2].map(i => {
+        const a = (angleDeg + i * 120) * Math.PI / 180;
+        return { x: Math.sin(a) * R, z: -Math.cos(a) * R };
+      });
+
+      // Проецируем верхние и нижние вершины
+      const top    = verts.map(v => project(v.x, yTop,    v.z));
+      const bottom = verts.map(v => project(v.x, yBottom, v.z));
+
+      // Определяем какая грань передняя (ближайшая к зрителю = наибольший z)
+      const frontIdx = verts.reduce((best, v, i) => v.z > verts[best].z ? i : best, 0);
+
+      // Рисуем только задние вертикальные рёбра (не принадлежащие передней грани)
+      ctx.save();
+      ctx.lineWidth = 1;
+
+      [0, 1, 2].forEach(i => {
+        if (i === frontIdx) return;
+
+        const depth = (verts[i].z + R) / (2 * R);
+        const alpha = 0.08 + depth * 0.12;
+
+        ctx.strokeStyle = `rgba(255,0,0,0.9)`;
+        ctx.beginPath();
+        ctx.moveTo(top[i].x,    top[i].y);
+        ctx.lineTo(bottom[i].x, bottom[i].y);
+        ctx.stroke();
+      });
+
+      [[0,1],[1,2],[2,0]].forEach(([a, b]) => {
+        if (a === frontIdx || b === frontIdx) return;
+        ctx.strokeStyle = `rgba(255,0,0,0.9)`;
+
+        ctx.beginPath();
+        ctx.moveTo(top[a].x, top[a].y);
+        ctx.lineTo(top[b].x, top[b].y);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(bottom[a].x, bottom[a].y);
+        ctx.lineTo(bottom[b].x, bottom[b].y);
+        ctx.stroke();
+      });
+
+      ctx.restore();
+    }
+
+    // Слушаем изменение угла через MutationObserver на transform h-rotor
+    const rotor = document.getElementById('h-rotor');
+    if (rotor) {
+      // Парсим угол из transform: translateZ(-133px) rotateY(Xdeg)
+      function getAngle() {
+        const t = rotor.style.transform || '';
+        const m = t.match(/rotateY\((-?[\d.]+)deg\)/);
+        return m ? parseFloat(m[1]) : 0;
+      }
+
+      function update() {
+        drawEdges(getAngle());
+      }
+
+      new MutationObserver(update).observe(rotor, { attributes: true, attributeFilter: ['style'] });
+      window.addEventListener('resize', update);
+      // Первый рендер после init
+      requestAnimationFrame(update);
+    }
+  })();
+  </script>
   (function() {
     const canvas = document.getElementById('grid-dots');
     const ctx    = canvas.getContext('2d');

@@ -298,7 +298,7 @@
       border: none;
     }
 
-    /* Слой 1: glow + контур */
+    /* Слой 1: glow + контур + преломление */
     .v-face::before {
       content: '';
       position: absolute; inset: 0; border-radius: 4px;
@@ -306,7 +306,9 @@
         inset 0 0 0 1px rgba(255,255,255,0.10),
         inset 0 0 20px 3px rgba(80,100,255,0.12),
         inset 0 0 20px 3px rgba(255,60,120,0.07);
-      background: #000;
+      background: rgba(0, 0, 0, 0.60);
+      -webkit-backdrop-filter: url(#catalog-glass);
+      backdrop-filter: url(#catalog-glass);
       z-index: 0;
     }
 
@@ -477,7 +479,6 @@
       ['.back-link', '-8s'],
       ['.next-model-btn', '-16s'],
       ['.card-content', '-24s'],
-      ['.card-order', '-32s'],
     ].forEach(([sel, delay]) => {
       document.querySelectorAll(sel).forEach(el => {
         el.style.position = 'relative';
@@ -486,6 +487,13 @@
         g.style.animationDelay = delay;
         wrap.appendChild(g); el.appendChild(wrap);
       });
+    });
+    // Контур на каждую грань кнопки — флипается вместе с ней
+    document.querySelectorAll('.v-face').forEach((face, i) => {
+      const wrap = document.createElement('div'); wrap.className = 'border-glow-wrap';
+      const g = document.createElement('div'); g.className = 'border-glow-sm';
+      g.style.animationDelay = `${-32 - i * 8}s`;
+      wrap.appendChild(g); face.appendChild(wrap);
     });
   </script>
   <script type="module" src="viewer.js"></script>
