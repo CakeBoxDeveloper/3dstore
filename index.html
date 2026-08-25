@@ -33,6 +33,17 @@
       font-style: normal;
     }
 
+    /* ── Общий стекляный материал ── */
+    .glass {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px) saturate(1.6);
+      -webkit-backdrop-filter: blur(12px) saturate(1.6);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 1px 1px 0 rgba(255,255,255,0.12);
+      border-radius: 4px;
+    }
+
     /* ── Хедер: две колонки 30/70 ── */
     .card-header {
       flex-shrink: 0;
@@ -40,41 +51,31 @@
       grid-template-columns: 3fr 7fr;
       gap: 8px;
       height: 44px;
-      background: transparent; /* фон убран — дочерние блоки имеют свой */
+      background: transparent;
     }
     .card-header::after { display: none; }
 
-    /* Каждая половина хедера — отдельная карточка */
+    /* Каждая половина хедера — стекло */
     .header-logo {
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 12px;
-      background: #1c1e22;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px) saturate(1.6);
+      -webkit-backdrop-filter: blur(12px) saturate(1.6);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 1px 1px 0 rgba(255,255,255,0.12);
       border-radius: 4px;
-    }
-
-    .header-ticker {
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      background: #1c1e22;
-      border-radius: 4px;
-    }
-    .logo {
-      font-family: 'Ageta', system-ui, sans-serif;
-      font-size: 20px;
-      font-weight: normal;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
     }
 
     .header-ticker {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #1c1e22;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px) saturate(1.6);
+      -webkit-backdrop-filter: blur(12px) saturate(1.6);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 1px 1px 0 rgba(255,255,255,0.12);
       border-radius: 4px;
       overflow: hidden;
     }
@@ -128,7 +129,10 @@
       align-items: center;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      background: #1c1e22;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px) saturate(1.6);
+      -webkit-backdrop-filter: blur(12px) saturate(1.6);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 1px 1px 0 rgba(255,255,255,0.12);
       padding: 0 12px;
       border: none;
       font-family: inherit;
@@ -176,7 +180,10 @@
       font-weight: 700;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      background: #1c1e22;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px) saturate(1.6);
+      -webkit-backdrop-filter: blur(12px) saturate(1.6);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 1px 1px 0 rgba(255,255,255,0.12);
       cursor: pointer;
       border: none;
       font-family: inherit;
@@ -209,7 +216,6 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Грань призмы — стекло */
     .h-face {
       position: absolute;
       inset: 0;
@@ -218,18 +224,92 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       overflow: hidden;
-      /* Стекло */
-      backdrop-filter: blur(14px) saturate(1.4);
-      -webkit-backdrop-filter: blur(14px) saturate(1.4);
-      background: rgba(5, 6, 10, 0.55);
-      box-shadow: inset 2px 2px 0px -2px rgba(255,255,255,0.5),
-                  inset 0 0 3px 1px rgba(255,255,255,0.25);
+      background: #000;
+      border-radius: 4px;
+      box-shadow:
+        inset 0 0 18px 4px rgba(80,120,255,0.12),
+        inset 0 0 36px 8px rgba(200,80,255,0.07);
     }
 
-    /* Зернистость убрана */
+    /* Анимированная дисперсия — паттерн движется, элемент статичен */
+    @property --ca {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
 
-    /* Контент поверх */
-    .face-header, .face-scroll-wrap { position: relative; z-index: 1; }
+    .border-glow-wrap {
+      position: absolute;
+      inset: 0;
+      border-radius: 6px; /* чуть больше чем у грани — обрезает углы контура */
+      pointer-events: none;
+      z-index: 5;
+      overflow: hidden;
+    }
+
+    .border-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      padding: 1.25px;
+      pointer-events: none;
+      /* scaleX делает боковые части тоньше */
+      transform: scaleX(1.003) scaleY(1.003);
+      transform-origin: center center;
+      background: conic-gradient(
+        from var(--ca) at 50% 50%,
+        hsla(300, 20%, 60%, 0.4),
+        hsla(275, 20%, 35%, 0.4),
+        hsla(0,   0%,  100%, 0.7),
+        hsla(0,   0%,   0%, 0.0),
+        hsla(240, 20%, 60%, 0.4),
+        hsla(180, 20%, 60%, 0.4),
+        hsla(0,   0%,   0%, 0.0),
+        hsla(120, 20%, 50%, 0.4),
+        hsla(0,   0%,  100%, 0.7),
+        hsla(0,   0%,   0%, 0.0),
+        hsla(60,  20%, 60%, 0.4),
+        hsla(30,  20%, 55%, 0.4),
+        hsla(0,   20%, 55%, 0.4),
+        hsla(300, 20%, 60%, 0.4)
+      );
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: ca-spin 28s linear infinite;
+    }
+
+    @keyframes ca-spin {
+      from { --ca: 0deg;   }
+      to   { --ca: 360deg; }
+    }
+
+    /* Shimmer — запускается когда ротор получает класс .spinning */
+    .h-face::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        110deg,
+        transparent 10%,
+        rgba(255,255,255,0.05) 35%,
+        rgba(220,235,255,0.18) 50%,
+        rgba(255,255,255,0.05) 65%,
+        transparent 90%
+      );
+      transform: translateX(-150%);
+      pointer-events: none;
+      z-index: 10;
+    }
+    .h-rotor.spinning .h-face::after {
+      animation: face-shimmer 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+    @keyframes face-shimmer {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(120%); }
+    }
 
     .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
     .h-f1 { transform: rotateY(120deg) translateZ(133px); }
@@ -243,8 +323,8 @@
       align-items: center;
       justify-content: space-between;
       position: relative;
-      z-index: 3; /* поверх fade-top */
-      background: #1c1e22; /* перекрывает fade если тот вылезает */
+      z-index: 3;
+      background: transparent;
     }
 
     .face-title {
@@ -278,7 +358,7 @@
       overflow: hidden; /* clip fade-div-ов чтобы не вылезали за рамку */
     }
 
-    /* fade-out сверху и снизу — отдельные div .fade-top / .fade-bottom */
+    /* fade-out сверху и снизу — отключено
     .fade-top, .fade-bottom {
       position: absolute;
       left: 0; right: 0;
@@ -291,6 +371,7 @@
     .fade-bottom { bottom: 0; background: linear-gradient(to top,   rgba(5,6,10,0.85), transparent); }
     .fade-top.hidden    { opacity: 0; }
     .fade-bottom.hidden { opacity: 0; }
+    */
 
     .face-body {
       height: 100%;
@@ -326,21 +407,24 @@
     .prod-icon {
       width: 25%;
       aspect-ratio: 1;
-      background: #242424;
-      border: 1px solid #2e2e2e;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 1px 1px 0 rgba(255,255,255,0.1);
       border-radius: 4px;
       overflow: hidden;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: border-color 0.15s;
+      transition: box-shadow 0.15s;
     }
-    /* В grid — ширина задаётся grid, переопределяем */
     .sub-products .prod-icon {
       width: 100%;
     }
-    .prod-icon:hover { border-color: #555; }
+    .prod-icon:hover {
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), inset 1px 1px 0 rgba(255,255,255,0.2);
+    }
     .prod-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .pi-ph { font-size: 18px; opacity: 0.15; }
   </style>
@@ -415,6 +499,14 @@
         face.className = `h-face h-f${i}`;
         face.style.transform = `rotateY(${i * 120}deg) translateZ(${R}px)`;
 
+        // Анимированная дисперсия по периметру
+        const glowWrap = document.createElement('div');
+        glowWrap.className = 'border-glow-wrap';
+        const glow = document.createElement('div');
+        glow.className = 'border-glow';
+        glowWrap.appendChild(glow);
+        face.appendChild(glowWrap);
+
         // Заголовок
         const header = document.createElement('div');
         header.className = 'face-header';
@@ -487,6 +579,9 @@
       function spin(dir) {
         angle -= dir * 120;
         rotor.style.transform = `translateZ(-${R}px) rotateY(${angle}deg)`;
+        // Shimmer
+        rotor.classList.add('spinning');
+        setTimeout(() => rotor.classList.remove('spinning'), 700);
       }
 
       // Свайп

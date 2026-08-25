@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glass Prism</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+    #hint {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,0.3); font: 13px/1.4 system-ui, sans-serif;
+      letter-spacing: 0.04em; pointer-events: none; user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="hint">нажмите чтобы повернуть</div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setClearColor(0x000000, 1);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.05, 80);
+    camera.position.set(0, 0.15, 6.2);
+
+    // ── Освещение ─────────────────────────────────────────────────────────────
+    // Нет ambient — грани остаются тёмными
+    // Узкие направленные источники светят вдоль рёбер → блик только на ребре
+
+    // Статичный верхний (в верхнюю треугольную грань)
+    const topLight = new THREE.DirectionalLight(0xffffff, 4.0);
+    topLight.position.set(0, 8, 1);
+    scene.add(topLight);
+
+    // Анимированные — дают скользящие блики
+    const movingLights = [
+      { light: new THREE.DirectionalLight(0xffffff, 3.0), r: 5, speed: 0.07, phase: 0,           yAmp: 3, ySpeed: 0.05 },
+      { light: new THREE.DirectionalLight(0xffffff, 2.5), r: 4, speed: 0.05, phase: Math.PI,      yAmp: 2, ySpeed: 0.06 },
+      { light: new THREE.DirectionalLight(0xffffff, 2.8), r: 6, speed: 0.06, phase: Math.PI*0.6,  yAmp: 3, ySpeed: 0.04 },
+    ];
+    movingLights.forEach(o => scene.add(o.light));
+
+    // ── HDR env ───────────────────────────────────────────────────────────────
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    new RGBELoader().setDataType(THREE.FloatType).load(
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr',
+      (hdr) => { scene.environment = pmrem.fromEquirectangular(hdr).texture; hdr.dispose(); pmrem.dispose(); },
+      undefined,
+      () => {
+        const ev = new THREE.Scene();
+        [[0xffffff,4,3,5,3],[0x8899ff,3,-4,3,2],[0xffd080,3,2,-3,-2]]
+          .forEach(([c,i,x,y,z])=>{ const l=new THREE.PointLight(c,i,40); l.position.set(x,y,z); ev.add(l); });
+        const rt = new THREE.WebGLCubeRenderTarget(512);
+        new THREE.CubeCamera(0.1,50,rt).update(renderer,ev);
+        scene.environment = pmrem.fromCubemap(rt.texture).texture;
+        pmrem.dispose();
+      }
+    );
+
+    // ── Геометрия ─────────────────────────────────────────────────────────────
+    function makePrismGeo(r, depth, bevel) {
+      const shape = new THREE.Shape();
+      for (let i=0;i<3;i++) {
+        const a = Math.PI/2 + (i/3)*Math.PI*2;
+        const x=Math.cos(a)*r, y=Math.sin(a)*r;
+        if (i===0) shape.moveTo(x,y); else shape.lineTo(x,y);
+      }
+      shape.closePath();
+      const geo = new THREE.ExtrudeGeometry(shape, {
+        depth, bevelEnabled: true,
+        bevelThickness: bevel, bevelSize: bevel*0.8, bevelSegments: 2, curveSegments: 1,
+      });
+      geo.translate(0, 0, -depth/2);
+      geo.computeVertexNormals();
+      return geo;
+    }
+
+    // ── Материал основного меша — тёмное стекло ───────────────────────────────
+    // Почти чёрный, глянцевый, clearcoat даёт яркие блики на рёбрах
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color:              new THREE.Color(0x050508),
+      metalness:          0,
+      roughness:          0.0,
+      reflectivity:       1.0,
+      clearcoat:          1.0,
+      clearcoatRoughness: 0.0,
+      envMapIntensity:    1.5,
+      // iridescence — тонкоплёночный эффект, RGB-переливы на гранях под разными углами
+      iridescence:               1.0,
+      iridescenceIOR:            2.8,
+      iridescenceThicknessRange: [80, 500],
+    });
+
+    // ── Edge-glow меш — чуть больше, рендерится изнутри ──────────────────────
+    // Trick: рисуем только back-faces слегка увеличенного меша с аддитивным цветом.
+    // Это создаёт ореол по краям без постобработки.
+    const edgeMat = new THREE.ShaderMaterial({
+      side: THREE.BackSide,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      uniforms: {
+        uColor1: { value: new THREE.Color(0xff3300) }, // красный
+        uColor2: { value: new THREE.Color(0x00aaff) }, // синий
+        uColor3: { value: new THREE.Color(0x00ff88) }, // зелёный
+        uTime:   { value: 0 },
+        uPower:  { value: 2.5 },
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vWorldPos;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          vWorldPos = wp.xyz;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position * 1.012, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uColor1, uColor2, uColor3;
+        uniform float uTime, uPower;
+        varying vec3 vNormal;
+        varying vec3 vWorldPos;
+        void main() {
+          // Edge factor: яркость максимальна там где нормаль перпендикулярна взгляду
+          vec3 viewDir = normalize(cameraPosition - vWorldPos);
+          float edge = 1.0 - abs(dot(vNormal, viewDir));
+          edge = pow(edge, uPower);
+
+          // Хроматическое смещение цвета по вертикали и времени
+          float t = uTime * 0.4;
+          float y = vWorldPos.y * 0.5 + 0.5;
+          vec3 col = mix(uColor1, uColor2, sin(y * 3.14 + t) * 0.5 + 0.5);
+          col = mix(col, uColor3, sin(y * 6.28 - t * 1.3) * 0.5 + 0.5);
+          col = mix(col, vec3(1.0), 0.3); // добавить белизны
+
+          gl_FragColor = vec4(col * edge * 1.8, edge * 0.9);
+        }
+      `,
+    });
+
+    // ── Сборка ────────────────────────────────────────────────────────────────
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const r = 1.15, depth = 2.8;
+    const prismGeo = makePrismGeo(r, depth, 0.008);
+
+    // Основной тёмный меш
+    const prismMesh = new THREE.Mesh(prismGeo, glassMat);
+    prismMesh.rotation.x = -Math.PI / 2;
+    group.add(prismMesh);
+
+    // Edge-glow поверх
+    const edgeMesh = new THREE.Mesh(prismGeo, edgeMat);
+    edgeMesh.rotation.x = -Math.PI / 2;
+    group.add(edgeMesh);
+
+    // ── Текст на гранях ───────────────────────────────────────────────────────
+    const LABELS = ['Пластик', 'Віск', 'Епоксидка'];
+    const inrad  = r * 0.5;
+    const halfH  = depth / 2;
+
+    function makeLabelTex(text) {
+      const DPR = Math.min(window.devicePixelRatio||1,2);
+      const cv = document.createElement('canvas');
+      cv.width=512*DPR; cv.height=128*DPR;
+      const ctx=cv.getContext('2d');
+      ctx.scale(DPR,DPR);
+      ctx.clearRect(0,0,512,128);
+      ctx.fillStyle='rgba(255,255,255,0.9)';
+      ctx.font='bold 44px system-ui,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(text,256,64);
+      const tex=new THREE.CanvasTexture(cv);
+      tex.needsUpdate=true;
+      return tex;
+    }
+
+    LABELS.forEach((label,i) => {
+      const fa = (i/3)*Math.PI*2;
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.85, 0.38),
+        new THREE.MeshBasicMaterial({ map:makeLabelTex(label), transparent:true, depthTest:false, depthWrite:false })
+      );
+      plane.renderOrder=999;
+      plane.position.set(Math.sin(fa)*inrad, halfH-0.25, Math.cos(fa)*inrad);
+      plane.rotation.y=fa;
+      group.add(plane);
+    });
+
+    // ── Вращение ──────────────────────────────────────────────────────────────
+    let spinning=false, angleY=0, fromAngle=0, toAngle=0, spinStart=0;
+    const SPIN_MS=700;
+    const ease = t => t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+
+    canvas.addEventListener('click',()=>{
+      if(spinning)return;
+      spinning=true; fromAngle=angleY; toAngle=angleY-Math.PI*2/3; spinStart=performance.now();
+    });
+
+    window.addEventListener('resize',()=>{
+      camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth,innerHeight);
+    });
+
+    function tick() {
+      requestAnimationFrame(tick);
+      const now = performance.now()*0.001;
+
+      // Обновляем время в edge-шейдере
+      edgeMat.uniforms.uTime.value = now;
+
+      // Анимация источников
+      movingLights.forEach(o=>{
+        const a=now*o.speed+o.phase;
+        o.light.position.set(Math.cos(a)*o.r, Math.sin(now*o.ySpeed+o.phase*0.4)*o.yAmp, Math.sin(a)*o.r*0.4+3);
+      });
+
+      if(spinning){
+        const t=Math.min((performance.now()-spinStart)/SPIN_MS,1);
+        angleY=fromAngle+(toAngle-fromAngle)*ease(t);
+        group.rotation.y=angleY;
+        if(t>=1)spinning=false;
+      }
+      renderer.render(scene,camera);
+    }
+    tick();
+  </script>
+</body>
+</html>

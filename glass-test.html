@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Glass Prism Test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body {
+      background-color: #000;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px);
+      background-size: 40px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas { display: block; }
+    #info {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.5);
+      font-family: system-ui;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="info">Click to spin · Scroll to zoom</div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+
+    // ── Renderer ──────────────────────────────────────────────────────────────
+    const renderer = new THREE.WebGLRenderer({
+      canvas: document.getElementById('c'),
+      antialias: true,
+      alpha: true,
+    });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(W, H);
+    renderer.setClearColor(0x000000, 0); // прозрачный — видна CSS сетка
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+
+    // ── Scene ─────────────────────────────────────────────────────────────────
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, W / H, 0.01, 100);
+    camera.position.set(0, 0, 5);
+
+    // ── Controls ──────────────────────────────────────────────────────────────
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+
+    // ── Environment map (нужен для transmission) ──────────────────────────────
+    // Генерируем простой env через PMREMGenerator
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+
+    // Маленькая сцена с цветными огнями → env map
+    const envScene = new THREE.Scene();
+    envScene.background = new THREE.Color(0x060810);
+    [
+      [0x6688ff, 4,  3,  4,  3],
+      [0xff8844, 2, -4,  2, -2],
+      [0x44ffcc, 2,  0, -3,  4],
+      [0xffffff, 1,  0,  6,  0],
+    ].forEach(([c, i, x, y, z]) => {
+      const l = new THREE.PointLight(c, i, 30);
+      l.position.set(x, y, z);
+      envScene.add(l);
+    });
+
+    // Render env scene into cube render target
+    const cubeRT = new THREE.WebGLCubeRenderTarget(256, {
+      generateMipmaps: true,
+      minFilter: THREE.LinearMipmapLinearFilter,
+    });
+    const cubeCamera = new THREE.CubeCamera(0.1, 50, cubeRT);
+    envScene.add(cubeCamera);
+    cubeCamera.update(renderer, envScene);
+
+    const envMap = pmrem.fromCubemap(cubeRT.texture).texture;
+    scene.environment = envMap;
+    pmrem.dispose();
+
+    // ── Lights ────────────────────────────────────────────────────────────────
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const dir = new THREE.DirectionalLight(0xeeeeff, 2);
+    dir.position.set(3, 6, 4);
+    scene.add(dir);
+    const rim = new THREE.DirectionalLight(0xff9944, 1);
+    rim.position.set(-4, 2, -3);
+    scene.add(rim);
+
+    // ── Glass material ────────────────────────────────────────────────────────
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      transmission:   1.0,      // полностью прозрачное стекло
+      ior:            1.52,     // IOR стекла
+      roughness:      0.0,      // гладкое
+      thickness:      0.5,      // толщина для преломления
+      transparent:    true,
+      side:           THREE.DoubleSide,
+      envMap:         envMap,
+      envMapIntensity: 1.5,
+      // Дисперсия (разные длины волн)
+      dispersion:     0.3,      // Three.js r160+ (если не работает — падёт тихо)
+      // Иридесценция — радужные переливы
+      iridescence:         0.8,
+      iridescenceIOR:      1.8,
+      iridescenceThicknessRange: [100, 600],
+    });
+
+    // ── Triangular prism geometry ─────────────────────────────────────────────
+    // Строим призму вручную: два треугольника (торцы) + три прямоугольника (грани)
+    const prismGroup = new THREE.Group();
+    scene.add(prismGroup);
+
+    const H_PRISM = 2.0;
+    const R_PRISM = 0.9; // inradius треугольника
+
+    // Три боковые грани (PlaneGeometry)
+    for (let i = 0; i < 3; i++) {
+      const angle = (i / 3) * Math.PI * 2;
+      const geo   = new THREE.PlaneGeometry(R_PRISM * Math.sqrt(3), H_PRISM);
+      const mesh  = new THREE.Mesh(geo, glassMat);
+      mesh.rotation.y = -angle;
+      mesh.position.set(
+        Math.sin(angle) * R_PRISM,
+        0,
+        Math.cos(angle) * R_PRISM
+      );
+      prismGroup.add(mesh);
+    }
+
+    // Два торца (треугольники)
+    for (let side = 0; side < 2; side++) {
+      const geo = new THREE.BufferGeometry();
+      const y   = side === 0 ? H_PRISM / 2 : -H_PRISM / 2;
+      const verts = [];
+      for (let i = 0; i < 3; i++) {
+        const a = (i / 3) * Math.PI * 2;
+        verts.push(Math.sin(a) * R_PRISM * 1.155, y, Math.cos(a) * R_PRISM * 1.155);
+      }
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+      geo.setIndex(side === 0 ? [0, 1, 2] : [0, 2, 1]);
+      geo.computeVertexNormals();
+      const mesh = new THREE.Mesh(geo, glassMat);
+      prismGroup.add(mesh);
+    }
+
+    // ── Spin on click ─────────────────────────────────────────────────────────
+    let targetY = 0;
+    renderer.domElement.addEventListener('click', () => { targetY += Math.PI * 2 / 3; });
+
+    // ── Render loop ───────────────────────────────────────────────────────────
+    function animate() {
+      requestAnimationFrame(animate);
+      // Плавный поворот
+      prismGroup.rotation.y += (targetY - prismGroup.rotation.y) * 0.06;
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // ── Resize ────────────────────────────────────────────────────────────────
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth, h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+  </script>
+</body>
+</html>

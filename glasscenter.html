@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glass Prism</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #050505; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+    #hint {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.45);
+      font: 13px/1.4 system-ui, sans-serif;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="hint">нажмите чтобы повернуть</div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setClearColor(0x050505, 1);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.05, 80);
+    camera.position.set(0, 0.15, 6.2);
+
+    // ── Grid backdrop (in-scene so glass can refract it) ─────────────────────
+    const gridMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uBase:  { value: new THREE.Color(0x070707) },
+        uLine:  { value: new THREE.Color(0xc8c8c8) },
+        uScale: { value: 18.0 },
+        uWidth: { value: 0.035 },
+      },
+      vertexShader: /* glsl */ `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: /* glsl */ `
+        uniform vec3 uBase;
+        uniform vec3 uLine;
+        uniform float uScale;
+        uniform float uWidth;
+        varying vec2 vUv;
+        void main() {
+          vec2 g = abs(fract(vUv * uScale - 0.5) - 0.5);
+          vec2 fw = fwidth(vUv * uScale);
+          vec2 line = smoothstep(uWidth - fw, uWidth + fw, g);
+          float grid = 1.0 - min(line.x, line.y);
+          vec3 col = mix(uBase, uLine, grid * 0.42);
+          float vignette = smoothstep(1.15, 0.25, length(vUv - 0.5) * 1.55);
+          col *= 0.55 + 0.45 * vignette;
+          gl_FragColor = vec4(col, 1.0);
+        }
+      `,
+    });
+    const grid = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), gridMat);
+    grid.position.z = -8;
+    scene.add(grid);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    const key = new THREE.DirectionalLight(0xf2f6ff, 2.4);
+    key.position.set(4, 6, 5);
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0x88aaff, 0.7);
+    fill.position.set(-5, 1, 2);
+    scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffc8a0, 1.1);
+    rim.position.set(-3, 4, -4);
+    scene.add(rim);
+
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    new RGBELoader()
+      .setDataType(THREE.FloatType)
+      .load(
+        'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr',
+        (hdr) => {
+          scene.environment = pmrem.fromEquirectangular(hdr).texture;
+          hdr.dispose();
+          pmrem.dispose();
+        },
+        undefined,
+        () => {
+          const envScene = new THREE.Scene();
+          envScene.background = new THREE.Color(0x101218);
+          [[0x8899ff, 6,  3, 4,  2], [0xffaa66, 4, -4, 2, -1], [0xffffff, 2, 0, 5, 3]]
+            .forEach(([c, i, x, y, z]) => {
+              const l = new THREE.PointLight(c, i, 40);
+              l.position.set(x, y, z);
+              envScene.add(l);
+            });
+          const cubeRT = new THREE.WebGLCubeRenderTarget(128);
+          const cubeCam = new THREE.CubeCamera(0.1, 50, cubeRT);
+          cubeCam.update(renderer, envScene);
+          scene.environment = pmrem.fromCubemap(cubeRT.texture).texture;
+          pmrem.dispose();
+        }
+      );
+
+    function createPrismGeometry() {
+      const shape = new THREE.Shape();
+      const r = 1.15;
+      const start = Math.PI / 2;
+      for (let i = 0; i < 3; i++) {
+        const a = start + (i / 3) * Math.PI * 2;
+        const x = Math.cos(a) * r;
+        const y = Math.sin(a) * r;
+        if (i === 0) shape.moveTo(x, y);
+        else shape.lineTo(x, y);
+      }
+      shape.closePath();
+
+      const geo = new THREE.ExtrudeGeometry(shape, {
+        depth: 2.8,
+        bevelEnabled: true,
+        bevelThickness: 0.045,
+        bevelSize: 0.04,
+        bevelSegments: 3,
+        curveSegments: 1,
+      });
+
+      // Центрируем только по Z (depth): от 0..2.8 → -1.4..+1.4
+      // По Y НЕ трогаем геометрию — иначе после rotation.x=-PI/2
+      // Y-смещение превращается в Z-смещение и pivot уходит от оси вращения.
+      // Вертикальный сдвиг компенсируем позицией меша, не геометрией.
+      const depth = 2.8;
+      geo.translate(0, 0, -depth / 2);
+      geo.computeVertexNormals();
+      return geo;
+    }
+
+    const glass = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      metalness: 0,
+      roughness: 0.04,
+      transmission: 1,
+      thickness: 1.8,
+      ior: 1.52,
+      reflectivity: 0.5,
+      dispersion: 0.55,
+      iridescence: 0.35,
+      iridescenceIOR: 1.4,
+      iridescenceThicknessRange: [120, 420],
+      clearcoat: 1,
+      clearcoatRoughness: 0.05,
+      attenuationColor: new THREE.Color(0xdcecff),
+      attenuationDistance: 4.5,
+      envMapIntensity: 1.35,
+      flatShading: false,
+    });
+
+    // Группа вращается по мировой Y → грани переключаются корректно
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const prism = new THREE.Mesh(createPrismGeometry(), glass);
+    // rotation.x = -PI/2: extrude-ось Z → мировая Y (призма стоит вертикально)
+    // Вершина треугольника (0,+r) в XY → после поворота смотрит в -Z (от камеры)
+    // Значит плоская грань уже обращена к камере — дополнительных поворотов не нужно
+    prism.rotation.x = -Math.PI / 2;
+    group.add(prism);
+
+    // Вращение по клику — 120° по мировой Y через группу
+    let spinning  = false;
+    let angleY    = 0;
+    let fromAngle = 0;
+    let toAngle   = 0;
+    let spinStart = 0;
+    const SPIN_MS = 700;
+
+    function easeInOut(t) {
+      return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+    }
+
+    canvas.addEventListener('click', () => {
+      if (spinning) return;
+      spinning  = true;
+      fromAngle = angleY;
+      toAngle   = angleY - Math.PI * 2 / 3;
+      spinStart = performance.now();
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    function tick() {
+      requestAnimationFrame(tick);
+      if (spinning) {
+        const t = Math.min((performance.now() - spinStart) / SPIN_MS, 1);
+        angleY = fromAngle + (toAngle - fromAngle) * easeInOut(t);
+        group.rotation.y = angleY;
+        if (t >= 1) spinning = false;
+      }
+      renderer.render(scene, camera);
+    }
+    tick();
+  </script>
+</body>
+</html>
