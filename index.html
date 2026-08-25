@@ -6,8 +6,15 @@
   <title>PRISM</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; background: #080808; }
-    body { font-family: system-ui, sans-serif; color: #f0f0f0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: system-ui, sans-serif; color: #f0f0f0;
+      background-color: #000;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
 
     .page {
       max-width: 480px;
@@ -202,7 +209,7 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Грань призмы — тёмно-серое стекло */
+    /* Грань призмы — стекло */
     .h-face {
       position: absolute;
       inset: 0;
@@ -211,20 +218,15 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       overflow: hidden;
-      background: #1c1e22;
+      /* Стекло */
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      background: rgba(5, 6, 10, 0.55);
+      box-shadow: inset 2px 2px 0px -2px rgba(255,255,255,0.5),
+                  inset 0 0 3px 1px rgba(255,255,255,0.25);
     }
 
-    /* Зернистость */
-    .h-face::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.035;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 180px 180px;
-    }
+    /* Зернистость убрана */
 
     /* Контент поверх */
     .face-header, .face-scroll-wrap { position: relative; z-index: 1; }
@@ -285,8 +287,8 @@
       pointer-events: none;
       transition: opacity 0.3s ease;
     }
-    .fade-top    { top: 0;    background: linear-gradient(to bottom, #1c1e22, transparent); }
-    .fade-bottom { bottom: 0; background: linear-gradient(to top,    #1c1e22, transparent); }
+    .fade-top    { top: 0;    background: linear-gradient(to bottom, rgba(5,6,10,0.85), transparent); }
+    .fade-bottom { bottom: 0; background: linear-gradient(to top,   rgba(5,6,10,0.85), transparent); }
     .fade-top.hidden    { opacity: 0; }
     .fade-bottom.hidden { opacity: 0; }
 

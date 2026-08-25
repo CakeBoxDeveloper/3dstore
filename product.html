@@ -9,13 +9,11 @@
     html, body { height: 100%; overflow: hidden; }
     body {
       font-family: system-ui, sans-serif; color: #f0f0f0;
-      background: url('https://raw.githubusercontent.com/lucasromerodb/liquid-glass-effect-macos/refs/heads/main/assets/flowers.jpg') center center;
-      background-size: 400px;
-      animation: moveBackground 60s linear infinite;
-    }
-    @keyframes moveBackground {
-      from { background-position: 0% 0%; }
-      to   { background-position: 0% -1000%; }
+      background-color: #000;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 40px 40px;
     }
 
     .page {
