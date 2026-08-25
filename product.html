@@ -420,13 +420,13 @@
       <div class="v-scene" id="order-scene">
         <div class="v-rotor" id="order-rotor">
           <button class="v-face v-f0" id="face-order">
-            <span class="v-f0-top" id="btn-order-label">Заказати</span>
+            <span class="v-f0-top" id="btn-order-label">Замовити</span>
             <span class="v-f0-sub" id="btn-order-price"></span>
           </button>
           <div class="v-face v-f1" id="face-phone">
             <input type="tel" id="phone-input" placeholder="+380XXXXXXXXX" autocomplete="tel" inputmode="tel">
           </div>
-          <div class="v-face v-f2" id="face-success">Заявка прийнята!</div>
+          <div class="v-face v-f2" id="face-success" style="color:#a8f0c0;font-size:14px;font-weight:600">Заявку прийнято! ✓</div>
         </div>
       </div>
     </div>
@@ -462,7 +462,7 @@
       ['.back-link', '-8s'],
       ['.next-model-btn', '-16s'],
       ['.card-content', '-24s'],
-      ['#order-rotor .v-face', '-32s'],
+      ['.card-order', '-32s'],
     ].forEach(([sel, delay]) => {
       document.querySelectorAll(sel).forEach(el => {
         el.style.position = 'relative';

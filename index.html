@@ -65,7 +65,7 @@
       height: 44px;
       background: transparent;
       position: relative;
-      z-index: 2;
+      z-index: 1;
     }
     .card-header::after { display: none; }
 
@@ -556,13 +556,14 @@
     /* fade-out сверху и снизу */
     .fade-top, .fade-bottom {
       position: absolute;
-      left: 8.5%; right: 8.5%; /* совпадает с padding face-body — не выходит на glow */
-      height: 36px;
+      left: 8.5%; right: 8.5%;
+      height: 28px;
       z-index: 2;
       pointer-events: none;
       transition: opacity 0.3s ease;
-    }    .fade-top    { top: 0;    background: linear-gradient(to bottom, #000, transparent); }
-    .fade-bottom { bottom: 0; background: linear-gradient(to top,   #000, transparent); }
+    }
+    .fade-top    { top: 0;    background: linear-gradient(to bottom, #000, transparent); }
+    .fade-bottom { bottom: 24px; background: linear-gradient(to top, #000, transparent); }
     .fade-top.hidden    { opacity: 0; }
     .fade-bottom.hidden { opacity: 0; }
 
@@ -634,15 +635,15 @@
           <div class="ticker-input-rotor" id="ticker-rotor">
             <div class="footer-input-face fin-f0" data-href="https://t.me/prism3dstore">
               <div class="border-glow-wrap"><div class="border-glow-sm"></div></div>
-              <span style="font-size:13px;font-weight:800;color:#f0f0f0;width:100%;text-align:center;position:relative;z-index:1">наш Telegram</span>
+              <a href="https://t.me/prism3dstore" target="_blank" style="font-size:13px;font-weight:800;color:#f0f0f0;position:relative;z-index:2;text-decoration:none;margin:auto">Написати нам у Telegram</a>
             </div>
             <div class="footer-input-face fin-f1" data-href="https://instagram.com/prism3dstore">
               <div class="border-glow-wrap"><div class="border-glow-sm" style="animation-delay:-13s"></div></div>
-              <span style="font-size:13px;font-weight:800;color:#f0f0f0;width:100%;text-align:center;position:relative;z-index:1">наш Instagram</span>
+              <a href="https://instagram.com/prism3dstore" target="_blank" style="font-size:13px;font-weight:800;color:#f0f0f0;position:relative;z-index:2;text-decoration:none;margin:auto">Написати нам в Instagram</a>
             </div>
             <div class="footer-input-face fin-f2" data-href="https://viber.com">
               <div class="border-glow-wrap"><div class="border-glow-sm" style="animation-delay:-26s"></div></div>
-              <span style="font-size:13px;font-weight:800;color:#f0f0f0;width:100%;text-align:center;position:relative;z-index:1">наш Viber</span>
+              <a href="https://viber.com" target="_blank" style="font-size:13px;font-weight:800;color:#f0f0f0;position:relative;z-index:2;text-decoration:none;margin:auto">Написати нам у Viber</a>
             </div>
           </div>
         </div>
@@ -664,7 +665,7 @@
             <!-- Грань 0: поле ввода -->
             <div class="footer-input-face fin-f0">
               <div class="fin-shimmer"></div>
-              <input type="text" id="footer-input" placeholder="Напишіть нам…" autocomplete="off">
+              <input type="text" id="footer-input" placeholder="Напишіть нам, оператор на зв'язку" autocomplete="off">
             </div>
             <!-- Грань 1: ожидание ответа -->
             <div class="footer-input-face fin-f1">
