@@ -3,116 +3,68 @@
     {
       "id": "plastic",
       "name": "Пластик",
-      "subcategories": [
+      "products": [
         {
-          "id": "monstera",
-          "name": "Серія Монстера",
-          "products": [
-            {
-              "id": "monstera-phone",
-              "name": "Підставка Monstera",
-              "sizes": "120 × 90 × 85 мм",
-              "description": "Підставка для телефону у формі листа монстери.",
-              "price": 350,
-              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraPhoneSupport.glb",
-              "thumbnail": "/thumbnails/monstera-phone.webp"
-            },
-            {
-              "id": "monstera-shelf",
-              "name": "Полиця Monstera",
-              "sizes": "200 × 80 × 40 мм",
-              "description": "Настінна полиця у формі листа монстери.",
-              "price": 480,
-              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraBench.glb",
-              "thumbnail": "/thumbnails/monstera-shelf.webp"
-            },
-            {
-              "id": "monstera-pot",
-              "name": "Кашпо Monstera",
-              "sizes": "⌀120 × 110 мм",
-              "description": "Кашпо для квітів у формі листа монстери.",
-              "price": 420,
-              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraPot.glb",
-              "thumbnail": "/thumbnails/monstera-pot.webp"
-            },
-            {
-              "id": "monstera-bowl",
-              "name": "Миска Monstera",
-              "sizes": "⌀160 × 60 мм",
-              "description": "Декоративна миска з рельєфом листа монстери.",
-              "price": 390,
-              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraBowl.glb",
-              "thumbnail": "/thumbnails/monstera-bowl.webp"
-            },
-            {
-              "id": "monstera-plate",
-              "name": "Котел Monstera",
-              "sizes": "⌀140 × 90 мм",
-              "description": "Котел з рельєфом листа монстери.",
-              "price": 450,
-              "model": "https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/Catalog/Plastic/MonsteraPlate.glb",
-              "thumbnail": "/thumbnails/monstera-plate.webp"
-            }
-          ]
+          "id": "monstera-stand",
+          "name": "Подставка \"Монстера\"",
+          "sizes": "120 × 90 × 85 мм",
+          "description": "Подставка для телефона в форме листа монстеры.",
+          "price": 350,
+          "colors": ["matte-white", "matte-black", "matte-green", "gloss-black", "silk-gold", "silk-mint"],
+          "model": "Catalog/Plastic/monstera-stand/model.glb",
+          "thumbnail": "Catalog/Plastic/monstera-stand/preview.webp"
+        },
+        {
+          "id": "monstera-bowl",
+          "name": "Миска \"Монстера\"",
+          "sizes": "⌀160 × 60 мм",
+          "description": "Декоративная миска с рельефом листа монстеры.",
+          "price": 390,
+          "colors": ["matte-white", "matte-green", "matte-beige", "gloss-white", "silk-mint"],
+          "model": "Catalog/Plastic/monstera-bowl/model.glb",
+          "thumbnail": "Catalog/Plastic/monstera-bowl/preview.webp"
+        },
+        {
+          "id": "monstera-shelf",
+          "name": "Полка \"Монстера\"",
+          "sizes": "200 × 80 × 40 мм",
+          "description": "Настенная полка в форме листа монстеры.",
+          "price": 480,
+          "colors": ["matte-black", "matte-white", "matte-green", "gloss-black", "silk-gold"],
+          "model": "Catalog/Plastic/monstera-shelf/model.glb",
+          "thumbnail": "Catalog/Plastic/monstera-shelf/preview.webp"
+        },
+        {
+          "id": "maple-pot",
+          "name": "Кашпо \"Кленовый лист\"",
+          "sizes": "⌀120 × 110 мм",
+          "description": "Кашпо для растений с рельефом кленового листа.",
+          "price": 420,
+          "colors": ["matte-beige", "matte-red", "matte-green", "gloss-yellow", "silk-rose"],
+          "model": "Catalog/Plastic/maple-pot/model.glb",
+          "thumbnail": "Catalog/Plastic/maple-pot/preview.webp"
+        },
+        {
+          "id": "liberty-headband",
+          "name": "Обруч \"Статуя Свободы\"",
+          "sizes": "Универсальный",
+          "description": "Праздничный обруч на голову с короной Статуи Свободы.",
+          "price": 300,
+          "colors": ["matte-green", "gloss-yellow", "silk-gold", "clear-teal"],
+          "model": "Catalog/Plastic/liberty-headband/model.glb",
+          "thumbnail": "Catalog/Plastic/liberty-headband/preview.webp"
         }
       ]
     },
     {
       "id": "wax",
       "name": "Воск",
-      "subcategories": [
-        {
-          "id": "candles",
-          "name": "Свечи",
-          "products": [
-            { "id": "candle-geo",    "name": "Свеча Geo",    "sizes": "80 × 80 × 100 мм", "description": "Геометрическая свеча из натурального воска.", "price": 450, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/candle-geo.jpg" },
-            { "id": "candle-pillar", "name": "Свеча Pillar", "sizes": "⌀60 × 140 мм",    "description": "Колонна из воска с рельефным орнаментом.",   "price": 380, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/candle-pillar.jpg" },
-            { "id": "candle-moon",   "name": "Свеча Moon",   "sizes": "⌀90 × 85 мм",     "description": "Свеча в форме луны с кратерами.",             "price": 520, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/candle-moon.jpg" }
-          ]
-        }
-      ]
+      "products": []
     },
     {
       "id": "epoxy",
       "name": "Эпоксидка",
-      "subcategories": [
-        {
-          "id": "tabletops",
-          "name": "Столешницы",
-          "products": [
-            { "id": "table-river", "name": "Столешница River", "sizes": "1200 × 600 × 40 мм", "description": "Столешница с эффектом реки из эпоксидной смолы.", "price": 12000, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/table-river.jpg" }
-          ]
-        },
-        {
-          "id": "jewelry",
-          "name": "Украшения",
-          "products": [
-            { "id": "ring-epoxy",    "name": "Кольцо с цветком", "sizes": "р. 16–20",       "description": "Кольцо из эпоксидной смолы с сухоцветом.", "price": 650,  "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/ring-epoxy.jpg" },
-            { "id": "pendant-ocean", "name": "Кулон Ocean",      "sizes": "35 × 25 × 8 мм", "description": "Кулон с эффектом морской волны.",         "price": 800,  "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/pendant-ocean.jpg" }
-          ]
-        },
-        {
-          "id": "nightlights",
-          "name": "Ночники",
-          "products": [
-            { "id": "nightlight-river", "name": "Ночник River", "sizes": "200 × 60 × 180 мм", "description": "Светящийся ночник с эффектом реки.", "price": 3500, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/nightlight-river.jpg" }
-          ]
-        },
-        {
-          "id": "trays",
-          "name": "Подносы и тарелки",
-          "products": [
-            { "id": "tray-marble", "name": "Поднос Marble", "sizes": "300 × 200 × 15 мм", "description": "Декоративный поднос с эффектом мрамора.", "price": 1800, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/tray-marble.jpg" }
-          ]
-        },
-        {
-          "id": "panels",
-          "name": "Декоративные панели",
-          "products": [
-            { "id": "panel-wave", "name": "Панель Wave", "sizes": "400 × 300 × 20 мм", "description": "Настенная декоративная панель с волновым рельефом.", "price": 4500, "model": "/models/placeholder.glb", "thumbnail": "/thumbnails/panel-wave.jpg" }
-          ]
-        }
-      ]
+      "products": []
     }
   ]
 }

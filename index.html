@@ -712,7 +712,7 @@
     .prod-icon:hover {
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), inset 1px 1px 0 rgba(255,255,255,0.2);
     }
-    .prod-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .prod-icon img { width: 100%; height: 100%; object-fit: contain; padding: 4px; display: block; }
     .pi-ph { font-size: 18px; opacity: 0.15; }
   </style>
 </head>
@@ -848,33 +848,118 @@
         const body = document.createElement('div');
         body.className = 'face-body';
 
-        cat.subcategories.forEach(sub => {
-          const block = document.createElement('div');
-          block.className = 'sub-block';
-          block.innerHTML = `<div class="sub-title">${sub.name}</div>`;
-
-          const grid = document.createElement('div');
-          grid.className = 'sub-products';
-
-          sub.products.forEach(p => {
-            const icon = document.createElement('div');
-            icon.className = 'prod-icon';
-            icon.onclick = () => location.href = `product.html?id=${p.id}`;
-            // Тонкий анимированный контур
-            const gw = document.createElement('div'); gw.className = 'border-glow-wrap';
-            const gg = document.createElement('div'); gg.className = 'border-glow-sm';
-            gg.style.animationDelay = `${-(Math.random()*40).toFixed(1)}s`;
-            gw.appendChild(gg); icon.appendChild(gw);
-            icon.innerHTML += p.thumbnail
-              ? `<img src="${p.thumbnail}" alt="${p.name}" loading="lazy"
-                   onerror="this.parentElement.innerHTML='<span class=pi-ph>⬡</span>'">`
-              : `<span class="pi-ph">⬡</span>`;
-            grid.appendChild(icon);
+        // Собираем группы товаров (подкатегории или прямой список)
+        const groups = [];
+        if (cat.products && cat.products.length > 0) {
+          groups.push({ name: '', products: cat.products });
+        }
+        if (cat.subcategories && cat.subcategories.length > 0) {
+          cat.subcategories.forEach(sub => {
+            if (sub.products && sub.products.length > 0) {
+              groups.push(sub);
+            }
           });
+        }
 
-          block.appendChild(grid);
-          body.appendChild(block);
-        });
+        if (groups.length === 0) {
+          const emptyBlock = document.createElement('div');
+          emptyBlock.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:240px;color:rgba(255,255,255,0.25);font-size:13px;gap:8px;';
+          emptyBlock.innerHTML = '<span style="font-size:24px;opacity:0.4;">⏳</span><span>Скоро в продаже</span>';
+          body.appendChild(emptyBlock);
+        } else {
+          groups.forEach(sub => {
+            const block = document.createElement('div');
+            block.className = 'sub-block';
+            if (sub.name) {
+              block.innerHTML = `<div class="sub-title">${sub.name}</div>`;
+            }
+
+            const grid = document.createElement('div');
+            grid.className = 'sub-products';
+
+            sub.products.forEach(p => {
+              const icon = document.createElement('div');
+              icon.className = 'prod-icon';
+              icon.title = `${p.name} (id: ${p.id})`;
+              icon.onclick = () => location.href = `product.html?id=${p.id}`;
+
+              // Тонкий анимированный контур
+              const gw = document.createElement('div'); gw.className = 'border-glow-wrap';
+              const gg = document.createElement('div'); gg.className = 'border-glow-sm';
+              gg.style.animationDelay = `${-(Math.random()*40).toFixed(1)}s`;
+              gw.appendChild(gg);
+              icon.appendChild(gw);
+
+              // Автоматический перебор форматов для ручных превью (.webp, .png, .jpg, .jpeg)
+              const candidates = [];
+              if (p.thumbnail) candidates.push(p.thumbnail.replace(/^\//, ''));
+              
+              // Проверяем папку товара в Catalog/
+              const catFolder = cat.id.charAt(0).toUpperCase() + cat.id.slice(1);
+              candidates.push(
+                `Catalog/${catFolder}/${p.id}/preview.webp`,
+                `Catalog/${catFolder}/${p.id}/preview.png`,
+                `Catalog/${catFolder}/${p.id}/preview.jpg`,
+                `Catalog/${catFolder}/${p.id}/preview.jpeg`,
+                `thumbnails/${p.id}.webp`,
+                `thumbnails/${p.id}.png`,
+                `thumbnails/${p.id}.jpg`,
+                `thumbnails/${p.id}.jpeg`
+              );
+
+              // Удаляем дубликаты
+              const uniquePaths = [...new Set(candidates)];
+              let attempt = 0;
+
+              const img = document.createElement('img');
+              img.alt = p.name;
+              img.loading = 'lazy';
+
+              function loadNext() {
+                if (attempt < uniquePaths.length) {
+                  img.src = uniquePaths[attempt++];
+                } else {
+                  img.style.display = 'none';
+                  if (!icon.querySelector('.pi-ph')) {
+                    const ph = document.createElement('span');
+                    ph.className = 'pi-ph';
+                    ph.textContent = '⬡';
+                    icon.appendChild(ph);
+                  }
+                }
+              }
+
+              img.onerror = () => loadNext();
+              loadNext();
+              icon.appendChild(img);
+
+              // Drag & Drop превью прямо на карточку для быстрой проверки
+              icon.addEventListener('dragover', e => { e.preventDefault(); icon.style.boxShadow = '0 0 12px #ffd84d'; });
+              icon.addEventListener('dragleave', () => { icon.style.boxShadow = ''; });
+              icon.addEventListener('drop', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                icon.style.boxShadow = '';
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                  const reader = new FileReader();
+                  reader.onload = ev => {
+                    img.style.display = 'block';
+                    img.src = ev.target.result;
+                    const ph = icon.querySelector('.pi-ph');
+                    if (ph) ph.remove();
+                  };
+                  reader.readAsDataURL(file);
+                }
+              });
+
+              grid.appendChild(icon);
+            });
+
+            block.appendChild(grid);
+            body.appendChild(block);
+          });
+        }
 
         scrollWrap.appendChild(body);
         face.appendChild(scrollWrap);
