@@ -702,6 +702,7 @@
       overflow: hidden;
       cursor: pointer;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       transition: box-shadow 0.15s;
@@ -712,8 +713,63 @@
     .prod-icon:hover {
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), inset 1px 1px 0 rgba(255,255,255,0.2);
     }
-    .prod-icon img { width: 100%; height: 100%; object-fit: contain; padding: 4px; display: block; }
+    .prod-icon img { width: 100%; flex: 1; min-height: 0; object-fit: contain; padding: 4px; display: block; }
     .pi-ph { font-size: 18px; opacity: 0.15; }
+
+    /* ── Заглушка пустой категории ── */
+    .empty-cat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 240px;
+      gap: 10px;
+    }
+    .empty-cat-icon {
+      font-size: 36px;
+      opacity: 0.55;
+      filter: grayscale(0.3);
+    }
+    .empty-cat-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.04em;
+    }
+    .empty-cat-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.22);
+      text-align: center;
+      max-width: 200px;
+      line-height: 1.5;
+    }
+    .empty-cat-badge {
+      margin-top: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* ── Палитра цветов карточки ── */
+    .prod-palette {
+      display: flex;
+      gap: 2px;
+      padding: 3px 4px 0;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .prod-palette-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      opacity: 0.75;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -861,10 +917,32 @@
           });
         }
 
+        // Заглушки для пустых категорий
+        const EMPTY_STUBS = {
+          wax: {
+            icon: '🕯️',
+            title: 'Скоро у продажу',
+            sub: 'Авторські соєві свічки з силіконовими формами. Нові аромати та дизайни.',
+            badge: 'Незабаром'
+          },
+          epoxy: {
+            icon: '🔮',
+            title: 'Скоро у продажу',
+            sub: 'Вироби з епоксидної смоли: підставки, декор, нічники та прикраси.',
+            badge: 'Незабаром'
+          }
+        };
+
         if (groups.length === 0) {
+          const stub = EMPTY_STUBS[cat.id] || { icon: '⏳', title: 'Скоро у продажу', sub: '', badge: 'Незабаром' };
           const emptyBlock = document.createElement('div');
-          emptyBlock.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:240px;color:rgba(255,255,255,0.25);font-size:13px;gap:8px;';
-          emptyBlock.innerHTML = '<span style="font-size:24px;opacity:0.4;">⏳</span><span>Скоро в продаже</span>';
+          emptyBlock.className = 'empty-cat';
+          emptyBlock.innerHTML = `
+            <span class="empty-cat-icon">${stub.icon}</span>
+            <span class="empty-cat-title">${stub.title}</span>
+            ${stub.sub ? `<span class="empty-cat-sub">${stub.sub}</span>` : ''}
+            <span class="empty-cat-badge">${stub.badge}</span>
+          `;
           body.appendChild(emptyBlock);
         } else {
           groups.forEach(sub => {
@@ -952,6 +1030,19 @@
                   reader.readAsDataURL(file);
                 }
               });
+
+              // Палитра акцентных цветов
+              if (p.accentColors && p.accentColors.length > 0) {
+                const palette = document.createElement('div');
+                palette.className = 'prod-palette';
+                p.accentColors.forEach(hex => {
+                  const dot = document.createElement('div');
+                  dot.className = 'prod-palette-dot';
+                  dot.style.background = hex;
+                  palette.appendChild(dot);
+                });
+                icon.appendChild(palette);
+              }
 
               grid.appendChild(icon);
             });
@@ -1262,11 +1353,15 @@
     }
   })();
   </script>
+
+  <!-- ── Анимация мигающих точек в узлах сетки ── -->
+  <script>
   (function() {
     const canvas = document.getElementById('grid-dots');
-    const ctx    = canvas.getContext('2d');
-    const GRID   = 40; // совпадает с background-size
-    const MAX_DOTS = 55; // сколько точек одновременно живёт
+    if (!canvas) return;
+    const ctx  = canvas.getContext('2d');
+    const GRID = 40;
+    const MAX_DOTS = 55;
 
     let W, H, cols, rows, dots = [];
 
@@ -1288,7 +1383,6 @@
         alpha:    0,
         maxAlpha: 0.55 + Math.random() * 0.45,
         radius:   0.35 + Math.random() * 0.42,
-        // случайная фаза: fade-in, hold, fade-out
         phase:    'in',
         speed:    0.012 + Math.random() * 0.018,
         hold:     0,
@@ -1296,7 +1390,6 @@
       };
     }
 
-    // Заполняем начальный пул с разными фазами
     for (let i = 0; i < MAX_DOTS; i++) {
       const d = spawnDot();
       d.alpha = Math.random() * d.maxAlpha;
@@ -1306,9 +1399,7 @@
 
     function tick() {
       ctx.clearRect(0, 0, W, H);
-
       dots.forEach((d, idx) => {
-        // Обновляем состояние
         if (d.phase === 'in') {
           d.alpha += d.speed;
           if (d.alpha >= d.maxAlpha) { d.alpha = d.maxAlpha; d.phase = 'hold'; }
@@ -1317,38 +1408,56 @@
           if (d.hold >= d.maxHold) d.phase = 'out';
         } else {
           d.alpha -= d.speed * 0.7;
-          if (d.alpha <= 0) {
-            dots[idx] = spawnDot(); // рождается новая точка
-            return;
-          }
+          if (d.alpha <= 0) { dots[idx] = spawnDot(); return; }
         }
-
-        // Рисуем точку с мягким свечением
         const x = d.col * GRID;
         const y = d.row * GRID;
-
         ctx.save();
-        // Внешнее свечение
         const glow = ctx.createRadialGradient(x, y, 0, x, y, d.radius * 4);
         glow.addColorStop(0,   `rgba(180,180,180,${d.alpha * 0.5})`);
         glow.addColorStop(0.5, `rgba(140,140,140,${d.alpha * 0.15})`);
         glow.addColorStop(1,   `rgba(0,0,0,0)`);
         ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(x, y, d.radius * 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Ядро — серое
+        ctx.beginPath(); ctx.arc(x, y, d.radius * 4, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = `rgba(200,200,200,${d.alpha * 0.7})`;
-        ctx.beginPath();
-        ctx.arc(x, y, d.radius, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, d.radius, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
       });
-
       requestAnimationFrame(tick);
     }
     tick();
+  })();
+  </script>
+
+  <!-- ── Анимация турбуленса SVG фильтра (только не mobile) ── -->
+  <script>
+  (function() {
+    // Определяем мобильное устройство: touchscreen + маленький экран
+    const isMobile = ('ontouchstart' in window) && window.innerWidth <= 600;
+    if (isMobile) return; // на телефонах отключаем — лагает
+
+    const turbulence = document.querySelector('#catalog-glass feTurbulence');
+    if (!turbulence) return;
+
+    let t = 0;
+    const BASE_FREQ_X = 0.008;
+    const BASE_FREQ_Y = 0.010;
+    const AMP_X = 0.003;
+    const AMP_Y = 0.004;
+
+    function animateTurbulence() {
+      t += 0.004;
+      const fx = (BASE_FREQ_X + Math.sin(t * 0.7) * AMP_X).toFixed(5);
+      const fy = (BASE_FREQ_Y + Math.cos(t * 0.5) * AMP_Y).toFixed(5);
+      turbulence.setAttribute('baseFrequency', `${fx} ${fy}`);
+      // Медленная смена seed для эффекта "живого стекла"
+      if (Math.floor(t * 10) % 80 === 0) {
+        const seed = 4 + Math.floor(Math.sin(t) * 3);
+        turbulence.setAttribute('seed', seed);
+      }
+      requestAnimationFrame(animateTurbulence);
+    }
+    animateTurbulence();
   })();
   </script>
 </body>

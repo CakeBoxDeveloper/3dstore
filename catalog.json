@@ -2,55 +2,60 @@
   "categories": [
     {
       "id": "plastic",
-      "name": "Пластик",
+      "name": "3D Печать",
       "products": [
         {
           "id": "monstera-stand",
-          "name": "Подставка \"Монстера\"",
+          "name": "Підставка «Монстера»",
           "sizes": "120 × 90 × 85 мм",
-          "description": "Подставка для телефона в форме листа монстеры.",
+          "description": "Підставка для телефону у формі листа монстери.",
           "price": 350,
-          "colors": ["matte-white", "matte-black", "matte-green", "gloss-black", "silk-gold", "silk-mint"],
+          "colors": ["matte-green", "matte-black", "gloss-black", "silk-mint"],
+          "accentColors": ["#1a3d1a", "#2d4a1e", "#3a5c2a", "#4a7a38"],
           "model": "Catalog/Plastic/monstera-stand/model.glb",
           "thumbnail": "Catalog/Plastic/monstera-stand/preview.webp"
         },
         {
           "id": "monstera-bowl",
-          "name": "Миска \"Монстера\"",
+          "name": "Миска «Монстера»",
           "sizes": "⌀160 × 60 мм",
-          "description": "Декоративная миска с рельефом листа монстеры.",
+          "description": "Декоративна миска з рельєфом листа монстери.",
           "price": 390,
-          "colors": ["matte-white", "matte-green", "matte-beige", "gloss-white", "silk-mint"],
+          "colors": ["matte-green", "matte-khaki", "matte-black", "gloss-black", "silk-mint"],
+          "accentColors": ["#1a3d1a", "#4a5c2a", "#3d4a20", "#2d3d18"],
           "model": "Catalog/Plastic/monstera-bowl/model.glb",
           "thumbnail": "Catalog/Plastic/monstera-bowl/preview.webp"
         },
         {
           "id": "monstera-shelf",
-          "name": "Полка \"Монстера\"",
+          "name": "Полиця «Монстера»",
           "sizes": "200 × 80 × 40 мм",
-          "description": "Настенная полка в форме листа монстеры.",
+          "description": "Настінна полиця у формі листа монстери.",
           "price": 480,
-          "colors": ["matte-black", "matte-white", "matte-green", "gloss-black", "silk-gold"],
+          "colors": ["matte-green", "matte-khaki", "matte-black", "gloss-black", "silk-mint"],
+          "accentColors": ["#1a3d1a", "#3d4a20", "#4a5c2a", "#2a3d22"],
           "model": "Catalog/Plastic/monstera-shelf/model.glb",
           "thumbnail": "Catalog/Plastic/monstera-shelf/preview.webp"
         },
         {
           "id": "maple-pot",
-          "name": "Кашпо \"Кленовый лист\"",
+          "name": "Кашпо «Кленовий лист»",
           "sizes": "⌀120 × 110 мм",
-          "description": "Кашпо для растений с рельефом кленового листа.",
+          "description": "Кашпо для рослин з рельєфом кленового листа.",
           "price": 420,
-          "colors": ["matte-beige", "matte-red", "matte-green", "gloss-yellow", "silk-rose"],
+          "colors": ["matte-orange", "gloss-yellow", "matte-red", "silk-rose"],
+          "accentColors": ["#c45c10", "#e87820", "#d46010", "#f0a030"],
           "model": "Catalog/Plastic/maple-pot/model.glb",
           "thumbnail": "Catalog/Plastic/maple-pot/preview.webp"
         },
         {
           "id": "liberty-headband",
-          "name": "Обруч \"Статуя Свободы\"",
-          "sizes": "Универсальный",
-          "description": "Праздничный обруч на голову с короной Статуи Свободы.",
+          "name": "Обруч «Статуя Свободи»",
+          "sizes": "Універсальний",
+          "description": "Святковий обруч на голову з короною Статуї Свободи.",
           "price": 300,
-          "colors": ["matte-green", "gloss-yellow", "silk-gold", "clear-teal"],
+          "colors": ["clear-teal", "matte-teal", "silk-mint", "gloss-teal"],
+          "accentColors": ["#0d4a4a", "#0f5c5c", "#147070", "#1a8a8a"],
           "model": "Catalog/Plastic/liberty-headband/model.glb",
           "thumbnail": "Catalog/Plastic/liberty-headband/preview.webp"
         }
@@ -58,12 +63,12 @@
     },
     {
       "id": "wax",
-      "name": "Воск",
+      "name": "Свічки",
       "products": []
     },
     {
       "id": "epoxy",
-      "name": "Эпоксидка",
+      "name": "Епоксидна смола",
       "products": []
     }
   ]
