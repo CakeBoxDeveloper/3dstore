@@ -290,13 +290,24 @@ function getMatTypeLabel(mat) {
   return mat.roughness > 0.5 ? 'PLA' : 'PETG';
 }
 
-function buildMaterialSlider() {
+function buildMaterialSlider(allowedColorIds = null) {
   const slider = document.getElementById('material-slider');
   const wrap   = document.getElementById('slider-wrap');
   const outer  = document.getElementById('slider-outer');
   slider.innerHTML = '';
 
-  MATERIALS.forEach(mat => {
+  let list = MATERIALS;
+  if (Array.isArray(allowedColorIds) && allowedColorIds.length > 0) {
+    list = MATERIALS.filter(m => allowedColorIds.includes(m.id));
+    if (list.length === 0) list = MATERIALS;
+  }
+
+  // Выбираем первый из списка
+  if (list.length > 0) {
+    currentMat = list[0];
+  }
+
+  list.forEach(mat => {
     const card = document.createElement('button');
     card.className = 'mat-chip' + (mat.id === currentMat.id ? ' active' : '');
     card.setAttribute('aria-label', `${mat.label} ${mat.sublabel}`);
@@ -446,30 +457,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sizesEl = document.getElementById('p-sizes');
   if (sizesEl && product.sizes) sizesEl.textContent = product.sizes;
 
-  // Кнопка "следующая модель" — находим следующий товар в той же подкатегории
+  // Кнопка "следующая модель" — находим следующий товар в каталоге
   const btnNext = document.getElementById('btn-next-model');
   if (btnNext) {
-    // Собираем все товары из той же категории
     const allProducts = [];
     for (const cat of window.CatalogData.categories) {
-      for (const sub of cat.subcategories) {
-        for (const p of sub.products) allProducts.push(p.id);
+      if (cat.products) {
+        for (const p of cat.products) allProducts.push(p.id);
+      }
+      if (cat.subcategories) {
+        for (const sub of cat.subcategories) {
+          if (sub.products) {
+            for (const p of sub.products) allProducts.push(p.id);
+          }
+        }
       }
     }
     const currentIdx = allProducts.indexOf(product.id);
-    const nextId     = allProducts[(currentIdx + 1) % allProducts.length];
-    btnNext.addEventListener('click', () => {
-      location.href = `product.html?id=${nextId}`;
-    });
+    if (allProducts.length > 1 && currentIdx !== -1) {
+      const nextId = allProducts[(currentIdx + 1) % allProducts.length];
+      btnNext.addEventListener('click', () => {
+        location.href = `product.html?id=${nextId}`;
+      });
+    }
   }
 
   // Кнопка: текст передаётся в PrismButton через initPrismButton
   const priceStr = product.price.toLocaleString('uk-UA') + ' ₴';
 
   initScene();
-  buildMaterialSlider();
+  buildMaterialSlider(product.colors);
   loadModel(product.model);
-  initFlipOrder(product, category.name, subcategory.name);
+  initFlipOrder(product, category.name, subcategory ? subcategory.name : '');
 
   const procToggle = document.getElementById('proc-toggle');
   if (procToggle) {
