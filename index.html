@@ -883,9 +883,12 @@
   import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   import { RGBELoader }  from 'three/addons/loaders/RGBELoader.js';
 
-  // ── Детект слабого девайса ──────────────────────────────────────────────
-  const IS_LOW_END = ('ontouchstart' in window) &&
-    (navigator.hardwareConcurrency || 4) <= 4;
+  // ── Детект мобильного устройства ──────────────────────────────────────
+  // Используем User-Agent + ontouchstart, не hardwareConcurrency
+  // (современные телефоны имеют 8+ ядер и проходят проверку как десктоп)
+  const IS_MOBILE = ('ontouchstart' in window) ||
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const IS_LOW_END = IS_MOBILE;
 
   // ── Размер тайла рендертаргета (px) ────────────────────────────────────
   const TILE = IS_LOW_END ? 128 : 256;
@@ -1630,7 +1633,8 @@
   <!-- ── Турбуленс дисплейс: только во время spin-анимации каталога ── -->
   <script>
   (function() {
-    const isMobile = ('ontouchstart' in window) && window.innerWidth <= 600;
+    const isMobile = ('ontouchstart' in window) ||
+      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
     const turbulence = document.querySelector('#catalog-glass feTurbulence');
     const displacement = document.querySelector('#catalog-glass feDisplacementMap');
