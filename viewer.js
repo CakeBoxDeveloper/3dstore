@@ -243,36 +243,49 @@ function usePlaceholder() {
   meshObjects.push(mesh);
 }
 
-// ── Процедурная текстура слоёв FDM-печати ────────────────────────────────────
-// Горизонтальные полосы имитируют слои 0.2мм
-// texHeight — высота текстуры в пикселях (= кол-во слоёв видимых)
-// layerPx   — толщина одного слоя в пикселях
+// ── Процедурная текстура слоёв FDM (world-space шейдер) ─────────────────────
+// Работает через onBeforeCompile — патчит стандартный шейдер Three.js
+// Слои всегда горизонтальные в мировом пространстве, независимо от UV
 
-function createLayerTexture() {
-  const W = 4;          // ширина — повторяется горизонтально, нам не важна
-  const H = 512;        // высота
-  const LAYER_PX = 8;   // ~1 слой = 8px (при типичном масштабе модели)
+function applyFDMLayer(material) {
+  const LAYER_HEIGHT = 0.003; // тоньше слои
+  const STRENGTH     = 0.25;  // мягче рельеф
 
-  const data = new Uint8Array(W * H);
+  material.onBeforeCompile = (shader) => {
+    // Передаём мировую позицию вершины во фрагментный шейдер
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <worldpos_vertex>',
+      `#include <worldpos_vertex>
+       vWorldPos = worldPosition.xyz;`
+    );
+    shader.vertexShader = 'varying vec3 vWorldPos;\n' + shader.vertexShader;
 
-  for (let y = 0; y < H; y++) {
-    // sin-волна имитирует рельеф между слоями
-    const t = (y % LAYER_PX) / LAYER_PX;           // 0..1 внутри слоя
-    const ridge = Math.pow(Math.sin(t * Math.PI), 2); // пик посередине слоя
-    const val = Math.round(180 + ridge * 60);       // roughness: 0.70 .. 0.94
-    for (let x = 0; x < W; x++) data[y * W + x] = val;
-  }
+    shader.fragmentShader = 'varying vec3 vWorldPos;\n' + shader.fragmentShader;
 
-  const tex = new THREE.DataTexture(data, W, H, THREE.RedFormat);
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  // Масштаб повтора подбирается под размер модели в loadModel
-  tex.repeat.set(4, 12);
-  tex.needsUpdate = true;
-  return tex;
+    // Патчим нормаль в фрагментном шейдере — добавляем горизонтальную рябь
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <normal_fragment_maps>',
+      `#include <normal_fragment_maps>
+       {
+         // FDM layer lines — горизонтальная рябь по мировой Y
+         float layer  = vWorldPos.y / ${LAYER_HEIGHT.toFixed(4)};
+         float wave   = sin(layer * 3.14159);
+         float slope  = cos(layer * 3.14159) * ${STRENGTH.toFixed(3)};
+         // Добавляем наклон нормали вдоль мировой Y
+         vec3 worldUp = normalize(vec3(0.0, 1.0, 0.0));
+         // Проецируем на касательную плоскость
+         vec3 perturb = normalize(worldUp - dot(worldUp, normal) * normal);
+         normal = normalize(normal + perturb * slope);
+       }`
+    );
+  };
+
+  // Нужно для onBeforeCompile — material должен перекомпилироваться при смене
+  material.customProgramCacheKey = () => 'fdm-layer-' + LAYER_HEIGHT + '-' + STRENGTH;
+  return material;
 }
 
-const _layerTex = createLayerTexture(); // один экземпляр на всё
+const _layerTextures = null; // убрали DataTexture, используем шейдер
 
 // ── Material builder ─────────────────────────────────────────────────────────
 
@@ -293,13 +306,12 @@ function buildMaterial() {
       sheenColor: new THREE.Color(0xffffff),
     });
   }
-  // Матовый / глянец — MeshStandardMaterial с текстурой слоёв
-  return new THREE.MeshStandardMaterial({
+  // Матовый / глянец — MeshStandardMaterial с world-space FDM слоями
+  return applyFDMLayer(new THREE.MeshStandardMaterial({
     color,
     roughness: currentMat.roughness,
     metalness: 0,
-    roughnessMap: _layerTex,
-  });
+  }));
 }
 
 function applyMaterialToAll() {
