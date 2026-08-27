@@ -1,7 +1,8 @@
 {
-  "name": "Подставка \"Монстера\"",
-  "price": 350,
-  "sizes": "120 × 90 × 85 мм",
-  "description": "Подставка для телефона в форме листа монстеры.",
-  "colors": ["matte-white", "matte-black", "matte-green", "gloss-black", "silk-gold", "silk-mint"]
+  "name": "Полиця «Монстера»",
+  "price": 480,
+  "sizes": "200 × 80 × 40 мм",
+  "description": "Настінна полиця у формі листа монстери.",
+  "colors": ["matte-green", "matte-black", "gloss-black", "silk-mint"],
+  "accentColors": ["#1a3d1a", "#3d4a20", "#4a5c2a", "#2a3d22"]
 }

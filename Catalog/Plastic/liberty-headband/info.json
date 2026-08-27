@@ -1,7 +1,8 @@
 {
-  "name": "Обруч \"Статуя Свободы\"",
+  "name": "Обруч «Статуя Свободи»",
   "price": 300,
-  "sizes": "Универсальный",
-  "description": "Праздничный обруч на голову с короной Статуи Свободы.",
-  "colors": ["matte-green", "gloss-yellow", "silk-gold", "clear-teal"]
+  "sizes": "Універсальний",
+  "description": "Святковий обруч на голову з короною Статуї Свободи.",
+  "colors": ["clear-teal", "matte-green", "silk-mint"],
+  "accentColors": ["#0d4a4a", "#0f5c5c", "#147070", "#1a8a8a"]
 }

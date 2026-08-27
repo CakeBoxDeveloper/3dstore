@@ -1632,12 +1632,12 @@
     if (!turbulence || !displacement) return;
 
     // Базовые значения — покой (нет дисплейса)
-    const BASE_FREQ  = 0.009;
+    const BASE_FREQ  = 0.004;
     const BASE_SCALE = 0;
 
-    // Пиковые значения — максимум в середине спина
-    const PEAK_FREQ  = 0.032;
-    const PEAK_SCALE = isMobile ? 0 : 28;
+    // Пиковые значения — крупная волна в середине спина
+    const PEAK_FREQ  = 0.012;
+    const PEAK_SCALE = isMobile ? 0 : 55;
 
     let rafId = null;
     let pulseStart = 0;

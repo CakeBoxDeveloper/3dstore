@@ -90,10 +90,11 @@ module.exports = function handler(req, res) {
     categories.sort((a, b) => a._order - b._order);
     categories.forEach(c => delete c._order);
 
-    // Добавляем пустые категории если их нет в папках
+    // Добавляем пустые категории если их нет в папках (без дублирования)
     for (const [id, meta] of Object.entries(CATEGORY_META)) {
       if (!categories.find(c => c.id === id)) {
-        categories.splice(meta.order, 0, { id, name: meta.name, products: [] });
+        const insertAt = Math.min(meta.order, categories.length);
+        categories.splice(insertAt, 0, { id, name: meta.name, products: [] });
       }
     }
 
