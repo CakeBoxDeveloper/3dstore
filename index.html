@@ -777,6 +777,17 @@
       opacity: 0.75;
       flex-shrink: 0;
     }
+
+    /* ── Мобильные оптимизации ── */
+    @media (pointer: coarse) {
+      /* Убираем дорогой SVG displacement фильтр на гранях каталога */
+      .h-face,
+      .footer-face,
+      .footer-input-face {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+      }
+    }
   </style>
 
   <!-- Three.js для 3D превью в иконках каталога -->
@@ -920,16 +931,18 @@
   fill.position.set(-4, 1, 2);
   scene.add(fill);
 
-  // HDR env (опционально, при ошибке просто без)
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  new RGBELoader().setDataType(THREE.FloatType).load(
-    'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr',
-    hdr => {
-      scene.environment = pmrem.fromEquirectangular(hdr).texture;
-      hdr.dispose(); pmrem.dispose();
-    },
-    undefined, () => pmrem.dispose()
-  );
+  // HDR env — только на десктопе (на мобиле ~2MB и лишняя задержка)
+  if (!IS_MOBILE) {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    new RGBELoader().setDataType(THREE.FloatType).load(
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr',
+      hdr => {
+        scene.environment = pmrem.fromEquirectangular(hdr).texture;
+        hdr.dispose(); pmrem.dispose();
+      },
+      undefined, () => pmrem.dispose()
+    );
+  }
 
   // GLTF / DRACO лоадер
   const draco = new DRACOLoader();
@@ -1562,7 +1575,8 @@
     if (!canvas) return;
     const ctx  = canvas.getContext('2d');
     const GRID = 40;
-    const MAX_DOTS = 55;
+    const isMob = ('ontouchstart' in window) || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const MAX_DOTS = isMob ? 18 : 55;
 
     let W, H, cols, rows, dots = [];
 
