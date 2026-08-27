@@ -703,12 +703,19 @@
       cursor: pointer;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      align-items: stretch;
+      justify-content: stretch;
       transition: box-shadow 0.15s;
     }
     .sub-products .prod-icon {
       width: 100%;
+    }
+    /* canvas 3D превью внутри иконки */
+    .prod-icon canvas {
+      flex: 1;
+      min-height: 0;
+      width: 100% !important;
+      display: block;
     }
     .prod-icon:hover {
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), inset 1px 1px 0 rgba(255,255,255,0.2);
@@ -771,6 +778,16 @@
       flex-shrink: 0;
     }
   </style>
+
+  <!-- Three.js для 3D превью в иконках каталога -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
   <!-- Анимированные точки в узлах сетки -->
@@ -858,13 +875,224 @@
   </div>
 
   <script src="catalog.js"></script>
+
+  <!-- ── 3D превью в иконках каталога ── -->
+  <script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader }  from 'three/addons/loaders/GLTFLoader.js';
+  import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+  import { RGBELoader }  from 'three/addons/loaders/RGBELoader.js';
+
+  // ── Детект слабого девайса ──────────────────────────────────────────────
+  const IS_LOW_END = ('ontouchstart' in window) &&
+    (navigator.hardwareConcurrency || 4) <= 4;
+
+  // ── Размер тайла рендертаргета (px) ────────────────────────────────────
+  const TILE = IS_LOW_END ? 128 : 256;
+
+  // Один рендерер на всё
+  const renderer = new THREE.WebGLRenderer({ antialias: !IS_LOW_END, alpha: true });
+  renderer.setPixelRatio(IS_LOW_END ? 1 : Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping      = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  // Скрытый canvas рендерера — маленький, offscreen
+  renderer.setSize(TILE, TILE);
+  renderer.domElement.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;pointer-events:none;';
+  document.body.appendChild(renderer.domElement);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.01, 50);
+  // Изометрический ракурс: направление камеры (нормализованный вектор)
+  // theta=45° по XZ, phi=35.26° вверх (истинная изометрия)
+  const CAM_DIR = new THREE.Vector3(1, 1, 1).normalize(); // от origin к камере
+
+  // Освещение
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+  const key = new THREE.DirectionalLight(0xffffff, 1.8);
+  key.position.set(3, 5, 4);
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0x88aaff, 0.5);
+  fill.position.set(-4, 1, 2);
+  scene.add(fill);
+
+  // HDR env (опционально, при ошибке просто без)
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  new RGBELoader().setDataType(THREE.FloatType).load(
+    'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr',
+    hdr => {
+      scene.environment = pmrem.fromEquirectangular(hdr).texture;
+      hdr.dispose(); pmrem.dispose();
+    },
+    undefined, () => pmrem.dispose()
+  );
+
+  // GLTF / DRACO лоадер
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+  const gltfLoader = new GLTFLoader();
+  gltfLoader.setDRACOLoader(draco);
+
+  // Кеш моделей: url → THREE.Group (клонируется для каждой иконки)
+  const modelCache = new Map();
+
+  // Список всех иконок для рендер-цикла
+  // { canvas, mesh, rotY, visible }
+  const icons = [];
+
+  // IntersectionObserver — рендерим только видимые
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      const item = icons.find(i => i.canvas === e.target);
+      if (item) item.visible = e.isIntersecting;
+    });
+  }, { threshold: 0.1 });
+
+  // ── Регистрация иконки ──────────────────────────────────────────────────
+  async function register(canvas, modelUrl, accentHex) {
+    // Размер canvas = размер иконки в CSS px * dpr
+    const dpr  = IS_LOW_END ? 1 : Math.min(devicePixelRatio, 2);
+    const size = TILE;
+    canvas.width  = size;
+    canvas.height = size;
+    const ctx2d = canvas.getContext('2d');
+
+    // Placeholder — спиннер
+    ctx2d.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx2d.fillRect(0, 0, size, size);
+
+    const color = accentHex ? new THREE.Color(accentHex) : new THREE.Color(0x2d8c4e);
+
+    // Загружаем или берём из кеша
+    let gltfScene;
+    if (modelCache.has(modelUrl)) {
+      gltfScene = modelCache.get(modelUrl).clone(true);
+    } else {
+      try {
+        const gltf = await new Promise((res, rej) =>
+          gltfLoader.load(modelUrl, res, undefined, rej)
+        );
+        modelCache.set(modelUrl, gltf.scene);
+        gltfScene = gltf.scene.clone(true);
+      } catch(e) {
+        gltfScene = new THREE.Mesh(
+          new THREE.TorusKnotGeometry(0.3, 0.1, 64, 16),
+          new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0 })
+        );
+      }
+    }
+
+    // Материал — матовый пластик нужного цвета
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.88, metalness: 0.0 });
+    gltfScene.traverse(c => { if (c.isMesh) { c.material = mat; c.castShadow = false; } });
+
+    // ── Пересчёт origin из геометрии ──────────────────────────────────────
+    // Добавляем в сцену чтобы matrixWorld был актуален
+    scene.add(gltfScene);
+    gltfScene.updateMatrixWorld(true);
+
+    // Собираем реальный bbox из вертексов в мировом пространстве
+    const geoBbox = new THREE.Box3();
+    const _v = new THREE.Vector3();
+    gltfScene.traverse(node => {
+      if (!node.isMesh) return;
+      const pos = node.geometry?.attributes?.position;
+      if (!pos) return;
+      for (let i = 0; i < pos.count; i++) {
+        _v.fromBufferAttribute(pos, i).applyMatrix4(node.matrixWorld);
+        geoBbox.expandByPoint(_v);
+      }
+    });
+
+    scene.remove(gltfScene);
+
+    // Центр и радиус описывающей сферы реальной геометрии
+    const geoCenter = geoBbox.getCenter(new THREE.Vector3());
+    const geoSphere = new THREE.Sphere();
+    geoBbox.getBoundingSphere(geoSphere);
+    // geoSphere.radius — в мировых единицах (scale gltfScene = 1 пока)
+
+    // Шаг 1: нормируем scale → radius станет 1.0
+    const normScale = 1.0 / geoSphere.radius;
+    gltfScene.scale.setScalar(normScale);
+
+    // Шаг 2: сдвигаем position в нормированном пространстве
+    // geoCenter был в мировом пространстве при scale=1,
+    // после normScale центр в мировом = geoCenter * normScale
+    // чтобы его обнулить: position = -geoCenter * normScale
+    gltfScene.position.set(
+      -geoCenter.x * normScale,
+      -geoCenter.y * normScale,
+      -geoCenter.z * normScale
+    );
+
+    // pivot — только вращение, position=(0,0,0), scale=(1,1,1)
+    const pivot = new THREE.Group();
+    pivot.add(gltfScene);
+
+    const camDist = FIXED_CAM_DIST;
+    icons.push({ canvas, ctx2d, mesh: pivot, rotY: Math.random() * Math.PI * 2, visible: false, camDist });
+    io.observe(canvas);
+  }
+
+  // ── Рендер-цикл ────────────────────────────────────────────────────────
+  // На слабых девайсах рендерим реже
+  const FRAME_SKIP = IS_LOW_END ? 3 : 1;
+  let frameCount = 0;
+  const ROT_SPEED = IS_LOW_END ? 0.008 : 0.012;
+
+  // Камера позиционируется один раз — все модели нормированы в единичную сферу
+  // dist = 1/tan(fov/2) × запас
+  const fovRad0  = camera.fov * Math.PI / 180;
+  const FIXED_CAM_DIST = (1.0 / Math.tan(fovRad0 / 2)) * 1.15;
+  camera.position.copy(CAM_DIR).multiplyScalar(FIXED_CAM_DIST);
+  camera.lookAt(0, 0, 0);
+  camera.updateMatrixWorld();
+
+  function tick() {
+    requestAnimationFrame(tick);
+    frameCount++;
+    if (frameCount % FRAME_SKIP !== 0) return;
+
+    for (const item of icons) {
+      if (!item.visible) continue;
+
+      item.rotY += ROT_SPEED;
+      item.mesh.rotation.y = item.rotY;
+
+      scene.add(item.mesh);
+      renderer.render(scene, camera);
+      scene.remove(item.mesh);
+
+      item.ctx2d.clearRect(0, 0, TILE, TILE);
+      item.ctx2d.drawImage(renderer.domElement, 0, 0);
+    }
+  }
+
+  tick();
+
+  // Экспортируем глобально — вызывается из init() который не module
+  window.CatalogViewer3D = { register };
+  // Сигнализируем что готовы
+  if (window._catalogViewer3DResolve) window._catalogViewer3DResolve({ register });
+  </script>
   <script>
     const R = 133;
     // Накапливаем угол — не сбрасываем в 0..360, крутим в нужную сторону
     let angle = 0;
 
+    // Promise для ожидания CatalogViewer3D (module загружается async)
+    const viewer3DReady = new Promise(resolve => {
+      if (window.CatalogViewer3D) { resolve(window.CatalogViewer3D); return; }
+      window._catalogViewer3DResolve = resolve;
+      // Таймаут 3с — если модуль не загрузился, работаем без 3D
+      setTimeout(() => resolve(null), 3000);
+    });
+
     async function init() {
-      const data = await loadCatalog();
+      // Ждём одновременно каталог и 3D viewer
+      const [data] = await Promise.all([loadCatalog(), viewer3DReady]);
       const cats = data.categories;
       const rotor = document.getElementById('h-rotor');
 
@@ -968,81 +1196,44 @@
               gw.appendChild(gg);
               icon.appendChild(gw);
 
-              // Автоматический перебор форматов для ручных превью (.webp, .png, .jpg, .jpeg)
-              const candidates = [];
-              if (p.thumbnail) candidates.push(p.thumbnail.replace(/^\//, ''));
-              
-              // Проверяем папку товара в Catalog/
-              const catFolder = cat.id.charAt(0).toUpperCase() + cat.id.slice(1);
-              candidates.push(
-                `Catalog/${catFolder}/${p.id}/preview.webp`,
-                `Catalog/${catFolder}/${p.id}/preview.png`,
-                `Catalog/${catFolder}/${p.id}/preview.jpg`,
-                `Catalog/${catFolder}/${p.id}/preview.jpeg`,
-                `thumbnails/${p.id}.webp`,
-                `thumbnails/${p.id}.png`,
-                `thumbnails/${p.id}.jpg`,
-                `thumbnails/${p.id}.jpeg`
-              );
-
-              // Удаляем дубликаты
-              const uniquePaths = [...new Set(candidates)];
-              let attempt = 0;
-
-              const img = document.createElement('img');
-              img.alt = p.name;
-              img.loading = 'lazy';
-
-              function loadNext() {
-                if (attempt < uniquePaths.length) {
-                  img.src = uniquePaths[attempt++];
-                } else {
-                  img.style.display = 'none';
-                  if (!icon.querySelector('.pi-ph')) {
+              // Canvas для 3D превью (или img-fallback если нет модели / слабый девайс)
+              if (p.model && window.CatalogViewer3D) {
+                const cvs = document.createElement('canvas');
+                cvs.style.cssText = 'width:100%;flex:1;min-height:0;display:block;';
+                icon.appendChild(cvs);
+                window.CatalogViewer3D.register(cvs, p.model, p.accentColors ? p.accentColors[0] : null);
+              } else {
+                // Fallback: статичная картинка
+                const catFolder = cat.id.charAt(0).toUpperCase() + cat.id.slice(1);
+                const candidates = [];
+                if (p.thumbnail) candidates.push(p.thumbnail.replace(/^\//, ''));
+                candidates.push(
+                  `Catalog/${catFolder}/${p.id}/preview.webp`,
+                  `Catalog/${catFolder}/${p.id}/preview.png`,
+                  `thumbnails/${p.id}.webp`,
+                  `thumbnails/${p.id}.png`
+                );
+                const uniquePaths = [...new Set(candidates)];
+                let attempt = 0;
+                const img = document.createElement('img');
+                img.alt = p.name;
+                img.loading = 'lazy';
+                img.style.cssText = 'width:100%;flex:1;min-height:0;object-fit:contain;padding:4px;display:block;';
+                function loadNext() {
+                  if (attempt < uniquePaths.length) { img.src = uniquePaths[attempt++]; }
+                  else {
+                    img.style.display = 'none';
                     const ph = document.createElement('span');
-                    ph.className = 'pi-ph';
-                    ph.textContent = '⬡';
+                    ph.className = 'pi-ph'; ph.textContent = '⬡';
                     icon.appendChild(ph);
                   }
                 }
+                img.onerror = loadNext;
+                loadNext();
+                icon.appendChild(img);
               }
 
-              img.onerror = () => loadNext();
-              loadNext();
-              icon.appendChild(img);
-
-              // Drag & Drop превью прямо на карточку для быстрой проверки
-              icon.addEventListener('dragover', e => { e.preventDefault(); icon.style.boxShadow = '0 0 12px #ffd84d'; });
-              icon.addEventListener('dragleave', () => { icon.style.boxShadow = ''; });
-              icon.addEventListener('drop', e => {
-                e.preventDefault();
-                e.stopPropagation();
-                icon.style.boxShadow = '';
-                const file = e.dataTransfer.files[0];
-                if (file && file.type.startsWith('image/')) {
-                  const reader = new FileReader();
-                  reader.onload = ev => {
-                    img.style.display = 'block';
-                    img.src = ev.target.result;
-                    const ph = icon.querySelector('.pi-ph');
-                    if (ph) ph.remove();
-                  };
-                  reader.readAsDataURL(file);
-                }
-              });
-
-              // Палитра акцентных цветов
-              if (p.accentColors && p.accentColors.length > 0) {
-                const palette = document.createElement('div');
-                palette.className = 'prod-palette';
-                p.accentColors.forEach(hex => {
-                  const dot = document.createElement('div');
-                  dot.className = 'prod-palette-dot';
-                  dot.style.background = hex;
-                  palette.appendChild(dot);
-                });
-                icon.appendChild(palette);
-              }
+              // Палитра убрана — точки мешают восприятию превью
 
               grid.appendChild(icon);
             });
@@ -1074,6 +1265,8 @@
         // Shimmer
         rotor.classList.add('spinning');
         setTimeout(() => rotor.classList.remove('spinning'), 700);
+        // Импульс турбуленса синхронно со спином
+        if (window.triggerTurbulencePulse) window.triggerTurbulencePulse(700);
       }
 
       // Свайп
@@ -1244,7 +1437,7 @@
     <defs>
       <filter id="catalog-glass" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
         <feTurbulence type="fractalNoise" baseFrequency="0.008 0.010" numOctaves="2" seed="4" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
       <!-- Motion blur — убран -->
     </defs>
@@ -1429,35 +1622,62 @@
   })();
   </script>
 
-  <!-- ── Анимация турбуленса SVG фильтра (только не mobile) ── -->
+  <!-- ── Турбуленс дисплейс: только во время spin-анимации каталога ── -->
   <script>
   (function() {
-    // Определяем мобильное устройство: touchscreen + маленький экран
     const isMobile = ('ontouchstart' in window) && window.innerWidth <= 600;
-    if (isMobile) return; // на телефонах отключаем — лагает
 
     const turbulence = document.querySelector('#catalog-glass feTurbulence');
-    if (!turbulence) return;
+    const displacement = document.querySelector('#catalog-glass feDisplacementMap');
+    if (!turbulence || !displacement) return;
 
-    let t = 0;
-    const BASE_FREQ_X = 0.008;
-    const BASE_FREQ_Y = 0.010;
-    const AMP_X = 0.003;
-    const AMP_Y = 0.004;
+    // Базовые значения — покой (нет дисплейса)
+    const BASE_FREQ  = 0.009;
+    const BASE_SCALE = 0;
 
-    function animateTurbulence() {
-      t += 0.004;
-      const fx = (BASE_FREQ_X + Math.sin(t * 0.7) * AMP_X).toFixed(5);
-      const fy = (BASE_FREQ_Y + Math.cos(t * 0.5) * AMP_Y).toFixed(5);
-      turbulence.setAttribute('baseFrequency', `${fx} ${fy}`);
-      // Медленная смена seed для эффекта "живого стекла"
-      if (Math.floor(t * 10) % 80 === 0) {
-        const seed = 4 + Math.floor(Math.sin(t) * 3);
-        turbulence.setAttribute('seed', seed);
-      }
-      requestAnimationFrame(animateTurbulence);
+    // Пиковые значения — максимум в середине спина
+    const PEAK_FREQ  = 0.032;
+    const PEAK_SCALE = isMobile ? 0 : 28;
+
+    let rafId = null;
+    let pulseStart = 0;
+    let pulseDuration = 700;
+
+    // easeInOut симметричный: нарастает к середине, спадает к концу
+    function easeInOut(t) {
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
     }
-    animateTurbulence();
+
+    function pulseTick() {
+      const elapsed  = performance.now() - pulseStart;
+      const progress = Math.min(elapsed / pulseDuration, 1);
+
+      // Симметричный колокол: 0 → 1 → 0 через sin
+      const bell = Math.sin(progress * Math.PI);
+
+      const freq  = BASE_FREQ  + (PEAK_FREQ  - BASE_FREQ)  * bell;
+      const scale = BASE_SCALE + (PEAK_SCALE - BASE_SCALE) * bell;
+
+      turbulence.setAttribute('baseFrequency', `${freq.toFixed(4)} ${(freq * 1.1).toFixed(4)}`);
+      displacement.setAttribute('scale', scale.toFixed(1));
+
+      if (progress < 1) {
+        rafId = requestAnimationFrame(pulseTick);
+      } else {
+        // Возвращаем в покой
+        turbulence.setAttribute('baseFrequency', `${BASE_FREQ} ${(BASE_FREQ * 1.1).toFixed(4)}`);
+        displacement.setAttribute('scale', BASE_SCALE);
+        rafId = null;
+      }
+    }
+
+    // Глобальная функция — вызывается из spin()
+    window.triggerTurbulencePulse = function(duration) {
+      if (rafId) cancelAnimationFrame(rafId);
+      pulseDuration = duration || 700;
+      pulseStart = performance.now();
+      rafId = requestAnimationFrame(pulseTick);
+    };
   })();
   </script>
 </body>
