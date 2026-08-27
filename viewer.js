@@ -243,6 +243,37 @@ function usePlaceholder() {
   meshObjects.push(mesh);
 }
 
+// ── Процедурная текстура слоёв FDM-печати ────────────────────────────────────
+// Горизонтальные полосы имитируют слои 0.2мм
+// texHeight — высота текстуры в пикселях (= кол-во слоёв видимых)
+// layerPx   — толщина одного слоя в пикселях
+
+function createLayerTexture() {
+  const W = 4;          // ширина — повторяется горизонтально, нам не важна
+  const H = 512;        // высота
+  const LAYER_PX = 8;   // ~1 слой = 8px (при типичном масштабе модели)
+
+  const data = new Uint8Array(W * H);
+
+  for (let y = 0; y < H; y++) {
+    // sin-волна имитирует рельеф между слоями
+    const t = (y % LAYER_PX) / LAYER_PX;           // 0..1 внутри слоя
+    const ridge = Math.pow(Math.sin(t * Math.PI), 2); // пик посередине слоя
+    const val = Math.round(180 + ridge * 60);       // roughness: 0.70 .. 0.94
+    for (let x = 0; x < W; x++) data[y * W + x] = val;
+  }
+
+  const tex = new THREE.DataTexture(data, W, H, THREE.RedFormat);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  // Масштаб повтора подбирается под размер модели в loadModel
+  tex.repeat.set(4, 12);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+const _layerTex = createLayerTexture(); // один экземпляр на всё
+
 // ── Material builder ─────────────────────────────────────────────────────────
 
 function buildMaterial() {
@@ -262,8 +293,13 @@ function buildMaterial() {
       sheenColor: new THREE.Color(0xffffff),
     });
   }
-  // Плоский без бликов — MeshLambertMaterial
-  return new THREE.MeshLambertMaterial({ color });
+  // Матовый / глянец — MeshStandardMaterial с текстурой слоёв
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness: currentMat.roughness,
+    metalness: 0,
+    roughnessMap: _layerTex,
+  });
 }
 
 function applyMaterialToAll() {
