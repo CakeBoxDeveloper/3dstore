@@ -1032,7 +1032,9 @@
     pivot.add(gltfScene);
 
     const camDist = FIXED_CAM_DIST;
-    icons.push({ canvas, ctx2d, mesh: pivot, rotY: Math.random() * Math.PI * 2, visible: false, camDist });
+    // На мобиле — статичный стоп-кадр: рендерим один раз и останавливаем
+    const isStatic = IS_LOW_END;
+    icons.push({ canvas, ctx2d, mesh: pivot, rotY: Math.random() * Math.PI * 2, visible: false, camDist, isStatic, rendered: false });
     io.observe(canvas);
   }
 
@@ -1057,6 +1059,8 @@
 
     for (const item of icons) {
       if (!item.visible) continue;
+      // Статичный режим (мобиле): рендерим только один раз
+      if (item.isStatic && item.rendered) continue;
 
       item.rotY += ROT_SPEED;
       item.mesh.rotation.y = item.rotY;
@@ -1067,6 +1071,7 @@
 
       item.ctx2d.clearRect(0, 0, TILE, TILE);
       item.ctx2d.drawImage(renderer.domElement, 0, 0);
+      item.rendered = true;
     }
   }
 
