@@ -1,0 +1,8 @@
+{
+  "name": "Органайзер «Банан»",
+  "price": 380,
+  "sizes": "180 × 80 × 80 мм",
+  "description": "Органайзер або скарбничка у формі банана.",
+  "colors": ["gloss-yellow", "matte-yellow", "silk-gold"],
+  "accentColors": ["#f5d020", "#e8c010", "#fce040", "#d4a800"]
+}
