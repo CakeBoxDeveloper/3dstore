@@ -183,10 +183,12 @@ function animate() {
 // ── Load model ───────────────────────────────────────────────────────────────
 
 function loadModel(url) {
-  const loader_el = document.getElementById('viewer-loader');
+  const loader_el  = document.getElementById('viewer-loader');
+  const progress_el = document.getElementById('viewer-progress');
   meshObjects.forEach(o => scene.remove(o));
   meshObjects = [];
   loader_el.style.display = 'flex';
+  if (progress_el) progress_el.style.width = '0%';
 
   const dracoLoader = new DRACOLoader();
   dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
@@ -197,8 +199,8 @@ function loadModel(url) {
   gltfLoader.load(
     url,
     (gltf) => {
-      const model = gltf.scene;
-      const box   = new THREE.Box3().setFromObject(model);
+      const model  = gltf.scene;
+      const box    = new THREE.Box3().setFromObject(model);
       const center = box.getCenter(new THREE.Vector3());
       const size   = box.getSize(new THREE.Vector3());
       const scale  = 1.2 / Math.max(size.x, size.y, size.z);
@@ -206,21 +208,32 @@ function loadModel(url) {
       model.scale.setScalar(scale);
       model.traverse(c => {
         if (c.isMesh) {
-          c.material    = buildMaterial();
-          c.castShadow  = true;
+          c.material      = buildMaterial();
+          c.castShadow    = true;
           c.receiveShadow = true;
         }
       });
 
-      // Ставим модель на стол: нижняя точка bbox = y стола (-0.82)
+      // Ставим модель на стол
       const box2   = new THREE.Box3().setFromObject(model);
       const bottom = box2.min.y;
       model.position.y += (-0.82 - bottom);
       scene.add(model);
       meshObjects.push(model);
-      loader_el.style.display = 'none';
+
+      // controls.target = центр модели → зум работает правильно
+      const box3 = new THREE.Box3().setFromObject(model);
+      controls.target.copy(box3.getCenter(new THREE.Vector3()));
+      controls.update();
+
+      if (progress_el) progress_el.style.width = '100%';
+      setTimeout(() => { loader_el.style.display = 'none'; }, 150);
     },
-    undefined,
+    (xhr) => {
+      if (progress_el && xhr.total) {
+        progress_el.style.width = `${Math.round(xhr.loaded / xhr.total * 100)}%`;
+      }
+    },
     (err) => {
       console.warn('GLB failed, using placeholder:', err);
       usePlaceholder();

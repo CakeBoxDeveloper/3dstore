@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PRISM</title>
+  <link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/7647cb6023d45e9166cefb67b78c5acd9e88b5cf/PrismLogoFavicon.svg">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
@@ -580,6 +581,10 @@
       color: #e0e8ff;
       text-align: center;
       flex: 1;
+      /* Лёгкая хроматическая аберрация — эффект 3D на контуре */
+      text-shadow:
+        -0.5px 0 0.5px rgba(255, 80, 80, 0.55),
+         0.5px 0 0.5px rgba(80, 160, 255, 0.55);
     }
 
     /* Кнопки навигации каталога */
@@ -801,6 +806,23 @@
   </script>
 </head>
 <body>
+  <!-- ── Лоадер страницы ── -->
+  <div id="page-loader" style="
+    position:fixed;inset:0;z-index:9999;
+    background:#000;
+    display:flex;align-items:center;justify-content:center;
+    transition:opacity 0.4s ease;
+  ">
+    <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg"
+         alt="PRISM"
+         style="height:36px;filter:brightness(0) invert(1);opacity:0.9;">
+  </div>
+  <script>
+    window.addEventListener('load', () => {
+      const l = document.getElementById('page-loader');
+      if (l) { l.style.opacity = '0'; setTimeout(() => l.remove(), 420); }
+    });
+  </script>
   <!-- Анимированные точки в узлах сетки -->
   <canvas id="grid-dots" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
 
@@ -808,7 +830,7 @@
 
     <div class="card-header">
       <div class="header-logo">
-        <span class="logo">PRISM</span>
+        <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg" alt="PRISM" style="height:22px;filter:brightness(0) invert(1);display:block;">
       </div>
       <div class="header-ticker">
         <!-- фоновый слой: клипает шиммер, не мешает 3D -->
