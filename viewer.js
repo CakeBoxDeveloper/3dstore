@@ -538,11 +538,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const labelA  = document.getElementById('nav-label-a');
   const labelB  = document.getElementById('nav-label-b');
 
-  // isFlipped — true когда грань B смотрит вперёд
-  let isFlipped  = false;
-  let navCurIdx  = allProducts.findIndex(p => p.id === product.id);
+  // Накапливаем угол — не сбрасываем, крутим в одну сторону
+  let navAngle  = 0;
+  let navCurIdx = allProducts.findIndex(p => p.id === product.id);
+  // Какая грань сейчас видна: 0=A (angle=0,180,...), 1=B (angle=-180,-360,...)
+  // A видна при чётных полуоборотах (0, -360, ...), B при нечётных (-180, -540, ...)
+  let navStep   = 0; // чётный = грань A спереди, нечётный = грань B
 
-  // Инициализируем грань A текущим товаром
   if (labelA) labelA.textContent = product.name;
 
   function navFlip(dir) {
@@ -551,17 +553,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const nextIdx  = ((navCurIdx + dir) % total + total) % total;
     const nextProd = allProducts[nextIdx];
 
-    // Записываем следующее название в скрытую грань
-    const hiddenLabel = isFlipped ? labelA : labelB;
+    // Шаг вперёд — всегда -180 (вверх). Шаг назад — всегда +180 (вниз)
+    navAngle += dir > 0 ? -180 : 180;
+    navStep++;
+
+    // Записываем в скрытую грань до начала анимации
+    const hiddenLabel = (navStep % 2 === 1) ? labelB : labelA;
     if (hiddenLabel) hiddenLabel.textContent = nextProd.name;
 
-    // Флипаем
-    isFlipped = !isFlipped;
-    if (rotor) rotor.classList.toggle('flipped', isFlipped);
+    if (rotor) rotor.style.transform = `translateZ(-22px) rotateX(${navAngle}deg)`;
 
     navCurIdx = nextIdx;
 
-    // SPA: обновляем URL и контент без перезагрузки
     history.pushState({ productId: nextProd.id }, '', `?id=${nextProd.id}`);
     document.title = `${nextProd.name} — PRISM`;
 

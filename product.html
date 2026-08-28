@@ -66,7 +66,7 @@
     }
     .back-link:hover { color: #fff; }
 
-    /* ── Флип-призма навигации моделей — 2 грани по 180° ── */
+    /* ── Флип-призма навигации моделей ── */
     .nav-flip-wrap {
       position: relative;
       height: 44px;
@@ -84,10 +84,6 @@
       transform: translateZ(-22px) rotateX(0deg);
       transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    /* Флипнутое состояние — всегда вверх (-180°) */
-    .nav-flip-rotor.flipped {
-      transform: translateZ(-22px) rotateX(-180deg);
-    }
     .nav-flip-face {
       position: absolute; inset: 0;
       border-radius: 4px;
@@ -100,10 +96,8 @@
         inset 0 0 16px 2px rgba(255,160,0,0.06);
       overflow: hidden;
     }
-    /* Грань A — спереди при 0° */
-    .nav-flip-face-a { transform: rotateX(0deg) translateZ(22px); }
-    /* Грань B — сзади, выворачивается при -180°. scaleX(-1) исправляет зеркальность */
-    .nav-flip-face-b { transform: rotateX(180deg) translateZ(22px) scaleX(-1); }
+    .nav-flip-face-a { transform: rotateX(0deg)   translateZ(22px); }
+    .nav-flip-face-b { transform: rotateX(-180deg) translateZ(22px); }
 
     .nav-flip-arrow {
       width: 44px; height: 44px;
@@ -451,15 +445,20 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
     transition:opacity 0.5s ease;
   ">
-    <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg"
-         alt="PRISM"
-         style="height:72px;filter:brightness(0) invert(1);opacity:0.95;">
-    <div style="width:160px;height:6px;display:flex;gap:3px;">
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease;"></div>
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.12s;"></div>
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.24s;"></div>
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.36s;"></div>
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.48s;"></div>
+    <div style="display:inline-flex;flex-direction:column;align-items:stretch;gap:16px;">
+      <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg"
+           alt="PRISM"
+           style="height:72px;filter:brightness(0) invert(1);opacity:0.95;display:block;">
+      <div style="display:flex;gap:4px;">
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.1s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.2s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.3s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.4s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.5s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.6s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.7s;"></div>
+      </div>
     </div>
   </div>
   <script>
@@ -597,7 +596,7 @@
     [
       ['.viewer-wrap', '-0s'],
       ['.back-link', '-8s'],
-      ['.next-model-btn', '-16s'],
+      ['.nav-flip-wrap', '-16s'],
       ['.card-content', '-24s'],
     ].forEach(([sel, delay]) => {
       document.querySelectorAll(sel).forEach(el => {

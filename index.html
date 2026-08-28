@@ -810,18 +810,24 @@
   <div id="page-loader" style="
     position:fixed;inset:0;z-index:9999;
     background:#000;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
     transition:opacity 0.5s ease;
   ">
-    <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg"
-         alt="PRISM"
-         style="height:72px;filter:brightness(0) invert(1);opacity:0.95;">
-    <div style="width:160px;height:6px;display:flex;gap:3px;">
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease;"></div>
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.12s;"></div>
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.24s;"></div>
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.36s;"></div>
-      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.48s;"></div>
+    <!-- Обёртка: ширина определяется логотипом, сегменты растягиваются под неё -->
+    <div style="display:inline-flex;flex-direction:column;align-items:stretch;gap:16px;">
+      <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg"
+           alt="PRISM"
+           style="height:72px;filter:brightness(0) invert(1);opacity:0.95;display:block;">
+      <div style="display:flex;gap:4px;justify-content:space-between;">
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.1s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.2s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.3s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.4s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.5s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.6s;"></div>
+        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.7s;"></div>
+      </div>
     </div>
   </div>
   <script>
@@ -835,7 +841,7 @@
       const ticker = setInterval(() => {
         if (cur < segs.length - 1) { segs[cur].style.transform = 'scaleX(1)'; cur++; }
         else clearInterval(ticker);
-      }, 320);
+      }, 220);
 
       window.addEventListener('load', () => {
         clearInterval(ticker);
