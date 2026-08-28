@@ -810,18 +810,43 @@
   <div id="page-loader" style="
     position:fixed;inset:0;z-index:9999;
     background:#000;
-    display:flex;align-items:center;justify-content:center;
-    transition:opacity 0.4s ease;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+    transition:opacity 0.5s ease;
   ">
     <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg"
          alt="PRISM"
-         style="height:36px;filter:brightness(0) invert(1);opacity:0.9;">
+         style="height:72px;filter:brightness(0) invert(1);opacity:0.95;">
+    <div style="width:160px;height:6px;display:flex;gap:3px;">
+      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease;"></div>
+      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.12s;"></div>
+      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.24s;"></div>
+      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.36s;"></div>
+      <div class="pg-seg" style="flex:1;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform 0.25s ease 0.48s;"></div>
+    </div>
   </div>
   <script>
-    window.addEventListener('load', () => {
-      const l = document.getElementById('page-loader');
-      if (l) { l.style.opacity = '0'; setTimeout(() => l.remove(), 420); }
-    });
+    (function() {
+      const loader = document.getElementById('page-loader');
+      const segs   = loader ? Array.from(loader.querySelectorAll('.pg-seg')) : [];
+      const MIN_MS = 2000;
+      const start  = Date.now();
+      let cur = 0;
+
+      const ticker = setInterval(() => {
+        if (cur < segs.length - 1) { segs[cur].style.transform = 'scaleX(1)'; cur++; }
+        else clearInterval(ticker);
+      }, 320);
+
+      window.addEventListener('load', () => {
+        clearInterval(ticker);
+        segs.forEach((s, i) => setTimeout(() => { s.style.transform = 'scaleX(1)'; }, i * 55));
+        const delay = Math.max(0, MIN_MS - (Date.now() - start));
+        setTimeout(() => {
+          loader.style.opacity = '0';
+          setTimeout(() => loader.remove(), 520);
+        }, delay + 360);
+      });
+    })();
   </script>
   <!-- Анимированные точки в узлах сетки -->
   <canvas id="grid-dots" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>

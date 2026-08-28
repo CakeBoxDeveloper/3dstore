@@ -518,29 +518,84 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sizesEl = document.getElementById('p-sizes');
   if (sizesEl && product.sizes) sizesEl.textContent = product.sizes;
 
-  // Кнопка "следующая модель" — находим следующий товар в каталоге
-  const btnNext = document.getElementById('btn-next-model');
-  if (btnNext) {
-    const allProducts = [];
-    for (const cat of window.CatalogData.categories) {
-      if (cat.products) {
-        for (const p of cat.products) allProducts.push(p.id);
-      }
-      if (cat.subcategories) {
-        for (const sub of cat.subcategories) {
-          if (sub.products) {
-            for (const p of sub.products) allProducts.push(p.id);
-          }
-        }
+  // ── Флип-призма навигации ────────────────────────────────────────────────
+  // Собираем список всех товаров из каталога
+  const allProducts = [];
+  for (const cat of window.CatalogData.categories) {
+    if (cat.products) {
+      for (const p of cat.products) allProducts.push(p);
+    }
+    if (cat.subcategories) {
+      for (const sub of cat.subcategories) {
+        if (sub.products) for (const p of sub.products) allProducts.push(p);
       }
     }
-    const currentIdx = allProducts.indexOf(product.id);
-    if (allProducts.length > 1 && currentIdx !== -1) {
-      const nextId = allProducts[(currentIdx + 1) % allProducts.length];
-      btnNext.addEventListener('click', () => {
-        location.href = `product.html?id=${nextId}`;
-      });
-    }
+  }
+
+  const total    = allProducts.length;
+
+  const rotor   = document.getElementById('nav-flip-rotor');
+  const labelA  = document.getElementById('nav-label-a');
+  const labelB  = document.getElementById('nav-label-b');
+
+  // isFlipped — true когда грань B смотрит вперёд
+  let isFlipped  = false;
+  let navCurIdx  = allProducts.findIndex(p => p.id === product.id);
+
+  // Инициализируем грань A текущим товаром
+  if (labelA) labelA.textContent = product.name;
+
+  function navFlip(dir) {
+    if (total < 2) return;
+
+    const nextIdx  = ((navCurIdx + dir) % total + total) % total;
+    const nextProd = allProducts[nextIdx];
+
+    // Записываем следующее название в скрытую грань
+    const hiddenLabel = isFlipped ? labelA : labelB;
+    if (hiddenLabel) hiddenLabel.textContent = nextProd.name;
+
+    // Флипаем
+    isFlipped = !isFlipped;
+    if (rotor) rotor.classList.toggle('flipped', isFlipped);
+
+    navCurIdx = nextIdx;
+
+    // SPA: обновляем URL и контент без перезагрузки
+    history.pushState({ productId: nextProd.id }, '', `?id=${nextProd.id}`);
+    document.title = `${nextProd.name} — PRISM`;
+
+    const nameEl  = document.getElementById('p-name');
+    const sizesEl = document.getElementById('p-sizes');
+    if (nameEl)  nameEl.textContent  = nextProd.name;
+    if (sizesEl) sizesEl.textContent = nextProd.sizes || '';
+
+    buildMaterialSlider(nextProd.colors);
+    loadModel(nextProd.model);
+
+    const btnPrice = document.getElementById('btn-order-price');
+    if (btnPrice) btnPrice.textContent = `за ${nextProd.price.toLocaleString('uk-UA')} ₴`;
+  }
+
+  // Стрелки на обеих гранях
+  ['nav-prev', 'nav-prev-b'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', () => navFlip(-1));
+  });
+  ['nav-next', 'nav-next-b'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', () => navFlip(1));
+  });
+
+  // Свайп
+  const navWrap = document.getElementById('nav-flip-wrap');
+  if (navWrap) {
+    let touchStartY = 0;
+    navWrap.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+    navWrap.addEventListener('touchend', e => {
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dy) > 30) navFlip(dy < 0 ? 1 : -1);
+    });
   }
 
   // Кнопка: текст передаётся в PrismButton через initPrismButton
