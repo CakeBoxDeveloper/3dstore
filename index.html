@@ -681,7 +681,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.09em;
-      color: #555;
+      color: #fff;
       text-align: center;
       margin-bottom: 8px;
     }
@@ -729,42 +729,46 @@
     .pi-ph { font-size: 18px; opacity: 0.15; }
 
     /* ── Заглушка пустой категории ── */
+    /* ── Заглушка пустой категории — новый стиль ── */
     .empty-cat {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 240px;
-      gap: 10px;
+      /* растягиваем на всю доступную высоту грани минус падинги */
+      flex: 1;
+      min-height: 200px;
+      gap: 12px;
+      margin: 12px;
+      border-radius: 4px;
+      position: relative;
+      /* такой же box-shadow как у других блоков */
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 0 0 20px 2px rgba(80,100,255,0.10),
+        inset 0 0 20px 2px rgba(255,60,120,0.06),
+        inset 0 0 20px 2px rgba(255,160,0,0.05);
+      padding: 24px 20px;
     }
-    .empty-cat-icon {
-      font-size: 36px;
-      opacity: 0.55;
-      filter: grayscale(0.3);
+    .empty-cat-logo {
+      height: 28px;
+      filter: brightness(0) invert(1);
+      opacity: 0.5;
+      display: block;
     }
     .empty-cat-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.7);
       letter-spacing: 0.04em;
+      text-align: center;
     }
     .empty-cat-sub {
       font-size: 11px;
-      color: rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.35);
       text-align: center;
       max-width: 200px;
       line-height: 1.5;
-    }
-    .empty-cat-badge {
-      margin-top: 4px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
     }
 
     /* ── Палитра цветов карточки ── */
@@ -1222,29 +1226,29 @@
         // Заглушки для пустых категорий
         const EMPTY_STUBS = {
           wax: {
-            icon: '🕯️',
-            title: 'Скоро у продажу',
-            sub: 'Авторські соєві свічки з силіконовими формами. Нові аромати та дизайни.',
-            badge: 'Незабаром'
+            sub: 'Авторські соєві свічки з силіконовими формами — нові аромати та дизайни з\'являться тут першими.',
           },
           epoxy: {
-            icon: '🔮',
-            title: 'Скоро у продажу',
-            sub: 'Вироби з епоксидної смоли: підставки, декор, нічники та прикраси.',
-            badge: 'Незабаром'
+            sub: 'Вироби з епоксидної смоли: підставки, декор, нічники та прикраси. Слідкуйте за оновленнями.',
           }
         };
 
         if (groups.length === 0) {
-          const stub = EMPTY_STUBS[cat.id] || { icon: '⏳', title: 'Скоро у продажу', sub: '', badge: 'Незабаром' };
+          const stub = EMPTY_STUBS[cat.id] || { sub: 'Скоро тут з\'являться нові товари.' };
           const emptyBlock = document.createElement('div');
           emptyBlock.className = 'empty-cat';
           emptyBlock.innerHTML = `
-            <span class="empty-cat-icon">${stub.icon}</span>
-            <span class="empty-cat-title">${stub.title}</span>
-            ${stub.sub ? `<span class="empty-cat-sub">${stub.sub}</span>` : ''}
-            <span class="empty-cat-badge">${stub.badge}</span>
+            <img class="empty-cat-logo"
+                 src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg"
+                 alt="PRISM">
+            <span class="empty-cat-title">Скоро у продажу</span>
+            <span class="empty-cat-sub">${stub.sub} А поки що — зaгляньте в інші категорії.</span>
           `;
+          // Анимированный контур — как у всех блоков
+          const gw = document.createElement('div'); gw.className = 'border-glow-wrap';
+          const gg = document.createElement('div'); gg.className = 'border-glow-sm';
+          gg.style.animationDelay = '-5s';
+          gw.appendChild(gg); emptyBlock.appendChild(gw);
           body.appendChild(emptyBlock);
         } else {
           groups.forEach(sub => {
