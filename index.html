@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PRISM</title>
-  <link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/7647cb6023d45e9166cefb67b78c5acd9e88b5cf/PrismLogoFavicon.svg">
+  <link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
@@ -714,6 +714,24 @@
     }
     .sub-products .prod-icon {
       width: 100%;
+      position: relative;
+    }
+    .prod-icon-name {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 4px 4px 2px;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      color: #ffffff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.9);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+      z-index: 5;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+      border-radius: 4px 4px 0 0;
     }
     /* canvas 3D превью внутри иконки */
     .prod-icon canvas {
@@ -727,6 +745,51 @@
     }
     .prod-icon img { width: 100%; flex: 1; min-height: 0; object-fit: contain; padding: 4px; display: block; }
     .pi-ph { font-size: 18px; opacity: 0.15; }
+
+    /* ── Стили шиммер-лоадера PRISM ── */
+    .prism-loader-box {
+      position: relative;
+      width: 220px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .prism-loader-base {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: brightness(0) invert(0.22);
+      display: block;
+    }
+    .prism-loader-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.45) 35%,
+        #ffffff 50%,
+        rgba(255, 255, 255, 0.45) 65%,
+        transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: prism-shimmer-sweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      -webkit-mask-image: url('https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg');
+      mask-image: url('https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg');
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+      pointer-events: none;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    }
+    @keyframes prism-shimmer-sweep {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
 
     /* ── Заглушка пустой категории ── */
     /* ── Заглушка пустой категории — новый стиль ── */
@@ -817,44 +880,26 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     transition:opacity 0.5s ease;
   ">
-    <!-- Обёртка: ширина определяется логотипом, сегменты растягиваются под неё -->
-    <div style="display:inline-flex;flex-direction:column;align-items:stretch;gap:16px;">
-      <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg"
-           alt="PRISM"
-           style="height:72px;filter:brightness(0) invert(1);opacity:0.95;display:block;">
-      <div style="display:flex;gap:4px;justify-content:space-between;">
-        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease;"></div>
-        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.1s;"></div>
-        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.2s;"></div>
-        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.3s;"></div>
-        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.4s;"></div>
-        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.5s;"></div>
-        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.6s;"></div>
-        <div class="pg-seg" style="flex:1;height:8px;background:#fff;border-radius:1px;transform:scaleX(0);transform-origin:left;transition:transform 0.2s ease 0.7s;"></div>
-      </div>
+    <div class="prism-loader-box">
+      <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg"
+           class="prism-loader-base" alt="PRISM">
+      <div class="prism-loader-shimmer"></div>
     </div>
   </div>
   <script>
     (function() {
       const loader = document.getElementById('page-loader');
-      const segs   = loader ? Array.from(loader.querySelectorAll('.pg-seg')) : [];
-      const MIN_MS = 2000;
+      const MIN_MS = 1400;
       const start  = Date.now();
-      let cur = 0;
-
-      const ticker = setInterval(() => {
-        if (cur < segs.length - 1) { segs[cur].style.transform = 'scaleX(1)'; cur++; }
-        else clearInterval(ticker);
-      }, 220);
 
       window.addEventListener('load', () => {
-        clearInterval(ticker);
-        segs.forEach((s, i) => setTimeout(() => { s.style.transform = 'scaleX(1)'; }, i * 55));
         const delay = Math.max(0, MIN_MS - (Date.now() - start));
         setTimeout(() => {
-          loader.style.opacity = '0';
-          setTimeout(() => loader.remove(), 520);
-        }, delay + 360);
+          if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 520);
+          }
+        }, delay);
       });
     })();
   </script>
@@ -865,7 +910,7 @@
 
     <div class="card-header">
       <div class="header-logo">
-        <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg" alt="PRISM" style="height:22px;filter:brightness(0) invert(1);display:block;">
+        <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg" alt="PRISM" style="height:22px;filter:brightness(0) invert(1);display:block;">
       </div>
       <div class="header-ticker">
         <!-- фоновый слой: клипает шиммер, не мешает 3D -->
@@ -1023,7 +1068,7 @@
   }, { threshold: 0.1 });
 
   // ── Регистрация иконки ──────────────────────────────────────────────────
-  async function register(canvas, modelUrl, accentHex) {
+  async function register(canvas, modelUrl, accentHex, isWax = false) {
     // Размер canvas = размер иконки в CSS px * dpr
     const dpr  = IS_LOW_END ? 1 : Math.min(devicePixelRatio, 2);
     const size = TILE;
@@ -1035,7 +1080,7 @@
     ctx2d.fillStyle = 'rgba(255,255,255,0.04)';
     ctx2d.fillRect(0, 0, size, size);
 
-    const color = accentHex ? new THREE.Color(accentHex) : new THREE.Color(0x2d8c4e);
+    const color = accentHex ? new THREE.Color(accentHex) : new THREE.Color(isWax ? 0xe8b86d : 0x27ae60);
 
     // Загружаем или берём из кеша
     let gltfScene;
@@ -1056,8 +1101,25 @@
       }
     }
 
-    // Материал — матовый пластик нужного цвета
-    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.88, metalness: 0.0 });
+    // Материал — восковой шейдер (для Свечей) или матовый/глянец пластик
+    let mat;
+    if (isWax) {
+      mat = new THREE.MeshPhysicalMaterial({
+        color,
+        roughness: 0.55,
+        metalness: 0.0,
+        clearcoat: 0.10,
+        clearcoatRoughness: 0.35,
+        sheen: 0.40,
+        sheenColor: new THREE.Color(0xffffff),
+        sheenRoughness: 0.30,
+        transmission: 0.03,
+        thickness: 0.25,
+        ior: 1.48
+      });
+    } else {
+      mat = new THREE.MeshStandardMaterial({ color, roughness: 0.88, metalness: 0.0 });
+    }
     gltfScene.traverse(c => { if (c.isMesh) { c.material = mat; c.castShadow = false; } });
 
     // ── Пересчёт масштаба и идеальное центрирование строго в (0, 0, 0) ─────
@@ -1218,7 +1280,7 @@
           emptyBlock.className = 'empty-cat';
           emptyBlock.innerHTML = `
             <img class="empty-cat-logo"
-                 src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/92ff75c9ab406af30c626e39b713901f83f64ece/PrismLogo.svg"
+                 src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg"
                  alt="PRISM">
             <span class="empty-cat-title">Скоро у продажу</span>
             <span class="empty-cat-sub">${stub.sub} А поки що — зaгляньте в інші категорії.</span>
@@ -1230,6 +1292,52 @@
           gw.appendChild(gg); emptyBlock.appendChild(gw);
           body.appendChild(emptyBlock);
         } else {
+          const COLOR_HEX_MAP = {
+            'matte-white':       '#f2f2f2',
+            'matte-black':       '#222222',
+            'matte-gray':        '#888888',
+            'matte-red':         '#c0392b',
+            'matte-orange-red':  '#c0521a',
+            'matte-orange':      '#d4621a',
+            'matte-yellow':      '#d4b800',
+            'matte-blue':        '#2980b9',
+            'matte-green':       '#27ae60',
+            'matte-dark-green':  '#1a5c30',
+            'matte-khaki':       '#556b2f',
+            'matte-dark-teal':   '#1a5c52',
+            'matte-beige':       '#d4c5a9',
+            'matte-cream':       '#f5f0e0',
+            'gloss-white':       '#f5f5f5',
+            'gloss-black':       '#111111',
+            'gloss-red':         '#e74c3c',
+            'gloss-burgundy':    '#7b1a2a',
+            'gloss-blue':        '#3498db',
+            'gloss-yellow':      '#f1c40f',
+            'clear':             '#e8f4ff',
+            'clear-smoke':       '#555566',
+            'clear-amber':       '#d4820a',
+            'clear-teal':        '#1abc9c',
+            'wax-white':         '#f8f6f0',
+            'wax-cream':         '#f3e8d2',
+            'wax-honey':         '#e8b86d',
+            'wax-black':         '#222222',
+            'wax-red':           '#b82b2b',
+            'wax-sage':          '#7d8c75',
+            'wax-lavender':      '#a394b8',
+            'wax-terracotta':    '#c06c52',
+          };
+
+          function getProductHex(p, catId) {
+            if (p.accentColors && p.accentColors[0]) return p.accentColors[0];
+            if (p.colors && p.colors.length > 0) {
+              const colId = p.colors[0];
+              if (COLOR_HEX_MAP[colId]) return COLOR_HEX_MAP[colId];
+              if (colId.startsWith('#')) return colId;
+            }
+            if (catId === 'wax') return '#e8b86d';
+            return '#27ae60';
+          }
+
           groups.forEach(sub => {
             const block = document.createElement('div');
             block.className = 'sub-block';
@@ -1253,12 +1361,21 @@
               gw.appendChild(gg);
               icon.appendChild(gw);
 
+              // Название модели сверху превью
+              const titleOverlay = document.createElement('div');
+              titleOverlay.className = 'prod-icon-name';
+              titleOverlay.textContent = p.name;
+              icon.appendChild(titleOverlay);
+
+              const isWax = cat.id === 'wax' || (cat.name && cat.name.toLowerCase().includes('свіч'));
+              const productHex = getProductHex(p, cat.id);
+
               // Canvas для 3D превью (или img-fallback если нет модели / слабый девайс)
               if (p.model && window.CatalogViewer3D) {
                 const cvs = document.createElement('canvas');
                 cvs.style.cssText = 'width:100%;flex:1;min-height:0;display:block;';
                 icon.appendChild(cvs);
-                window.CatalogViewer3D.register(cvs, p.model, p.accentColors ? p.accentColors[0] : null);
+                window.CatalogViewer3D.register(cvs, p.model, productHex, isWax);
               } else {
                 // Fallback: статичная картинка
                 const catFolder = cat.id.charAt(0).toUpperCase() + cat.id.slice(1);
@@ -1289,8 +1406,6 @@
                 loadNext();
                 icon.appendChild(img);
               }
-
-              // Палитра убрана — точки мешают восприятию превью
 
               grid.appendChild(icon);
             });

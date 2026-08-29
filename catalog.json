@@ -110,12 +110,23 @@
     },
     {
       "id": "wax",
-      "name": "Воск",
-      "products": []
+      "name": "Свічки",
+      "products": [
+        {
+          "id": "corn-candle",
+          "name": "Свічка «Кукурудза»",
+          "price": 320,
+          "sizes": "⌀60 × 120 мм",
+          "description": "Авторська соєва свічка у формі качана кукурудзи.",
+          "colors": ["wax-honey", "wax-white", "wax-cream", "wax-sage", "wax-terracotta"],
+          "model": "Catalog/Wax/corn-candle/model.glb",
+          "thumbnail": "thumbnails/corn-candle.webp"
+        }
+      ]
     },
     {
       "id": "epoxy",
-      "name": "Эпоксидка",
+      "name": "Епоксидна смола",
       "products": []
     }
   ]

@@ -383,16 +383,29 @@ function getMatTypeLabel(mat) {
   return mat.roughness > 0.5 ? 'PLA' : 'PETG';
 }
 
-function buildMaterialSlider(allowedColorIds = null) {
+function buildMaterialSlider(allowedColorIds = null, categoryId = null) {
   const slider = document.getElementById('material-slider');
   const wrap   = document.getElementById('slider-wrap');
   const outer  = document.getElementById('slider-outer');
   slider.innerHTML = '';
 
+  const isWaxCat = categoryId === 'wax' || (categoryId && (categoryId.includes('wax') || categoryId.includes('свіч') || categoryId.includes('воск')));
+
   let list = MATERIALS;
+  if (isWaxCat) {
+    list = MATERIALS.filter(m => m.type === 'wax');
+  }
+
   if (Array.isArray(allowedColorIds) && allowedColorIds.length > 0) {
-    list = MATERIALS.filter(m => allowedColorIds.includes(m.id));
-    if (list.length === 0) list = MATERIALS;
+    const filtered = MATERIALS.filter(m => allowedColorIds.includes(m.id));
+    if (filtered.length > 0) {
+      list = filtered;
+    }
+  }
+
+  // Если категория Воск, гарантируем что все выбранные материалы имеют тип wax
+  if (isWaxCat) {
+    list = list.map(m => m.type === 'wax' ? m : { ...m, type: 'wax' });
   }
 
   // Выбираем первый из списка
@@ -637,7 +650,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const priceStr = product.price.toLocaleString('uk-UA') + ' ₴';
 
   initScene();
-  buildMaterialSlider(product.colors);
+  buildMaterialSlider(product.colors, category ? category.id : null);
   loadModel(product.model);
   initFlipOrder(product, category.name, subcategory ? subcategory.name : '');
 

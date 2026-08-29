@@ -2,7 +2,6 @@
   "name": "Свічка «Кукурудза»",
   "price": 320,
   "sizes": "⌀60 × 120 мм",
-  "description": "Соєва свічка у формі качана кукурудзи.",
-  "colors": ["matte-yellow", "gloss-yellow", "silk-gold"],
-  "accentColors": ["#d4a017", "#e8b820", "#f0cc40", "#c89010"]
+  "description": "Авторська соєва свічка у формі качана кукурудзи.",
+  "colors": ["wax-honey", "wax-white", "wax-cream", "wax-sage", "wax-terracotta"]
 }
