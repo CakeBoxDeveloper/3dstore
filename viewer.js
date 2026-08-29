@@ -105,11 +105,10 @@ function initScene() {
   const bg = createGridBackground();
   if (bg) scene.add(bg);
 
-  // Стол — большая плоскость, края растворяются, принимает тени
+  // Сетка стола — только сетка без сплошной цветной поверхности, края растворяются
   const tableGeo = new THREE.PlaneGeometry(12, 12);
   const tableMat = new THREE.ShaderMaterial({
     uniforms: {
-      uBase:  { value: new THREE.Color(0x1a5c5c) },
       uGrid:  { value: new THREE.Color(0xffffff) },
       uScale: { value: 20.0 },
       uWidth: { value: 0.025 },
@@ -119,18 +118,18 @@ function initScene() {
       void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }
     `,
     fragmentShader: `
-      uniform vec3 uBase;
       uniform vec3 uGrid;
       uniform float uScale;
       uniform float uWidth;
       varying vec2 vUv;
       void main() {
-        vec2 g     = fract(vUv * uScale);
-        float line = clamp(step(1.0-uWidth,g.x)+step(1.0-uWidth,g.y),0.0,1.0);
-        vec3 col   = mix(uBase, mix(uBase,uGrid,0.28), line);
-        float d    = length(vUv - 0.5) * 2.0;
-        float alpha = 1.0 - smoothstep(0.45, 1.0, d);
-        gl_FragColor = vec4(col, alpha);
+        vec2 g      = fract(vUv * uScale);
+        float line  = clamp(step(1.0 - uWidth, g.x) + step(1.0 - uWidth, g.y), 0.0, 1.0);
+        float d     = length(vUv - 0.5) * 2.0;
+        float fade  = 1.0 - smoothstep(0.45, 1.0, d);
+        float alpha = line * fade * 0.45;
+        if (alpha <= 0.001) discard;
+        gl_FragColor = vec4(uGrid, alpha);
       }
     `,
     side: THREE.FrontSide,

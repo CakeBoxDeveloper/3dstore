@@ -296,6 +296,30 @@
       box-shadow: none;
     }
 
+    .h-face::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        110deg,
+        transparent 10%,
+        rgba(106, 178, 242, 0.05) 35%,
+        rgba(255, 255, 255, 0.22) 50%,
+        rgba(106, 178, 242, 0.05) 65%,
+        transparent 90%
+      );
+      transform: translateX(-150%);
+      pointer-events: none;
+      z-index: 10;
+    }
+    .h-rotor.spinning .h-face::after {
+      animation: face-shimmer 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+    @keyframes face-shimmer {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(120%); }
+    }
+
     .border-glow-wrap { display: none; }
     .border-glow { display: none; }
     .border-glow-sm { display: none; }
@@ -864,6 +888,8 @@
       function spin(dir) {
         angle -= dir * 120;
         rotor.style.transform = `translateZ(-${R}px) rotateY(${angle}deg)`;
+        rotor.classList.add('spinning');
+        setTimeout(() => rotor.classList.remove('spinning'), 700);
       }
 
       let tx = 0;
