@@ -1029,15 +1029,14 @@
   // ── Размер тайла рендертаргета (px) ────────────────────────────────────
   const TILE = IS_LOW_END ? 128 : 256;
 
-  // Один рендерер на всё
-  const renderer = new THREE.WebGLRenderer({ antialias: !IS_LOW_END, alpha: true });
-  renderer.setPixelRatio(IS_LOW_END ? 1 : Math.min(devicePixelRatio, 2));
+  // Один рендерер на всё (setPixelRatio(1) гарантирует строгое совпадение с canvas 2D 1:1)
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(1);
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping      = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
-  // Скрытый canvas рендерера — маленький, offscreen
-  renderer.setSize(TILE, TILE);
+  renderer.setSize(TILE, TILE, false);
   renderer.domElement.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;pointer-events:none;';
   document.body.appendChild(renderer.domElement);
 
@@ -1147,7 +1146,9 @@
 
     // ── Пересчёт масштаба и идеальное центрирование строго в (0, 0, 0) ─────
     gltfScene.position.set(0, 0, 0);
+    gltfScene.rotation.set(0, 0, 0);
     gltfScene.scale.setScalar(1);
+    gltfScene.updateMatrixWorld(true);
 
     // 1. Вычисляем точные габариты исходной модели
     const box0 = new THREE.Box3().setFromObject(gltfScene);
@@ -1157,13 +1158,13 @@
     // 2. Масштабируем так, чтобы модель идеально вписывалась в ячейку
     const normScale = 1.6 / maxDim;
     gltfScene.scale.setScalar(normScale);
+    gltfScene.updateMatrixWorld(true);
 
-    // 3. Сдвигаем геометрию так, чтобы центр BoundingBox был точно в (0, 0, 0)
+    // 3. Сдвигаем геометрию так, чтобы геометрический центр BoundingBox был строго в (0, 0, 0)
     const box1 = new THREE.Box3().setFromObject(gltfScene);
     const center1 = box1.getCenter(new THREE.Vector3());
-    gltfScene.position.x = -center1.x;
-    gltfScene.position.y = -center1.y;
-    gltfScene.position.z = -center1.z;
+    gltfScene.position.set(-center1.x, -center1.y, -center1.z);
+    gltfScene.updateMatrixWorld(true);
 
     // pivot — только вращение вокруг своей центральной оси (0, 0, 0)
     const pivot = new THREE.Group();
@@ -1207,7 +1208,7 @@
       scene.remove(item.mesh);
 
       item.ctx2d.clearRect(0, 0, TILE, TILE);
-      item.ctx2d.drawImage(renderer.domElement, 0, 0);
+      item.ctx2d.drawImage(renderer.domElement, 0, 0, TILE, TILE);
       item.rendered = true;
     }
   }
