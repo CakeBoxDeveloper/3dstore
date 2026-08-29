@@ -1,8 +1,6 @@
 {
-  "name": "Кашпо «Кленовий лист»",
-  "price": 420,
-  "sizes": "⌀120 × 110 мм",
-  "description": "Кашпо для рослин з рельєфом кленового листа.",
-  "colors": ["matte-orange", "gloss-yellow", "matte-red", "silk-rose"],
-  "accentColors": ["#c45c10", "#e87820", "#d46010", "#f0a030"]
+  "name": "Тарелка «Кленовый лист»",
+  "price": 380,
+  "description": "Декоративная тарелка в форме кленового листа.",
+  "colors": ["matte-yellow", "matte-orange", "matte-orange-red"]
 }

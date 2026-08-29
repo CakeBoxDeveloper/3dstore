@@ -9,30 +9,33 @@ import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 // Каждый объект — один вариант в слайдере
 
 const MATERIALS = [
-  // Матовые
-  { id: 'matte-white',    label: 'Матовый',   sublabel: 'Белый',     hex: '#f2f2f2', roughness: 0.95, metalness: 0, type: 'standard' },
-  { id: 'matte-black',    label: 'Матовый',   sublabel: 'Чёрный',    hex: '#222222', roughness: 0.95, metalness: 0, type: 'standard' },
-  { id: 'matte-gray',     label: 'Матовый',   sublabel: 'Серый',     hex: '#888888', roughness: 0.95, metalness: 0, type: 'standard' },
-  { id: 'matte-red',      label: 'Матовый',   sublabel: 'Красный',   hex: '#c0392b', roughness: 0.95, metalness: 0, type: 'standard' },
-  { id: 'matte-blue',     label: 'Матовый',   sublabel: 'Синий',     hex: '#2980b9', roughness: 0.95, metalness: 0, type: 'standard' },
-  { id: 'matte-green',    label: 'Матовый',   sublabel: 'Зелёный',   hex: '#27ae60', roughness: 0.95, metalness: 0, type: 'standard' },
-  { id: 'matte-beige',    label: 'Матовый',   sublabel: 'Бежевый',   hex: '#d4c5a9', roughness: 0.95, metalness: 0, type: 'standard' },
-  // Глянец
-  { id: 'gloss-white',    label: 'Глянец',    sublabel: 'Белый',     hex: '#f5f5f5', roughness: 0.05, metalness: 0, type: 'standard' },
-  { id: 'gloss-black',    label: 'Глянец',    sublabel: 'Чёрный',    hex: '#111111', roughness: 0.05, metalness: 0, type: 'standard' },
-  { id: 'gloss-red',      label: 'Глянец',    sublabel: 'Красный',   hex: '#e74c3c', roughness: 0.05, metalness: 0, type: 'standard' },
-  { id: 'gloss-blue',     label: 'Глянец',    sublabel: 'Синий',     hex: '#3498db', roughness: 0.05, metalness: 0, type: 'standard' },
-  { id: 'gloss-yellow',   label: 'Глянец',    sublabel: 'Жёлтый',    hex: '#f1c40f', roughness: 0.05, metalness: 0, type: 'standard' },
-  // Шёлк
-  { id: 'silk-white',     label: 'Шёлк',      sublabel: 'Белый',     hex: '#f0ede8', roughness: 0.4,  metalness: 0, type: 'silk' },
-  { id: 'silk-gold',      label: 'Шёлк',      sublabel: 'Золото',    hex: '#c9a84c', roughness: 0.4,  metalness: 0, type: 'silk' },
-  { id: 'silk-rose',      label: 'Шёлк',      sublabel: 'Розовый',   hex: '#e8a0a0', roughness: 0.4,  metalness: 0, type: 'silk' },
-  { id: 'silk-mint',      label: 'Шёлк',      sublabel: 'Мятный',    hex: '#a8d8c0', roughness: 0.4,  metalness: 0, type: 'silk' },
-  // Прозрачный
-  { id: 'clear',          label: 'Прозрачный',sublabel: 'Чистый',    hex: '#e8f4ff', roughness: 0.02, metalness: 0, type: 'clear' },
-  { id: 'clear-smoke',    label: 'Прозрачный',sublabel: 'Дымчатый',  hex: '#555566', roughness: 0.05, metalness: 0, type: 'clear' },
-  { id: 'clear-amber',    label: 'Прозрачный',sublabel: 'Янтарный',  hex: '#d4820a', roughness: 0.02, metalness: 0, type: 'clear' },
-  { id: 'clear-teal',     label: 'Прозрачный',sublabel: 'Бирюза',    hex: '#1abc9c', roughness: 0.02, metalness: 0, type: 'clear' },
+  // Матовые (PLA)
+  { id: 'matte-white',       label: 'Матовый',    sublabel: 'Белый',           hex: '#f2f2f2', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-black',       label: 'Матовый',    sublabel: 'Чёрный',          hex: '#222222', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-gray',        label: 'Матовый',    sublabel: 'Серый',           hex: '#888888', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-red',         label: 'Матовый',    sublabel: 'Красный',         hex: '#c0392b', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-orange-red',  label: 'Матовый',    sublabel: 'Оранжево-красный',hex: '#c0521a', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-orange',      label: 'Матовый',    sublabel: 'Оранжевый',       hex: '#d4621a', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-yellow',      label: 'Матовый',    sublabel: 'Жёлтый',          hex: '#d4b800', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-blue',        label: 'Матовый',    sublabel: 'Синий',           hex: '#2980b9', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-green',       label: 'Матовый',    sublabel: 'Зелёный',         hex: '#27ae60', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-dark-green',  label: 'Матовый',    sublabel: 'Тёмно-зелёный',   hex: '#1a5c30', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-khaki',       label: 'Матовый',    sublabel: 'Хаки',            hex: '#556b2f', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-dark-teal',   label: 'Матовый',    sublabel: 'Тёмно-бирюзовый', hex: '#1a5c52', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-beige',       label: 'Матовый',    sublabel: 'Бежевый',         hex: '#d4c5a9', roughness: 0.95, metalness: 0, type: 'standard' },
+  { id: 'matte-cream',       label: 'Матовый',    sublabel: 'Кремовый',        hex: '#f5f0e0', roughness: 0.95, metalness: 0, type: 'standard' },
+  // Глянец (PETG)
+  { id: 'gloss-white',       label: 'Глянец',     sublabel: 'Белый',           hex: '#f5f5f5', roughness: 0.05, metalness: 0, type: 'standard' },
+  { id: 'gloss-black',       label: 'Глянец',     sublabel: 'Чёрный',          hex: '#111111', roughness: 0.05, metalness: 0, type: 'standard' },
+  { id: 'gloss-red',         label: 'Глянец',     sublabel: 'Красный',         hex: '#e74c3c', roughness: 0.05, metalness: 0, type: 'standard' },
+  { id: 'gloss-burgundy',    label: 'Глянец',     sublabel: 'Бордовый',        hex: '#7b1a2a', roughness: 0.05, metalness: 0, type: 'standard' },
+  { id: 'gloss-blue',        label: 'Глянец',     sublabel: 'Синий',           hex: '#3498db', roughness: 0.05, metalness: 0, type: 'standard' },
+  { id: 'gloss-yellow',      label: 'Глянец',     sublabel: 'Жёлтый',          hex: '#f1c40f', roughness: 0.05, metalness: 0, type: 'standard' },
+  // Прозрачный (PETG-T)
+  { id: 'clear',             label: 'Прозрачный', sublabel: 'Чистый',          hex: '#e8f4ff', roughness: 0.02, metalness: 0, type: 'clear' },
+  { id: 'clear-smoke',       label: 'Прозрачный', sublabel: 'Дымчатый',        hex: '#555566', roughness: 0.05, metalness: 0, type: 'clear' },
+  { id: 'clear-amber',       label: 'Прозрачный', sublabel: 'Янтарный',        hex: '#d4820a', roughness: 0.02, metalness: 0, type: 'clear' },
+  { id: 'clear-teal',        label: 'Прозрачный', sublabel: 'Бирюза',          hex: '#1abc9c', roughness: 0.02, metalness: 0, type: 'clear' },
 ];
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -229,9 +232,10 @@ function loadModel(url) {
       scene.add(model);
       meshObjects.push(model);
 
-      // controls.target = центр модели → зум работает правильно
+      // controls.target — середина модели по Y, X и Z всегда 0 (модель отцентрирована)
       const box3 = new THREE.Box3().setFromObject(model);
-      controls.target.copy(box3.getCenter(new THREE.Vector3()));
+      const midY = (box3.min.y + box3.max.y) / 2;
+      controls.target.set(0, midY, 0);
       controls.update();
 
       if (progress_el) progress_el.style.width = '100%';

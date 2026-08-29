@@ -1,8 +1,6 @@
 {
-  "name": "Миска «Кленовий лист»",
-  "price": 390,
-  "sizes": "⌀160 × 60 мм",
-  "description": "Декоративна миска з рельєфом кленового листа.",
-  "colors": ["matte-orange", "gloss-yellow", "matte-red", "silk-rose"],
-  "accentColors": ["#c45c10", "#e87820", "#d46010", "#f0a030"]
+  "name": "Миска «Кленовый лист»",
+  "price": 350,
+  "description": "Декоративная миска в форме кленового листа.",
+  "colors": ["matte-yellow", "matte-orange", "matte-orange-red"]
 }

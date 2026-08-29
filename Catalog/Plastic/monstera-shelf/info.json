@@ -1,8 +1,7 @@
 {
-  "name": "Полиця «Монстера»",
+  "name": "Полка «Монстера»",
   "price": 480,
   "sizes": "200 × 80 × 40 мм",
-  "description": "Настінна полиця у формі листа монстери.",
-  "colors": ["matte-green", "matte-black", "gloss-black", "silk-mint"],
-  "accentColors": ["#1a3d1a", "#3d4a20", "#4a5c2a", "#2a3d22"]
+  "description": "Настенная полка в форме листа монстеры.",
+  "colors": ["matte-khaki", "matte-dark-green", "matte-dark-teal"]
 }

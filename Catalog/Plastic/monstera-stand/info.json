@@ -1,8 +1,7 @@
 {
-  "name": "Підставка «Монстера»",
+  "name": "Подставка «Монстера»",
   "price": 350,
   "sizes": "120 × 90 × 85 мм",
-  "description": "Підставка для телефону у формі листа монстери.",
-  "colors": ["matte-green", "matte-black", "gloss-black", "silk-mint"],
-  "accentColors": ["#1a3d1a", "#2d4a1e", "#3a5c2a", "#4a7a38"]
+  "description": "Подставка для телефона в форме листа монстеры.",
+  "colors": ["matte-khaki", "matte-dark-green", "matte-dark-teal"]
 }

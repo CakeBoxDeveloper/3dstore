@@ -1,8 +1,6 @@
 {
-  "name": "Гачок «Кленовий лист»",
+  "name": "Крючок «Кленовый лист»",
   "price": 280,
-  "sizes": "80 × 60 × 40 мм",
-  "description": "Настінний гачок у формі кленового листа.",
-  "colors": ["matte-orange", "gloss-yellow", "matte-red", "silk-rose"],
-  "accentColors": ["#c45c10", "#e87820", "#d46010", "#f0a030"]
+  "description": "Настенный крючок в форме кленового листа.",
+  "colors": ["matte-yellow", "matte-orange", "matte-orange-red"]
 }

@@ -1,8 +1,6 @@
 {
-  "name": "Підставка «Мушля»",
-  "price": 390,
-  "sizes": "120 × 100 × 60 мм",
-  "description": "Підставка для телефону або прикрас у формі морської мушлі.",
-  "colors": ["silk-rose", "matte-white", "matte-beige", "gloss-white"],
-  "accentColors": ["#f0c8c0", "#f5e8e0", "#e8d0c8", "#faf0ec"]
+  "name": "Подставка «Ракушка»",
+  "price": 340,
+  "description": "Декоративная подставка в форме ракушки.",
+  "colors": ["matte-cream", "matte-beige"]
 }

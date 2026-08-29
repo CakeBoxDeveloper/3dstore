@@ -1,8 +1,6 @@
 {
-  "name": "Підставка «Coca-Cola»",
-  "price": 350,
-  "sizes": "200 × 200 × 10 мм",
-  "description": "Декоративна підставка з логотипом Coca-Cola.",
-  "colors": ["matte-red", "gloss-red", "matte-black"],
-  "accentColors": ["#c8102e", "#e01030", "#a00c24", "#d41828"]
+  "name": "Миска «Кока-Кола»",
+  "price": 320,
+  "description": "Декоративная миска в стиле крышки Кока-Колы.",
+  "colors": ["gloss-burgundy"]
 }

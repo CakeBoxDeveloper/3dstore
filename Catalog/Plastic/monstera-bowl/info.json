@@ -2,7 +2,6 @@
   "name": "Миска «Монстера»",
   "price": 390,
   "sizes": "⌀160 × 60 мм",
-  "description": "Декоративна миска з рельєфом листа монстери.",
-  "colors": ["matte-green", "matte-black", "gloss-black", "silk-mint"],
-  "accentColors": ["#1a3d1a", "#4a5c2a", "#3d4a20", "#2d3d18"]
+  "description": "Декоративная миска с рельефом листа монстеры.",
+  "colors": ["matte-khaki", "matte-dark-green", "matte-dark-teal"]
 }
