@@ -200,12 +200,20 @@ function loadModel(url) {
     url,
     (gltf) => {
       const model  = gltf.scene;
-      const box    = new THREE.Box3().setFromObject(model);
-      const center = box.getCenter(new THREE.Vector3());
-      const size   = box.getSize(new THREE.Vector3());
+
+      // Шаг 1: масштабируем модель по размеру
+      const box0   = new THREE.Box3().setFromObject(model);
+      const size   = box0.getSize(new THREE.Vector3());
       const scale  = 1.2 / Math.max(size.x, size.y, size.z);
-      model.position.sub(center.multiplyScalar(scale));
       model.scale.setScalar(scale);
+
+      // Шаг 2: пересчитываем bounding box после масштабирования и центрируем по X и Z
+      const box1   = new THREE.Box3().setFromObject(model);
+      const center = box1.getCenter(new THREE.Vector3());
+      model.position.x -= center.x;
+      model.position.z -= center.z;
+      // Y пока не трогаем — поставим на стол ниже
+
       model.traverse(c => {
         if (c.isMesh) {
           c.material      = buildMaterial();
@@ -214,7 +222,7 @@ function loadModel(url) {
         }
       });
 
-      // Ставим модель на стол
+      // Шаг 3: ставим нижнюю грань модели точно на стол
       const box2   = new THREE.Box3().setFromObject(model);
       const bottom = box2.min.y;
       model.position.y += (-0.82 - bottom);
