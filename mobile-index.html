@@ -555,15 +555,7 @@
 
   </style>
 
-  <!-- Three.js для 3D превью в иконках каталога -->
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
-    }
-  }
-  </script>
+  
 </head>
 <body>
   <!-- ── Лоадер страницы ── -->
@@ -596,7 +588,7 @@
     })();
   </script>
   <!-- Анимированные точки в узлах сетки -->
-  <canvas id="grid-dots" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+  
 
   <div class="page">
 
@@ -681,230 +673,56 @@
 
   <script src="catalog.js"></script>
 
-  <!-- ── 3D превью в иконках каталога ── -->
-  <script type="module">
-  import * as THREE from 'three';
-  import { GLTFLoader }  from 'three/addons/loaders/GLTFLoader.js';
-  import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-  import { RGBELoader }  from 'three/addons/loaders/RGBELoader.js';
-
-  // ── Детект мобильного устройства ──────────────────────────────────────
-  // Используем User-Agent + ontouchstart, не hardwareConcurrency
-  // (современные телефоны имеют 8+ ядер и проходят проверку как десктоп)
-  const IS_MOBILE = ('ontouchstart' in window) ||
-    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  const IS_LOW_END = IS_MOBILE;
-
-  // ── Размер тайла рендертаргета (px) ────────────────────────────────────
-  const TILE = IS_LOW_END ? 128 : 256;
-
-  // Один рендерер на всё (setPixelRatio(1) гарантирует строгое совпадение с canvas 2D 1:1)
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(1);
-  renderer.setClearColor(0x000000, 0);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping      = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
-  renderer.setSize(TILE, TILE, false);
-  renderer.domElement.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;pointer-events:none;';
-  document.body.appendChild(renderer.domElement);
-
-  const scene  = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.01, 50);
-  // Изометрический ракурс: направление камеры (нормализованный вектор)
-  // theta=45° по XZ, phi=35.26° вверх (истинная изометрия)
-  const CAM_DIR = new THREE.Vector3(1, 1, 1).normalize(); // от origin к камере
-
-  // Освещение
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-  const key = new THREE.DirectionalLight(0xffffff, 1.8);
-  key.position.set(3, 5, 4);
-  scene.add(key);
-  const fill = new THREE.DirectionalLight(0x88aaff, 0.5);
-  fill.position.set(-4, 1, 2);
-  scene.add(fill);
-
-  // HDR env — только на десктопе (на мобиле ~2MB и лишняя задержка)
-  if (!IS_MOBILE) {
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    new RGBELoader().setDataType(THREE.FloatType).load(
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr',
-      hdr => {
-        scene.environment = pmrem.fromEquirectangular(hdr).texture;
-        hdr.dispose(); pmrem.dispose();
-      },
-      undefined, () => pmrem.dispose()
-    );
-  }
-
-  // GLTF / DRACO лоадер
-  const draco = new DRACOLoader();
-  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
-  const gltfLoader = new GLTFLoader();
-  gltfLoader.setDRACOLoader(draco);
-
-  // Кеш моделей: url → THREE.Group (клонируется для каждой иконки)
-  const modelCache = new Map();
-
-  // Список всех иконок для рендер-цикла
-  // { canvas, mesh, rotY, visible }
-  const icons = [];
-
-  // IntersectionObserver — рендерим только видимые
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      const item = icons.find(i => i.canvas === e.target);
-      if (item) item.visible = e.isIntersecting;
-    });
-  }, { threshold: 0.1 });
-
-  // ── Регистрация иконки ──────────────────────────────────────────────────
-  async function register(canvas, modelUrl, accentHex, isWax = false) {
-    // Размер canvas = размер иконки в CSS px * dpr
-    const dpr  = IS_LOW_END ? 1 : Math.min(devicePixelRatio, 2);
-    const size = TILE;
-    canvas.width  = size;
-    canvas.height = size;
-    const ctx2d = canvas.getContext('2d');
-
-    // Placeholder — спиннер
-    ctx2d.fillStyle = 'rgba(255,255,255,0.04)';
-    ctx2d.fillRect(0, 0, size, size);
-
-    const color = accentHex ? new THREE.Color(accentHex) : new THREE.Color(isWax ? 0xe8b86d : 0x27ae60);
-
-    // Загружаем или берём из кеша
-    let gltfScene;
-    if (modelCache.has(modelUrl)) {
-      gltfScene = modelCache.get(modelUrl).clone(true);
-    } else {
-      try {
-        const gltf = await new Promise((res, rej) =>
-          gltfLoader.load(modelUrl, res, undefined, rej)
-        );
-        modelCache.set(modelUrl, gltf.scene);
-        gltfScene = gltf.scene.clone(true);
-      } catch(e) {
-        gltfScene = new THREE.Mesh(
-          new THREE.TorusKnotGeometry(0.3, 0.1, 64, 16),
-          new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0 })
-        );
-      }
-    }
-
-    // Материал — восковой шейдер (для Свечей) или матовый/глянец пластик
-    let mat;
-    if (isWax) {
-      mat = new THREE.MeshPhysicalMaterial({
-        color,
-        roughness: 0.55,
-        metalness: 0.0,
-        clearcoat: 0.10,
-        clearcoatRoughness: 0.35,
-        sheen: 0.40,
-        sheenColor: new THREE.Color(0xffffff),
-        sheenRoughness: 0.30,
-        transmission: 0.03,
-        thickness: 0.25,
-        ior: 1.48
-      });
-    } else {
-      mat = new THREE.MeshStandardMaterial({ color, roughness: 0.88, metalness: 0.0 });
-    }
-    gltfScene.traverse(c => { if (c.isMesh) { c.material = mat; c.castShadow = false; } });
-
-    // ── Пересчёт масштаба и идеальное центрирование строго в (0, 0, 0) ─────
-    gltfScene.position.set(0, 0, 0);
-    gltfScene.rotation.set(0, 0, 0);
-    gltfScene.scale.setScalar(1);
-    gltfScene.updateMatrixWorld(true);
-
-    // 1. Вычисляем точные габариты исходной модели
-    const box0 = new THREE.Box3().setFromObject(gltfScene);
-    const size0 = box0.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size0.x, size0.y, size0.z) || 1.0;
-
-    // 2. Масштабируем так, чтобы модель идеально вписывалась в ячейку
-    const normScale = 1.6 / maxDim;
-    gltfScene.scale.setScalar(normScale);
-    gltfScene.updateMatrixWorld(true);
-
-    // 3. Сдвигаем геометрию так, чтобы геометрический центр BoundingBox был строго в (0, 0, 0)
-    const box1 = new THREE.Box3().setFromObject(gltfScene);
-    const center1 = box1.getCenter(new THREE.Vector3());
-    gltfScene.position.set(-center1.x, -center1.y, -center1.z);
-    gltfScene.updateMatrixWorld(true);
-
-    // pivot — только вращение вокруг своей центральной оси (0, 0, 0)
-    const pivot = new THREE.Group();
-    pivot.position.set(0, 0, 0);
-    pivot.add(gltfScene);
-
-    const camDist = FIXED_CAM_DIST;
-    // На мобиле — статичный стоп-кадр: рендерим один раз и останавливаем
-    const isStatic = IS_LOW_END;
-    icons.push({ canvas, ctx2d, mesh: pivot, rotY: Math.random() * Math.PI * 2, visible: false, camDist, isStatic, rendered: false });
-    io.observe(canvas);
-  }
-
-  // ── Рендер-цикл ────────────────────────────────────────────────────────
-  // На слабых девайсах рендерим реже
-  const FRAME_SKIP = IS_LOW_END ? 3 : 1;
-  let frameCount = 0;
-  const ROT_SPEED = IS_LOW_END ? 0.008 : 0.012;
-
-  // Изометрическая камера строго нацелена на (0, 0, 0)
-  const FIXED_CAM_DIST = 3.2;
-  camera.position.set(2.0, 1.8, 2.0);
-  camera.lookAt(0, 0, 0);
-  camera.updateMatrixWorld();
-
-  function tick() {
-    requestAnimationFrame(tick);
-    frameCount++;
-    if (frameCount % FRAME_SKIP !== 0) return;
-
-    for (const item of icons) {
-      if (!item.visible) continue;
-      // Статичный режим (мобиле): рендерим только один раз
-      if (item.isStatic && item.rendered) continue;
-
-      item.rotY += ROT_SPEED;
-      item.mesh.rotation.y = item.rotY;
-
-      scene.add(item.mesh);
-      renderer.render(scene, camera);
-      scene.remove(item.mesh);
-
-      item.ctx2d.clearRect(0, 0, TILE, TILE);
-      item.ctx2d.drawImage(renderer.domElement, 0, 0, TILE, TILE);
-      item.rendered = true;
-    }
-  }
-
-  tick();
-
-  // Экспортируем глобально — вызывается из init() который не module
-  window.CatalogViewer3D = { register };
-  // Сигнализируем что готовы
-  if (window._catalogViewer3DResolve) window._catalogViewer3DResolve({ register });
-  </script>
+  
+  
   <script>
     const R = 133;
-    // Накапливаем угол — не сбрасываем в 0..360, крутим в нужную сторону
     let angle = 0;
 
-    // Promise для ожидания CatalogViewer3D (module загружается async)
-    const viewer3DReady = new Promise(resolve => {
-      if (window.CatalogViewer3D) { resolve(window.CatalogViewer3D); return; }
-      window._catalogViewer3DResolve = resolve;
-      // Таймаут 3с — если модуль не загрузился, работаем без 3D
-      setTimeout(() => resolve(null), 3000);
-    });
+    // Helper: список путей к картинкам превью (в папке модели с тем же названием)
+    function getModelPreviewUrls(p, cat) {
+      const urls = [];
+      if (p.model) {
+        const lastSlash = p.model.lastIndexOf('/');
+        const dir = lastSlash !== -1 ? p.model.substring(0, lastSlash) : '';
+        const file = lastSlash !== -1 ? p.model.substring(lastSlash + 1) : p.model;
+        const base = file.replace(/\.[^/.]+$/, ''); // название модели (напр. model)
+        
+        if (dir) {
+          // Превью в папке модели с таким же названием
+          urls.push(`${dir}/${base}.webp`);
+          urls.push(`${dir}/${base}.png`);
+          urls.push(`${dir}/${base}.jpg`);
+          urls.push(`${dir}/${base}.jpeg`);
+          urls.push(`${dir}/preview.webp`);
+          urls.push(`${dir}/preview.png`);
+          urls.push(`${dir}/preview.jpg`);
+          urls.push(`${dir}/${p.id}.webp`);
+          urls.push(`${dir}/${p.id}.png`);
+          urls.push(`${dir}/${p.id}.jpg`);
+        }
+      }
+
+      if (p.thumbnail) {
+        urls.push(p.thumbnail.replace(/^\//, ''));
+      }
+      
+      if (cat && cat.id) {
+        const catFolder = cat.id.charAt(0).toUpperCase() + cat.id.slice(1);
+        urls.push(`Catalog/${catFolder}/${p.id}/model.webp`);
+        urls.push(`Catalog/${catFolder}/${p.id}/model.png`);
+        urls.push(`Catalog/${catFolder}/${p.id}/preview.webp`);
+        urls.push(`Catalog/${catFolder}/${p.id}/preview.png`);
+      }
+
+      urls.push(`thumbnails/${p.id}.webp`);
+      urls.push(`thumbnails/${p.id}.png`);
+
+      return [...new Set(urls)];
+    }
 
     async function init() {
-      // Ждём одновременно каталог и 3D viewer
-      const [data] = await Promise.all([loadCatalog(), viewer3DReady]);
+      const data = await loadCatalog();
       const cats = data.categories;
       const rotor = document.getElementById('h-rotor');
 
@@ -912,14 +730,6 @@
         const face = document.createElement('div');
         face.className = `h-face h-f${i}`;
         face.style.transform = `rotateY(${i * 120}deg) translateZ(${R}px)`;
-
-        // Анимированная дисперсия по периметру — добавляется В КОНЦЕ чтобы быть поверх fade
-        const glowWrap = document.createElement('div');
-        glowWrap.className = 'border-glow-wrap';
-        const glow = document.createElement('div');
-        glow.className = 'border-glow';
-        glowWrap.appendChild(glow);
-        // НЕ добавляем сюда — добавим после scrollWrap
 
         // Заголовок
         const header = document.createElement('div');
@@ -937,14 +747,13 @@
         });
         face.appendChild(header);
 
-        // Скролл-обёртка с mask-фейдом
+        // Скролл-обёртка
         const scrollWrap = document.createElement('div');
         scrollWrap.className = 'face-scroll-wrap at-top';
 
         const body = document.createElement('div');
         body.className = 'face-body';
 
-        // Собираем группы товаров (подкатегории или прямой список)
         const groups = [];
         if (cat.products && cat.products.length > 0) {
           groups.push({ name: '', products: cat.products });
@@ -957,18 +766,10 @@
           });
         }
 
-        // Заглушки для пустых категорий
-        const EMPTY_STUBS = {
-          wax: {
-            sub: 'Авторські соєві свічки з силіконовими формами — нові аромати та дизайни з\'являться тут першими.',
-          },
-          epoxy: {
-            sub: 'Вироби з епоксидної смоли: підставки, декор, нічники та прикраси. Слідкуйте за оновленнями.',
-          }
-        };
-
         if (groups.length === 0) {
-          const stub = EMPTY_STUBS[cat.id] || { sub: 'Скоро тут з\'являться нові товари.' };
+          const stub = (cat.id === 'wax') 
+            ? { sub: 'Авторські соєві свічки з силіконовими формами — нові аромати та дизайни з\'являться тут першими.' }
+            : { sub: 'Скоро тут з\'являться нові товари.' };
           const emptyBlock = document.createElement('div');
           emptyBlock.className = 'empty-cat';
           emptyBlock.innerHTML = `
@@ -976,61 +777,10 @@
                  src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg"
                  alt="PRISM">
             <span class="empty-cat-title">Скоро у продажу</span>
-            <span class="empty-cat-sub">${stub.sub} А поки що — зaгляньте в інші категорії.</span>
+            <span class="empty-cat-sub">${stub.sub} А поки що — загляньте в інші категорії.</span>
           `;
-          // Анимированный контур — как у всех блоков
-          const gw = document.createElement('div'); gw.className = 'border-glow-wrap';
-          const gg = document.createElement('div'); gg.className = 'border-glow-sm';
-          gg.style.animationDelay = '-5s';
-          gw.appendChild(gg); emptyBlock.appendChild(gw);
           body.appendChild(emptyBlock);
         } else {
-          const COLOR_HEX_MAP = {
-            'matte-white':       '#f2f2f2',
-            'matte-black':       '#222222',
-            'matte-gray':        '#888888',
-            'matte-red':         '#c0392b',
-            'matte-orange-red':  '#c0521a',
-            'matte-orange':      '#d4621a',
-            'matte-yellow':      '#d4b800',
-            'matte-blue':        '#2980b9',
-            'matte-green':       '#27ae60',
-            'matte-dark-green':  '#1a5c30',
-            'matte-khaki':       '#556b2f',
-            'matte-dark-teal':   '#1a5c52',
-            'matte-beige':       '#d4c5a9',
-            'matte-cream':       '#f5f0e0',
-            'gloss-white':       '#f5f5f5',
-            'gloss-black':       '#111111',
-            'gloss-red':         '#e74c3c',
-            'gloss-burgundy':    '#7b1a2a',
-            'gloss-blue':        '#3498db',
-            'gloss-yellow':      '#f1c40f',
-            'clear':             '#e8f4ff',
-            'clear-smoke':       '#555566',
-            'clear-amber':       '#d4820a',
-            'clear-teal':        '#1abc9c',
-            'wax-white':         '#f8f6f0',
-            'wax-cream':         '#f3e8d2',
-            'wax-honey':         '#e8b86d',
-            'wax-black':         '#222222',
-            'wax-red':           '#b82b2b',
-            'wax-sage':          '#7d8c75',
-            'wax-lavender':      '#a394b8',
-            'wax-terracotta':    '#c06c52',
-          };
-
-          function getProductHex(p, catId) {
-            if (p.accentColors && p.accentColors[0]) return p.accentColors[0];
-            if (p.colors && p.colors.length > 0) {
-              const colId = p.colors[0];
-              if (COLOR_HEX_MAP[colId]) return COLOR_HEX_MAP[colId];
-              if (colId.startsWith('#')) return colId;
-            }
-            if (catId === 'wax') return '#e8b86d';
-            return '#27ae60';
-          }
-
           groups.forEach(sub => {
             const block = document.createElement('div');
             block.className = 'sub-block';
@@ -1047,14 +797,7 @@
               icon.title = `${p.name} (id: ${p.id})`;
               icon.onclick = () => location.href = `mobile-product.html?id=${p.id}`;
 
-              // Тонкий анимированный контур
-              const gw = document.createElement('div'); gw.className = 'border-glow-wrap';
-              const gg = document.createElement('div'); gg.className = 'border-glow-sm';
-              gg.style.animationDelay = `${-(Math.random()*40).toFixed(1)}s`;
-              gw.appendChild(gg);
-              icon.appendChild(gw);
-
-              // Название модели сверху превью (с плавной бегущей строкой при переполнении)
+              // Название модели сверху превью (бегущая строка)
               const titleOverlay = document.createElement('div');
               titleOverlay.className = 'prod-icon-name';
               const titleSpan = document.createElement('span');
@@ -1074,45 +817,28 @@
                 }
               }, 120);
 
-              const isWax = cat.id === 'wax' || (cat.name && cat.name.toLowerCase().includes('свіч'));
-              const productHex = getProductHex(p, cat.id);
+              // Превью из папки с моделью (с таким же названием)
+              const img = document.createElement('img');
+              img.alt = p.name;
+              img.loading = 'lazy';
+              img.style.cssText = 'width:100%;flex:1;min-height:0;object-fit:contain;padding:4px;display:block;';
 
-              // Canvas для 3D превью (или img-fallback если нет модели / слабый девайс)
-              if (p.model && window.CatalogViewer3D) {
-                const cvs = document.createElement('canvas');
-                cvs.style.cssText = 'width:100%;flex:1;min-height:0;display:block;';
-                icon.appendChild(cvs);
-                window.CatalogViewer3D.register(cvs, p.model, productHex, isWax);
-              } else {
-                // Fallback: статичная картинка
-                const catFolder = cat.id.charAt(0).toUpperCase() + cat.id.slice(1);
-                const candidates = [];
-                if (p.thumbnail) candidates.push(p.thumbnail.replace(/^\//, ''));
-                candidates.push(
-                  `Catalog/${catFolder}/${p.id}/preview.webp`,
-                  `Catalog/${catFolder}/${p.id}/preview.png`,
-                  `thumbnails/${p.id}.webp`,
-                  `thumbnails/${p.id}.png`
-                );
-                const uniquePaths = [...new Set(candidates)];
-                let attempt = 0;
-                const img = document.createElement('img');
-                img.alt = p.name;
-                img.loading = 'lazy';
-                img.style.cssText = 'width:100%;flex:1;min-height:0;object-fit:contain;padding:4px;display:block;';
-                function loadNext() {
-                  if (attempt < uniquePaths.length) { img.src = uniquePaths[attempt++]; }
-                  else {
-                    img.style.display = 'none';
-                    const ph = document.createElement('span');
-                    ph.className = 'pi-ph'; ph.textContent = '⬡';
-                    icon.appendChild(ph);
-                  }
+              const candidates = getModelPreviewUrls(p, cat);
+              let attempt = 0;
+              function loadNext() {
+                if (attempt < candidates.length) {
+                  img.src = candidates[attempt++];
+                } else {
+                  img.style.display = 'none';
+                  const ph = document.createElement('span');
+                  ph.className = 'pi-ph';
+                  ph.textContent = '⬡';
+                  icon.appendChild(ph);
                 }
-                img.onerror = loadNext;
-                loadNext();
-                icon.appendChild(img);
               }
+              img.onerror = loadNext;
+              loadNext();
+              icon.appendChild(img);
 
               grid.appendChild(icon);
             });
@@ -1124,31 +850,22 @@
 
         scrollWrap.appendChild(body);
         face.appendChild(scrollWrap);
-        face.appendChild(glowWrap);
         rotor.appendChild(face);
 
-        // Обновляем mask-классы при скролле
         function updateFade() {
           const { scrollTop, scrollHeight, clientHeight } = body;
-          scrollWrap.classList.toggle('at-top',    scrollTop < 8);
+          scrollWrap.classList.toggle('at-top', scrollTop < 8);
           scrollWrap.classList.toggle('at-bottom', scrollTop + clientHeight >= scrollHeight - 8);
         }
         body.addEventListener('scroll', updateFade, { passive: true });
         requestAnimationFrame(updateFade);
       });
 
-      // Вращаем в нужную сторону, накапливая угол (инвертировано)
       function spin(dir) {
         angle -= dir * 120;
         rotor.style.transform = `translateZ(-${R}px) rotateY(${angle}deg)`;
-        // Shimmer
-        rotor.classList.add('spinning');
-        setTimeout(() => rotor.classList.remove('spinning'), 700);
-        // Импульс турбуленса синхронно со спином
-        if (window.triggerTurbulencePulse) window.triggerTurbulencePulse(700);
       }
 
-      // Свайп
       let tx = 0;
       document.querySelector('.card-catalog').addEventListener('touchstart', e => {
         tx = e.touches[0].clientX;
@@ -1158,11 +875,11 @@
         if (Math.abs(dx) > 40) spin(dx < 0 ? 1 : -1);
       });
 
-      // Начальное состояние
       rotor.style.transform = `translateZ(-${R}px) rotateY(0deg)`;
     }
 
     init();
+
 
     // Добавляем анимированный контур на хедер-лого (тонкий вариант)
     (function() {
@@ -1312,15 +1029,7 @@
   </script>
   <!-- SVG фильтр: квадратная линза — центр ровный, края искажены -->
   <!-- SVG фильтр для преломления + motion blur при вращении -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
-    <defs>
-      <filter id="catalog-glass" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.010" numOctaves="2" seed="4" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
-      </filter>
-      <!-- Motion blur — убран -->
-    </defs>
-  </svg>
+  
 
   <script>
   // ── Рёбра задних граней призмы ──
@@ -1426,83 +1135,7 @@
   })();
   </script>
 
-  <!-- ── Анимация мигающих точек в узлах сетки ── -->
-  <script>
-  (function() {
-    const canvas = document.getElementById('grid-dots');
-    if (!canvas) return;
-    const ctx  = canvas.getContext('2d');
-    const GRID = 40;
-    const isMob = ('ontouchstart' in window) || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    const MAX_DOTS = isMob ? 18 : 55;
-
-    let W, H, cols, rows, dots = [];
-
-    function resize() {
-      W = canvas.width  = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-      cols = Math.floor(W / GRID) + 1;
-      rows = Math.floor(H / GRID) + 1;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    function randInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
-
-    function spawnDot() {
-      return {
-        col:      randInt(0, cols),
-        row:      randInt(0, rows),
-        alpha:    0,
-        maxAlpha: 0.55 + Math.random() * 0.45,
-        radius:   0.35 + Math.random() * 0.42,
-        phase:    'in',
-        speed:    0.012 + Math.random() * 0.018,
-        hold:     0,
-        maxHold:  randInt(18, 80),
-      };
-    }
-
-    for (let i = 0; i < MAX_DOTS; i++) {
-      const d = spawnDot();
-      d.alpha = Math.random() * d.maxAlpha;
-      d.phase = ['in','hold','out'][randInt(0,2)];
-      dots.push(d);
-    }
-
-    function tick() {
-      ctx.clearRect(0, 0, W, H);
-      dots.forEach((d, idx) => {
-        if (d.phase === 'in') {
-          d.alpha += d.speed;
-          if (d.alpha >= d.maxAlpha) { d.alpha = d.maxAlpha; d.phase = 'hold'; }
-        } else if (d.phase === 'hold') {
-          d.hold++;
-          if (d.hold >= d.maxHold) d.phase = 'out';
-        } else {
-          d.alpha -= d.speed * 0.7;
-          if (d.alpha <= 0) { dots[idx] = spawnDot(); return; }
-        }
-        const x = d.col * GRID;
-        const y = d.row * GRID;
-        ctx.save();
-        const glow = ctx.createRadialGradient(x, y, 0, x, y, d.radius * 4);
-        glow.addColorStop(0,   `rgba(180,180,180,${d.alpha * 0.5})`);
-        glow.addColorStop(0.5, `rgba(140,140,140,${d.alpha * 0.15})`);
-        glow.addColorStop(1,   `rgba(0,0,0,0)`);
-        ctx.fillStyle = glow;
-        ctx.beginPath(); ctx.arc(x, y, d.radius * 4, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = `rgba(200,200,200,${d.alpha * 0.7})`;
-        ctx.beginPath(); ctx.arc(x, y, d.radius, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-      });
-      requestAnimationFrame(tick);
-    }
-    tick();
-  })();
-  </script>
-
-  <!-- ── Турбуленс дисплейс: только во время spin-анимации каталога ── -->
+  
   <script>
   (function() {
     const isMobile = ('ontouchstart' in window) ||
