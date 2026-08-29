@@ -423,33 +423,26 @@
       position: absolute;
       inset: 0;
       border-radius: 4px;
-      padding: 1.25px;
+      padding: 1.3px;
       pointer-events: none;
-      transform: scaleX(1.003) scaleY(1.003);
-      transform-origin: center center;
       background: conic-gradient(
         from var(--ca) at 50% 50%,
-        hsla(300, 20%, 60%, 0.4),
-        hsla(275, 20%, 35%, 0.4),
-        hsla(0,   0%,  100%, 0.7),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(240, 20%, 60%, 0.4),
-        hsla(180, 20%, 60%, 0.4),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(120, 20%, 50%, 0.4),
-        hsla(0,   0%,  100%, 0.7),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(60,  20%, 60%, 0.4),
-        hsla(30,  20%, 55%, 0.4),
-        hsla(0,   20%, 55%, 0.4),
-        hsla(300, 20%, 60%, 0.4)
+        transparent 0deg,
+        transparent 180deg,
+        rgba(80, 120, 255, 0.2) 220deg,
+        rgba(80, 170, 255, 0.8) 255deg,
+        rgba(255, 70, 160, 0.95) 285deg,
+        #ffffff 315deg,
+        rgba(255, 190, 60, 0.95) 335deg,
+        rgba(60, 255, 190, 0.6) 350deg,
+        transparent 360deg
       );
       -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
-      animation: ca-spin 28s linear infinite;
+      animation: ca-spin 10s linear infinite;
     }
 
     @keyframes ca-spin {
@@ -457,37 +450,54 @@
       to   { --ca: 360deg; }
     }
 
-    /* Вариант для маленьких блоков — неравномерный контур с прозрачными зонами */
+    /* Слой 1: Нелинейный бегущий луч-комета для карточек и блоков */
     .border-glow-sm {
       position: absolute;
       inset: 0;
       border-radius: 4px;
-      padding: 0.8px;
+      padding: 1.2px;
       pointer-events: none;
       background: conic-gradient(
         from var(--ca) at 50% 50%,
-        hsla(300, 20%, 55%, 0.0),
-        hsla(300, 20%, 55%, 0.45),
-        hsla(275, 20%, 40%, 0.35),
-        hsla(240, 20%, 55%, 0.0),
-        hsla(240, 20%, 55%, 0.0),
-        hsla(180, 20%, 60%, 0.40),
-        hsla(0,   0%,  100%, 0.70),
-        hsla(0,   0%,  100%, 0.70),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(120, 20%, 50%, 0.35),
-        hsla(60,  20%, 55%, 0.0),
-        hsla(30,  20%, 55%, 0.40),
-        hsla(0,   20%, 55%, 0.45),
-        hsla(300, 20%, 55%, 0.0)
+        transparent 0deg,
+        transparent 175deg,
+        rgba(80, 120, 255, 0.15) 210deg,
+        rgba(80, 160, 255, 0.75) 255deg,
+        rgba(255, 70, 160, 0.95) 285deg,
+        #ffffff 315deg,
+        rgba(255, 190, 60, 0.95) 335deg,
+        rgba(60, 255, 190, 0.6) 350deg,
+        transparent 360deg
       );
       -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
-      animation: ca-spin 40s linear infinite;
+      animation: ca-spin 8s linear infinite;
+    }
+    /* Слой 2: Широкий нелинейный Glow-ореол (Aura) */
+    .border-glow-aura {
+      position: absolute;
+      inset: -4px;
+      border-radius: 8px;
+      padding: 4px;
+      pointer-events: none;
+      background: conic-gradient(
+        from var(--ca) at 50% 50%,
+        transparent 0deg,
+        transparent 190deg,
+        rgba(80, 120, 255, 0.3) 235deg,
+        rgba(255, 60, 150, 0.7) 280deg,
+        rgba(255, 255, 255, 1.0) 315deg,
+        rgba(255, 180, 60, 0.7) 340deg,
+        transparent 360deg
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      filter: blur(10px);
+      opacity: 0.7;
+      animation: ca-spin 8s linear infinite;
     }
 
     /* SVG стрелки */
@@ -926,19 +936,19 @@
         <div class="footer-input-scene" style="position:relative">
           <div class="ticker-input-rotor" id="ticker-rotor">
             <div class="footer-input-face fin-f0" data-href="https://t.me/prism3dstore" style="display:flex;align-items:center;justify-content:space-between;padding:0 12px;gap:8px;">
-              <div class="border-glow-wrap"><div class="border-glow-sm"></div></div>
+              <div class="border-glow-wrap"><div class="border-glow-aura"></div><div class="border-glow-sm"></div></div>
               <span class="ticker-arrow-big">↑</span>
               <a href="https://t.me/prism3dstore" target="_blank" style="font-size:13px;font-weight:800;color:#ffffff;position:relative;z-index:2;text-decoration:none;flex:1;text-align:center;">Написати нам у Telegram</a>
               <span class="ticker-arrow-big">↓</span>
             </div>
             <div class="footer-input-face fin-f1" data-href="https://instagram.com/prism3dstore" style="display:flex;align-items:center;justify-content:space-between;padding:0 12px;gap:8px;">
-              <div class="border-glow-wrap"><div class="border-glow-sm" style="animation-delay:-13s"></div></div>
+              <div class="border-glow-wrap"><div class="border-glow-aura" style="animation-delay:-4s"></div><div class="border-glow-sm" style="animation-delay:-4s"></div></div>
               <span class="ticker-arrow-big">↑</span>
               <a href="https://instagram.com/prism3dstore" target="_blank" style="font-size:13px;font-weight:800;color:#ffffff;position:relative;z-index:2;text-decoration:none;flex:1;text-align:center;">Написати нам в Instagram</a>
               <span class="ticker-arrow-big">↓</span>
             </div>
             <div class="footer-input-face fin-f2" data-href="https://viber.com" style="display:flex;align-items:center;justify-content:space-between;padding:0 12px;gap:8px;">
-              <div class="border-glow-wrap"><div class="border-glow-sm" style="animation-delay:-26s"></div></div>
+              <div class="border-glow-wrap"><div class="border-glow-aura" style="animation-delay:-8s"></div><div class="border-glow-sm" style="animation-delay:-8s"></div></div>
               <span class="ticker-arrow-big">↑</span>
               <a href="https://viber.com" target="_blank" style="font-size:13px;font-weight:800;color:#ffffff;position:relative;z-index:2;text-decoration:none;flex:1;text-align:center;">Написати нам у Viber</a>
               <span class="ticker-arrow-big">↓</span>
@@ -1359,10 +1369,14 @@
               icon.title = `${p.name} (id: ${p.id})`;
               icon.onclick = () => location.href = `product.html?id=${p.id}`;
 
-              // Тонкий анимированный контур
+              // Анимированный нелинейный контур + бегущий Glow
               const gw = document.createElement('div'); gw.className = 'border-glow-wrap';
+              const aura = document.createElement('div'); aura.className = 'border-glow-aura';
               const gg = document.createElement('div'); gg.className = 'border-glow-sm';
-              gg.style.animationDelay = `${-(Math.random()*40).toFixed(1)}s`;
+              const delay = `${-(Math.random()*10).toFixed(1)}s`;
+              aura.style.animationDelay = delay;
+              gg.style.animationDelay = delay;
+              gw.appendChild(aura);
               gw.appendChild(gg);
               icon.appendChild(gw);
 
