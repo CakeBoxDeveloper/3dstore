@@ -118,10 +118,28 @@
       white-space: nowrap;
       overflow: hidden;
       padding: 0 4px;
+      margin: 0 2px;
       text-shadow: -0.5px 0 0.5px rgba(255,80,80,0.5), 0.5px 0 0.5px rgba(80,160,255,0.5);
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
+      z-index: 2;
+      /* Умный fadeout по краям */
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        transparent 0px,
+        black 10px,
+        black calc(100% - 10px),
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        90deg,
+        transparent 0px,
+        black 10px,
+        black calc(100% - 10px),
+        transparent 100%
+      );
     }
 
     /* Shimmer при флипе */
@@ -459,7 +477,7 @@
     .v-f1 input::placeholder { color: rgba(255,255,255,0.35); }
     .v-f2 { color: #a8f0c0; font-size: 14px; font-weight: 600; }
 
-    /* ── Анимированный нелинейный контур с бегущим лучом и аурой ── */
+    /* ── Анимированный контур (из index.html) ── */
     @property --ca {
       syntax: '<angle>';
       initial-value: 0deg;
@@ -467,47 +485,22 @@
     }
     .border-glow-wrap {
       position: absolute; inset: 0; border-radius: 4px;
-      pointer-events: none; z-index: 5; overflow: hidden;
+      pointer-events: none; z-index: 10; overflow: hidden;
     }
-    /* Слой 1: Тонкий сверхяркий бегущий луч-комета с прозрачными сегментами */
     .border-glow-sm {
       position: absolute; inset: 0; border-radius: 4px;
-      padding: 1.2px; pointer-events: none;
+      padding: 0.8px; pointer-events: none;
       background: conic-gradient(
         from var(--ca) at 50% 50%,
-        transparent 0deg,
-        transparent 175deg,
-        rgba(80, 120, 255, 0.15) 210deg,
-        rgba(80, 160, 255, 0.75) 255deg,
-        rgba(255, 70, 160, 0.95) 285deg,
-        #ffffff 315deg,
-        rgba(255, 190, 60, 0.95) 335deg,
-        rgba(60, 255, 190, 0.6) 350deg,
-        transparent 360deg
+        hsla(300,20%,55%,0.35), hsla(275,20%,40%,0.30),
+        hsla(240,20%,55%,0.35), hsla(180,20%,55%,0.30),
+        hsla(0,0%,100%,0.65),  hsla(120,20%,50%,0.30),
+        hsla(60,20%,55%,0.35), hsla(30,20%,55%,0.30),
+        hsla(0,20%,55%,0.35),  hsla(300,20%,55%,0.35)
       );
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor; mask-composite: exclude;
-      animation: ca-spin 8s linear infinite;
-    }
-    /* Слой 2: Широкий рассеянный Glow-ореол (Aura), бегущий синхронно по контуру */
-    .border-glow-aura {
-      position: absolute; inset: -4px; border-radius: 8px;
-      padding: 4px; pointer-events: none;
-      background: conic-gradient(
-        from var(--ca) at 50% 50%,
-        transparent 0deg,
-        transparent 190deg,
-        rgba(80, 120, 255, 0.3) 235deg,
-        rgba(255, 60, 150, 0.7) 280deg,
-        rgba(255, 255, 255, 1.0) 315deg,
-        rgba(255, 180, 60, 0.7) 340deg,
-        transparent 360deg
-      );
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude;
-      filter: blur(10px);
-      opacity: 0.7;
-      animation: ca-spin 8s linear infinite;
+      animation: ca-spin 40s linear infinite;
     }
     @keyframes ca-spin { from{--ca:0deg} to{--ca:360deg} }
 
@@ -698,43 +691,31 @@
     // Анимированные контуры на статические блоки
     [
       ['.viewer-wrap', '-0s'],
-      ['.back-link', '-2s'],
-      ['.procedural-toggle', '-4s'],
-      ['.card-content', '-6s'],
+      ['.back-link', '-8s'],
+      ['.procedural-toggle', '-12s'],
+      ['.card-content', '-24s'],
     ].forEach(([sel, delay]) => {
       document.querySelectorAll(sel).forEach(el => {
         el.style.position = 'relative';
         const wrap = document.createElement('div'); wrap.className = 'border-glow-wrap';
-        const aura = document.createElement('div'); aura.className = 'border-glow-aura';
-        aura.style.animationDelay = delay;
         const g = document.createElement('div'); g.className = 'border-glow-sm';
         g.style.animationDelay = delay;
-        wrap.appendChild(aura);
-        wrap.appendChild(g);
-        el.appendChild(wrap);
+        wrap.appendChild(g); el.appendChild(wrap);
       });
     });
     // Контур на каждую грань флип-ротора навигации — вращается вместе с гранью
     document.querySelectorAll('.nav-flip-face').forEach((face, i) => {
       const wrap = document.createElement('div'); wrap.className = 'border-glow-wrap';
-      const aura = document.createElement('div'); aura.className = 'border-glow-aura';
-      aura.style.animationDelay = `${-4 - i * 2}s`;
       const g = document.createElement('div'); g.className = 'border-glow-sm';
-      g.style.animationDelay = `${-4 - i * 2}s`;
-      wrap.appendChild(aura);
-      wrap.appendChild(g);
-      face.appendChild(wrap);
+      g.style.animationDelay = `${-16 - i * 8}s`;
+      wrap.appendChild(g); face.appendChild(wrap);
     });
     // Контур на каждую грань кнопки заказа — флипается вместе с ней
     document.querySelectorAll('.v-face').forEach((face, i) => {
       const wrap = document.createElement('div'); wrap.className = 'border-glow-wrap';
-      const aura = document.createElement('div'); aura.className = 'border-glow-aura';
-      aura.style.animationDelay = `${-8 - i * 2}s`;
       const g = document.createElement('div'); g.className = 'border-glow-sm';
-      g.style.animationDelay = `${-8 - i * 2}s`;
-      wrap.appendChild(aura);
-      wrap.appendChild(g);
-      face.appendChild(wrap);
+      g.style.animationDelay = `${-32 - i * 8}s`;
+      wrap.appendChild(g); face.appendChild(wrap);
     });
   </script>
   <script type="module" src="viewer.js"></script>
