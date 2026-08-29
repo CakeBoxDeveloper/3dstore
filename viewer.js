@@ -583,14 +583,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   const labelA  = document.getElementById('nav-label-a');
   const labelB  = document.getElementById('nav-label-b');
 
+  function setNavLabelWithMarquee(labelEl, text) {
+    if (!labelEl) return;
+    labelEl.innerHTML = '';
+    const span = document.createElement('span');
+    span.className = 'marquee-text';
+    span.textContent = text;
+    labelEl.appendChild(span);
+
+    setTimeout(() => {
+      const overflow = span.scrollWidth - labelEl.clientWidth;
+      if (overflow > 2) {
+        const dist = overflow + 8;
+        const duration = Math.max(3.5, dist / 14);
+        span.style.setProperty('--marquee-dist', `-${dist}px`);
+        span.style.setProperty('--marquee-duration', `${duration}s`);
+        span.classList.add('marquee-active');
+      }
+    }, 120);
+  }
+
   // Накапливаем угол — не сбрасываем, крутим в одну сторону
   let navAngle  = 0;
   let navCurIdx = allProducts.findIndex(p => p.id === product.id);
   // Какая грань сейчас видна: 0=A (angle=0,180,...), 1=B (angle=-180,-360,...)
-  // A видна при чётных полуоборотах (0, -360, ...), B при нечётных (-180, -540, ...)
   let navStep   = 0; // чётный = грань A спереди, нечётный = грань B
 
-  if (labelA) labelA.textContent = product.name;
+  if (labelA) setNavLabelWithMarquee(labelA, product.name);
 
   function navFlip(dir) {
     if (total < 2) return;
@@ -604,7 +623,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Записываем в скрытую грань до начала анимации
     const hiddenLabel = (navStep % 2 === 1) ? labelB : labelA;
-    if (hiddenLabel) hiddenLabel.textContent = nextProd.name;
+    if (hiddenLabel) setNavLabelWithMarquee(hiddenLabel, nextProd.name);
 
     if (rotor) rotor.style.transform = `translateZ(-22px) rotateX(${navAngle}deg)`;
 
@@ -618,7 +637,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (nameEl)  nameEl.textContent  = nextProd.name;
     if (sizesEl) sizesEl.textContent = nextProd.sizes || '';
 
-    buildMaterialSlider(nextProd.colors);
+    buildMaterialSlider(nextProd.colors, category ? category.id : null);
     loadModel(nextProd.model);
 
     const btnPrice = document.getElementById('btn-order-price');
@@ -656,8 +675,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const procToggle = document.getElementById('proc-toggle');
   if (procToggle) {
+    const toggleBox = procToggle.closest('.procedural-toggle');
     procToggle.addEventListener('change', () => {
       proceduralMode = procToggle.checked;
+      if (toggleBox) {
+        toggleBox.classList.toggle('active', procToggle.checked);
+      }
     });
   }
 });

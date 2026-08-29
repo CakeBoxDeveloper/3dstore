@@ -727,11 +727,25 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.9);
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
       pointer-events: none;
       z-index: 5;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
       border-radius: 4px 4px 0 0;
+      display: flex;
+      justify-content: center;
+    }
+    .prod-icon-name .marquee-text {
+      display: inline-block;
+      white-space: nowrap;
+      will-change: transform;
+    }
+    .prod-icon-name .marquee-active {
+      animation: marquee-pingpong var(--marquee-duration, 5s) ease-in-out infinite;
+    }
+    @keyframes marquee-pingpong {
+      0%, 18% { transform: translateX(0); }
+      50%, 68% { transform: translateX(var(--marquee-dist, -24px)); }
+      100% { transform: translateX(0); }
     }
     /* canvas 3D превью внутри иконки */
     .prod-icon canvas {
@@ -746,7 +760,7 @@
     .prod-icon img { width: 100%; flex: 1; min-height: 0; object-fit: contain; padding: 4px; display: block; }
     .pi-ph { font-size: 18px; opacity: 0.15; }
 
-    /* ── Стили шиммер-лоадера PRISM ── */
+    /* ── Стили пульсирующего лоадера PRISM ── */
     .prism-loader-box {
       position: relative;
       width: 220px;
@@ -755,40 +769,32 @@
       align-items: center;
       justify-content: center;
     }
-    .prism-loader-base {
+    .prism-loader-logo {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      filter: brightness(0) invert(0.22);
-      display: block;
+      filter: brightness(0) invert(1);
+      animation: prism-pulse-glow 2.4s ease-in-out infinite alternate;
     }
-    .prism-loader-shimmer {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.45) 35%,
-        #ffffff 50%,
-        rgba(255, 255, 255, 0.45) 65%,
-        transparent 100%
-      );
-      background-size: 200% 100%;
-      animation: prism-shimmer-sweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      -webkit-mask-image: url('https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg');
-      mask-image: url('https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg');
-      -webkit-mask-size: contain;
-      mask-size: contain;
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-      -webkit-mask-position: center;
-      mask-position: center;
-      pointer-events: none;
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
-    }
-    @keyframes prism-shimmer-sweep {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
+    @keyframes prism-pulse-glow {
+      0% {
+        opacity: 0.55;
+        filter: brightness(0) invert(1) drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+        transform: scale(0.97);
+      }
+      50% {
+        opacity: 1;
+        filter: brightness(0) invert(1)
+                drop-shadow(0 0 14px rgba(255, 255, 255, 0.95))
+                drop-shadow(0 0 28px rgba(100, 140, 255, 0.6))
+                drop-shadow(0 0 45px rgba(255, 80, 140, 0.35));
+        transform: scale(1.02);
+      }
+      100% {
+        opacity: 0.55;
+        filter: brightness(0) invert(1) drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+        transform: scale(0.97);
+      }
     }
 
     /* ── Заглушка пустой категории ── */
@@ -882,8 +888,7 @@
   ">
     <div class="prism-loader-box">
       <img src="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg"
-           class="prism-loader-base" alt="PRISM">
-      <div class="prism-loader-shimmer"></div>
+           class="prism-loader-logo" alt="PRISM">
     </div>
   </div>
   <script>
@@ -1361,11 +1366,25 @@
               gw.appendChild(gg);
               icon.appendChild(gw);
 
-              // Название модели сверху превью
+              // Название модели сверху превью (с плавной бегущей строкой при переполнении)
               const titleOverlay = document.createElement('div');
               titleOverlay.className = 'prod-icon-name';
-              titleOverlay.textContent = p.name;
+              const titleSpan = document.createElement('span');
+              titleSpan.className = 'marquee-text';
+              titleSpan.textContent = p.name;
+              titleOverlay.appendChild(titleSpan);
               icon.appendChild(titleOverlay);
+
+              setTimeout(() => {
+                const overflow = titleSpan.scrollWidth - titleOverlay.clientWidth;
+                if (overflow > 2) {
+                  const dist = overflow + 8;
+                  const duration = Math.max(3.5, dist / 14);
+                  titleSpan.style.setProperty('--marquee-dist', `-${dist}px`);
+                  titleSpan.style.setProperty('--marquee-duration', `${duration}s`);
+                  titleSpan.classList.add('marquee-active');
+                }
+              }, 120);
 
               const isWax = cat.id === 'wax' || (cat.name && cat.name.toLowerCase().includes('свіч'));
               const productHex = getProductHex(p, cat.id);
