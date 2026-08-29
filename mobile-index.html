@@ -5,22 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PRISM</title>
   <link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg">
-  <script>
-    // Redirect mobile users to flat version
-    if (('ontouchstart' in window) || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) {
-      location.replace('mobile-index.html');
-    }
-  </script>
+  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
     body {
-      font-family: system-ui, sans-serif; color: #f0f0f0;
-      background-color: #000;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
-      background-size: 40px 40px;
+      font-family: system-ui, sans-serif; color: #ffffff;
+      background-color: #17212b;
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
       user-select: none;
@@ -44,38 +35,20 @@
       font-style: normal;
     }
 
-    /* ── Общий стекляный материал ── */
+    /* ── Flat Telegram Dark Theme (all corners 4px) ── */
     .glass {
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(12px) saturate(1.6);
-      -webkit-backdrop-filter: blur(12px) saturate(1.6);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 1px 1px 0 rgba(255,255,255,0.12);
+      background: #1d2b3a;
+      border: 1px solid rgba(106, 178, 242, 0.2);
       border-radius: 4px;
     }
 
-    /* ── Единый стиль блоков: полупрозрачный фон + искажение + inset glow ── */
     .header-logo,
     .footer-input-face,
     .footer-face {
-      background: rgba(0, 0, 0, 0.60);
-      -webkit-backdrop-filter: url(#catalog-glass);
-      backdrop-filter: url(#catalog-glass);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 0 0 20px 2px rgba(80,100,255,0.10),
-        inset 0 0 20px 2px rgba(255,60,120,0.06),
-        inset 0 0 20px 2px rgba(255,160,0,0.05);
-    }
-
-    /* Лого — glow вдвое слабее */
-    .header-logo {
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 0 0 20px 2px rgba(80,100,255,0.05),
-        inset 0 0 20px 2px rgba(255,60,120,0.03),
-        inset 0 0 20px 2px rgba(255,160,0,0.025);
+      background: #1d2b3a;
+      border: 1px solid rgba(106, 178, 242, 0.2);
+      border-radius: 4px;
+      box-shadow: none;
     }
 
     /* ── Хедер: две колонки 30/70 ── */
@@ -91,7 +64,6 @@
     }
     .card-header::after { display: none; }
 
-    /* Лого */
     .header-logo {
       display: flex;
       align-items: center;
@@ -107,7 +79,7 @@
       font-size: 20px;
       font-weight: normal;
       letter-spacing: 0.04em;
-      color: #f0f0f0;
+      color: #ffffff;
       user-select: none;
     }
 
@@ -115,54 +87,11 @@
     .header-ticker {
       position: relative;
       border-radius: 4px;
-      animation: ticker-rock 3.5s ease-in-out infinite;
-    }
-    @keyframes ticker-rock {
-      0%, 100% { transform: perspective(300px) rotateX(0deg); }
-      30%       { transform: perspective(300px) rotateX(6deg); }
-      70%       { transform: perspective(300px) rotateX(-6deg); }
     }
 
-    /* Фоновый слой с overflow:hidden — клипает шиммер, не мешает 3D */
-    .ticker-bg {
-      position: absolute;
-      inset: 0;
-      border-radius: 4px;
-      overflow: hidden;
-      pointer-events: none;
-      z-index: 0;
-    }
-    /* Диагональный шиммер внутри bg-слоя */
-    .ticker-sheen {
-      position: absolute; inset: 0;
-      background: linear-gradient(
-        105deg,
-        transparent 25%,
-        rgba(255,255,255,0.05) 48%,
-        rgba(255,255,255,0.09) 50%,
-        transparent 72%
-      );
-      animation: ticker-sheen-anim 4.5s ease-in-out infinite;
-      pointer-events: none;
-    }
-    @keyframes ticker-sheen-anim {
-      0%         { transform: translateX(-150%); }
-      60%, 100%  { transform: translateX(250%); }
-    }
+    .ticker-bg { display: none; }
+    .ticker-sheen { display: none; }
 
-    /* Стрелки тикера — большие, внутри граней, вращаются вместе */
-    .ticker-arrow-wrap {
-      display: none;
-    }
-    .ticker-arrow-big {
-      font-size: 18px;
-      line-height: 1;
-      color: rgba(255,255,255,0.35);
-      flex-shrink: 0;
-      pointer-events: none;
-      user-select: none;
-    }
-    /* Перспектива для тикера */
     .header-ticker .footer-input-scene {
       perspective: 300px;
       position: relative;
@@ -180,19 +109,30 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 13px; font-weight: 700;
       letter-spacing: 0.02em;
-      color: #888;
+      color: #6ab2f2;
       opacity: 0;
       transition: opacity 0.35s ease;
       cursor: pointer;
       text-decoration: none;
+      background: #1d2b3a;
+      border: 1px solid rgba(106, 178, 242, 0.2);
+      border-radius: 4px;
     }
     .ticker-face.active { opacity: 1; }
-    .ticker-face:hover { color: #f0f0f0; }
+    .ticker-face:hover { color: #ffffff; }
 
-    /* Декоративные стрелки на гранях тикера */
+    .ticker-arrow-big {
+      font-size: 18px;
+      line-height: 1;
+      color: rgba(106, 178, 242, 0.6);
+      flex-shrink: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+
     .ticker-arrow {
       font-size: 10px;
-      color: rgba(255,255,255,0.2);
+      color: rgba(106, 178, 242, 0.4);
       pointer-events: none;
       flex-shrink: 0;
       line-height: 1;
@@ -203,12 +143,12 @@
 
     .tg-link {
       font-size: 13px;
-      color: #888;
+      color: #6ab2f2;
       text-decoration: none;
       transition: color 0.15s;
       white-space: nowrap;
     }
-    .tg-link:hover { color: #f0f0f0; }
+    .tg-link:hover { color: #ffffff; }
 
     /* ── Футер: сообщение ── */
     .card-footer {
@@ -222,7 +162,6 @@
       position: relative;
       z-index: 2;
     }
-    /* Поле ввода — призма с тремя гранями rotateX */
     .footer-prism-wrap {
       overflow: visible;
       position: relative;
@@ -252,47 +191,25 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       padding: 0 12px;
-      border: none;
+      background: #1d2b3a;
+      border: 1px solid rgba(106, 178, 242, 0.2);
       font-family: inherit;
       overflow: hidden;
     }
 
-    /* Вертикальный shimmer на футере (rotateX — sweep идёт сверху вниз) */
-    .fin-shimmer {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to bottom,
-        transparent 5%,
-        rgba(255,255,255,0.05) 35%,
-        rgba(220,235,255,0.15) 50%,
-        rgba(255,255,255,0.05) 65%,
-        transparent 95%
-      );
-      transform: translateY(150%); /* спрятан снизу по умолчанию */
-      pointer-events: none;
-      z-index: 4; /* под glow (z:5), над контентом */
-      border-radius: 4px;
-    }
-    .footer-input-rotor.spinning .fin-shimmer {
-      animation: footer-shimmer 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-    @keyframes footer-shimmer {
-      from { transform: translateY(-150%); }
-      to   { transform: translateY(150%); }
-    }
+    .fin-shimmer { display: none; }
     .fin-f0 { transform: rotateX(0deg)    translateZ(15px); }
     .fin-f1 { transform: rotateX(-120deg) translateZ(15px); justify-content: center; }
     .fin-f2 { transform: rotateX(-240deg) translateZ(15px); cursor: pointer; }
 
     .footer-input-face input {
       width: 100%; background: transparent; border: none; outline: none;
-      color: #f0f0f0; font-size: 13px; font-family: inherit;
+      color: #ffffff; font-size: 13px; font-family: inherit;
     }
-    .footer-input-face input::placeholder { color: #444; }
+    .footer-input-face input::placeholder { color: rgba(255, 255, 255, 0.45); }
 
-    .fin-f1-text { font-size: 12px; color: #888; }
-    .fin-f2-text { font-size: 12px; color: #ffe066; line-height: 1.4; }
+    .fin-f1-text { font-size: 12px; color: rgba(255, 255, 255, 0.6); }
+    .fin-f2-text { font-size: 12px; color: #6ab2f2; line-height: 1.4; }
 
     .footer-btn-wrap {
       overflow: visible;
@@ -324,42 +241,19 @@
       font-weight: 800;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      background: rgba(0, 0, 0, 0.60);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 0 0 20px 2px rgba(80,100,255,0.12),
-        inset 0 0 20px 2px rgba(255,60,120,0.07),
-        inset 0 0 20px 2px rgba(255,160,0,0.05);
+      background: #6ab2f2;
+      color: #17212b;
       cursor: pointer;
       border: none;
       font-family: inherit;
       outline: none;
       overflow: hidden;
     }
-    .footer-f0 { transform: rotateX(0deg)    translateZ(15px); color: #888; }
-    .footer-f0:hover { color: #f0f0f0; }
-    .footer-f0:disabled { color: #333 !important; opacity: 1 !important; cursor: default; }
-    .footer-f1 { transform: rotateX(-120deg) translateZ(15px); color: #a8f0c0; font-size: 11px; }
-
-    /* Shimmer на кнопке пока ждёт ответа */
-    .footer-f1-shimmer {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        110deg,
-        transparent 10%,
-        rgba(255,255,255,0.04) 40%,
-        rgba(220,235,255,0.10) 50%,
-        rgba(255,255,255,0.04) 60%,
-        transparent 90%
-      );
-      animation: btn-shimmer 1.8s linear infinite;
-      pointer-events: none;
-    }
-    @keyframes btn-shimmer {
-      from { transform: translateX(-100%); }
-      to   { transform: translateX(200%); }
-    }
+    .footer-f0 { transform: rotateX(0deg) translateZ(15px); }
+    .footer-f0:hover { opacity: 0.9; }
+    .footer-f0:disabled { background: #1d2b3a !important; color: rgba(255,255,255,0.3) !important; border: 1px solid rgba(106, 178, 242, 0.2) !important; }
+    .footer-f1 { transform: rotateX(-120deg) translateZ(15px); background: #1d2b3a; color: #6ab2f2; font-size: 11px; border: 1px solid rgba(106, 178, 242, 0.2); }
+    .footer-f1-shimmer { display: none; }
 
     .card-catalog {
       overflow: visible;
@@ -387,7 +281,6 @@
       transform: translateZ(-133px) rotateY(0deg);
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    /* Направленный blur — убран */
 
     .h-face {
       position: absolute;
@@ -397,186 +290,36 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       overflow: hidden;
-      background: rgba(0, 0, 0, 0.60);
-      -webkit-backdrop-filter: url(#catalog-glass);
-      backdrop-filter: url(#catalog-glass);
+      background: #1d2b3a;
+      border: 1px solid rgba(106, 178, 242, 0.2);
       border-radius: 4px;
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.06),
-        inset 0 0 20px 2px rgba(80,100,255,0.10),
-        inset 0 0 20px 2px rgba(255,60,120,0.06),
-        inset 0 0 20px 2px rgba(255,160,0,0.05);
-    }
-    /* убираем пустой before */
-
-    /* Анимированная дисперсия — паттерн движется, элемент статичен */
-    @property --ca {
-      syntax: '<angle>';
-      initial-value: 0deg;
-      inherits: false;
+      box-shadow: none;
     }
 
-    .border-glow-wrap {
-      position: absolute;
-      inset: 0;
-      border-radius: 4px;
-      pointer-events: none;
-      z-index: 10;
-      overflow: hidden;
-    }
+    .border-glow-wrap { display: none; }
+    .border-glow { display: none; }
+    .border-glow-sm { display: none; }
 
-    .border-glow {
-      position: absolute;
-      inset: 0;
-      border-radius: 4px;
-      padding: 1.25px;
-      pointer-events: none;
-      transform: scaleX(1.003) scaleY(1.003);
-      transform-origin: center center;
-      background: conic-gradient(
-        from var(--ca) at 50% 50%,
-        hsla(300, 20%, 60%, 0.4),
-        hsla(275, 20%, 35%, 0.4),
-        hsla(0,   0%,  100%, 0.7),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(240, 20%, 60%, 0.4),
-        hsla(180, 20%, 60%, 0.4),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(120, 20%, 50%, 0.4),
-        hsla(0,   0%,  100%, 0.7),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(60,  20%, 60%, 0.4),
-        hsla(30,  20%, 55%, 0.4),
-        hsla(0,   20%, 55%, 0.4),
-        hsla(300, 20%, 60%, 0.4)
-      );
-      -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      animation: ca-spin 28s linear infinite;
-    }
-
-    @keyframes ca-spin {
-      from { --ca: 0deg;   }
-      to   { --ca: 360deg; }
-    }
-
-    /* Вариант для маленьких блоков — неравномерный контур с прозрачными зонами */
-    .border-glow-sm {
-      position: absolute;
-      inset: 0;
-      border-radius: 4px;
-      padding: 0.8px;
-      pointer-events: none;
-      background: conic-gradient(
-        from var(--ca) at 50% 50%,
-        hsla(300, 20%, 55%, 0.0),
-        hsla(300, 20%, 55%, 0.45),
-        hsla(275, 20%, 40%, 0.35),
-        hsla(240, 20%, 55%, 0.0),
-        hsla(240, 20%, 55%, 0.0),
-        hsla(180, 20%, 60%, 0.40),
-        hsla(0,   0%,  100%, 0.70),
-        hsla(0,   0%,  100%, 0.70),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(0,   0%,   0%, 0.0),
-        hsla(120, 20%, 50%, 0.35),
-        hsla(60,  20%, 55%, 0.0),
-        hsla(30,  20%, 55%, 0.40),
-        hsla(0,   20%, 55%, 0.45),
-        hsla(300, 20%, 55%, 0.0)
-      );
-      -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      animation: ca-spin 40s linear infinite;
-    }
-
-    /* SVG стрелки */
     .arrow-icon {
       width: 16px; height: 16px;
-      opacity: 0.4;
+      opacity: 0.6;
       flex-shrink: 0;
       pointer-events: none;
     }
     .arrow-icon-down { transform: rotate(180deg); }
 
-    /* Декоративные стрелки тикера */
-    .ticker-arrow-up { left: 10px; }
-    .ticker-arrow-dn { right: 10px; }
-    .ticker-text { flex: 1; text-align: center; }
-
-    /* Анимированный контур для хедера — через JS (border-glow-sm) */
-    .header-logo, .header-ticker { position: relative; }
-
-    /* Разные фазы для асинхронности — используется через JS animationDelay */
-
-    /* Контент поверх ::before */
-    .header-logo > * { position: relative; z-index: 1; }
-
-    /* Бесконечный shimmer на плашке ожидания */
-    .fin-wait-shimmer {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        110deg,
-        transparent 20%,
-        rgba(255,255,255,0.04) 45%,
-        rgba(220,235,255,0.10) 50%,
-        rgba(255,255,255,0.04) 55%,
-        transparent 80%
-      );
-      animation: fin-wait 2s linear infinite;
-      pointer-events: none;
-      z-index: 3;
-    }
-    @keyframes fin-wait {
-      from { transform: translateX(-100%); }
-      to   { transform: translateX(200%); }
-    }
-    .h-face::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        110deg,
-        transparent 10%,
-        rgba(255,255,255,0.05) 35%,
-        rgba(220,235,255,0.18) 50%,
-        rgba(255,255,255,0.05) 65%,
-        transparent 90%
-      );
-      transform: translateX(-150%);
-      pointer-events: none;
-      z-index: 10;
-    }
-    .h-rotor.spinning .h-face::after {
-      animation: face-shimmer 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
-    }
-    @keyframes face-shimmer {
-      from { transform: translateX(-100%); }
-      to   { transform: translateX(120%); }
-    }
-
     .h-f0 { transform: rotateY(0deg)   translateZ(133px); }
     .h-f1 { transform: rotateY(120deg) translateZ(133px); }
     .h-f2 { transform: rotateY(240deg) translateZ(133px); }
 
-    /* Заголовок — без разделителя, название по центру, стрелки без обводки */
     .face-header {
       padding: 12px 14px;
       flex-shrink: 0;
       position: relative;
-      z-index: 1;
+      z-index: 3;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: relative;
-      z-index: 3;
       background: transparent;
     }
 
@@ -584,26 +327,21 @@
       font-size: 17px;
       font-weight: 700;
       letter-spacing: -0.3px;
-      color: #e0e8ff;
+      color: #ffffff;
       text-align: center;
       flex: 1;
-      /* Лёгкая хроматическая аберрация — эффект 3D на контуре */
-      text-shadow:
-        -0.5px 0 0.5px rgba(255, 80, 80, 0.55),
-         0.5px 0 0.5px rgba(80, 160, 255, 0.55);
     }
 
-    /* Кнопки навигации каталога */
     .face-nav-btn {
       background: none;
       border: none;
-      color: rgba(255,255,255,0.45);
+      color: rgba(106, 178, 242, 0.8);
       cursor: pointer;
       padding: 4px 6px;
       line-height: 1;
       transition: opacity 0.15s;
       flex-shrink: 0;
-      opacity: 0.5;
+      opacity: 0.8;
       display: flex;
       align-items: center;
     }
@@ -612,60 +350,23 @@
     .face-nav-btn-prev img { transform: rotate(-90deg); }
     .face-nav-btn-next img { transform: rotate(90deg); }
 
-    /* Скролл-область грани */
     .face-scroll-wrap {
       flex: 1;
       min-height: 0;
       position: relative;
       overflow: hidden;
       margin-bottom: 40px;
-      /* fade через mask — работает даже в 3D-контексте */
-      -webkit-mask-image: linear-gradient(
-        to bottom,
-        transparent 0px,
-        black 28px,
-        black calc(100% - 28px),
-        transparent 100%
-      );
-      mask-image: linear-gradient(
-        to bottom,
-        transparent 0px,
-        black 28px,
-        black calc(100% - 28px),
-        transparent 100%
-      );
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 28px, black calc(100% - 28px), transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0px, black 28px, black calc(100% - 28px), transparent 100%);
     }
-    /* fade сверху скрыт когда в начале */
     .face-scroll-wrap.at-top {
-      -webkit-mask-image: linear-gradient(
-        to bottom,
-        black 0px,
-        black calc(100% - 28px),
-        transparent 100%
-      );
-      mask-image: linear-gradient(
-        to bottom,
-        black 0px,
-        black calc(100% - 28px),
-        transparent 100%
-      );
+      -webkit-mask-image: linear-gradient(to bottom, black 0px, black calc(100% - 28px), transparent 100%);
+      mask-image: linear-gradient(to bottom, black 0px, black calc(100% - 28px), transparent 100%);
     }
-    /* fade снизу скрыт когда в конце */
     .face-scroll-wrap.at-bottom {
-      -webkit-mask-image: linear-gradient(
-        to bottom,
-        transparent 0px,
-        black 28px,
-        black 100%
-      );
-      mask-image: linear-gradient(
-        to bottom,
-        transparent 0px,
-        black 28px,
-        black 100%
-      );
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 28px, black 100%);
+      mask-image: linear-gradient(to bottom, transparent 0px, black 28px, black 100%);
     }
-    /* оба скрыты */
     .face-scroll-wrap.at-top.at-bottom {
       -webkit-mask-image: none;
       mask-image: none;
@@ -680,14 +381,13 @@
     }
     .face-body::-webkit-scrollbar { display: none; }
 
-    /* Подкатегория */
     .sub-block { margin-bottom: 16px; }
     .sub-title {
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.09em;
-      color: #fff;
+      color: rgba(255,255,255,0.7);
       text-align: center;
       margin-bottom: 8px;
     }
@@ -699,16 +399,11 @@
       justify-items: center;
     }
 
-    /* Иконка: 25% от ширины грани.
-       Грань = ширина контейнера (~460px на 480px экране).
-       25% = ~115px. Используем aspect-ratio чтобы быть квадратными. */
     .prod-icon {
       width: 25%;
       aspect-ratio: 1;
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), inset 1px 1px 0 rgba(255,255,255,0.1);
+      background: #17212b;
+      border: 1px solid rgba(106, 178, 242, 0.2);
       border-radius: 4px;
       overflow: hidden;
       cursor: pointer;
@@ -716,7 +411,7 @@
       flex-direction: column;
       align-items: stretch;
       justify-content: stretch;
-      transition: box-shadow 0.15s;
+      transition: border-color 0.15s;
     }
     .sub-products .prod-icon {
       width: 100%;
@@ -738,25 +433,12 @@
       overflow: hidden;
       pointer-events: none;
       z-index: 2;
-      border-radius: 2px;
+      border-radius: 4px;
       display: flex;
       justify-content: center;
       align-items: center;
-      /* Умный fadeout по краям — надпись плавно растворяется у стенок карточки */
-      -webkit-mask-image: linear-gradient(
-        90deg,
-        transparent 0px,
-        black 6px,
-        black calc(100% - 6px),
-        transparent 100%
-      );
-      mask-image: linear-gradient(
-        90deg,
-        transparent 0px,
-        black 6px,
-        black calc(100% - 6px),
-        transparent 100%
-      );
+      -webkit-mask-image: linear-gradient(90deg, transparent 0px, black 6px, black calc(100% - 6px), transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0px, black 6px, black calc(100% - 6px), transparent 100%);
     }
     .prod-icon-name .marquee-text {
       display: inline-block;
@@ -771,18 +453,17 @@
       50%, 68% { transform: translateX(var(--marquee-dist, -24px)); }
       100% { transform: translateX(0); }
     }
-    /* canvas 3D превью внутри иконки */
     .prod-icon canvas {
       flex: 1;
       min-height: 0;
       width: 100% !important;
       display: block;
     }
-    .prod-icon:hover {
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), inset 1px 1px 0 rgba(255,255,255,0.2);
+    .prod-icon:hover, .prod-icon:active {
+      border-color: #6ab2f2;
     }
     .prod-icon img { width: 100%; flex: 1; min-height: 0; object-fit: contain; padding: 4px; display: block; }
-    .pi-ph { font-size: 18px; opacity: 0.15; }
+    .pi-ph { font-size: 18px; opacity: 0.3; }
 
     /* ── Стили пульсирующего лоадера PRISM ── */
     .prism-loader-box {
@@ -821,26 +502,19 @@
       }
     }
 
-    /* ── Заглушка пустой категории ── */
-    /* ── Заглушка пустой категории — новый стиль ── */
     .empty-cat {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      /* растягиваем на всю доступную высоту грани минус падинги */
       flex: 1;
       min-height: 200px;
       gap: 12px;
       margin: 12px;
       border-radius: 4px;
       position: relative;
-      /* такой же box-shadow как у других блоков */
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 0 0 20px 2px rgba(80,100,255,0.10),
-        inset 0 0 20px 2px rgba(255,60,120,0.06),
-        inset 0 0 20px 2px rgba(255,160,0,0.05);
+      background: #17212b;
+      border: 1px solid rgba(106, 178, 242, 0.2);
       padding: 24px 20px;
     }
     .empty-cat-logo {
@@ -852,19 +526,18 @@
     .empty-cat-title {
       font-size: 12px;
       font-weight: 700;
-      color: rgba(255,255,255,0.7);
+      color: #ffffff;
       letter-spacing: 0.04em;
       text-align: center;
     }
     .empty-cat-sub {
       font-size: 11px;
-      color: rgba(255,255,255,0.35);
+      color: rgba(255,255,255,0.55);
       text-align: center;
       max-width: 200px;
       line-height: 1.5;
     }
 
-    /* ── Палитра цветов карточки ── */
     .prod-palette {
       display: flex;
       gap: 2px;
@@ -880,16 +553,6 @@
       flex-shrink: 0;
     }
 
-    /* ── Мобильные оптимизации ── */
-    @media (pointer: coarse) {
-      /* Убираем дорогой SVG displacement фильтр на гранях каталога */
-      .h-face,
-      .footer-face,
-      .footer-input-face {
-        -webkit-backdrop-filter: none !important;
-        backdrop-filter: none !important;
-      }
-    }
   </style>
 
   <!-- Three.js для 3D превью в иконках каталога -->
@@ -906,7 +569,7 @@
   <!-- ── Лоадер страницы ── -->
   <div id="page-loader" style="
     position:fixed;inset:0;z-index:9999;
-    background:#000;
+    background:#17212b;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     transition:opacity 0.5s ease;
   ">
@@ -1382,7 +1045,7 @@
               const icon = document.createElement('div');
               icon.className = 'prod-icon';
               icon.title = `${p.name} (id: ${p.id})`;
-              icon.onclick = () => location.href = `product.html?id=${p.id}`;
+              icon.onclick = () => location.href = `mobile-product.html?id=${p.id}`;
 
               // Тонкий анимированный контур
               const gw = document.createElement('div'); gw.className = 'border-glow-wrap';

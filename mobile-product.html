@@ -5,22 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>3D Store — товар</title>
   <link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/b83638b4b452cb7ba7253bef65b6811cb569c968/PrismLogo2.svg">
-  <script>
-    // Redirect mobile users to flat version
-    if (('ontouchstart' in window) || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) {
-      location.replace('mobile-product.html' + location.search);
-    }
-  </script>
+  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
     body {
-      font-family: system-ui, sans-serif; color: #f0f0f0;
-      background-color: #000;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
-      background-size: 40px 40px;
+      font-family: system-ui, sans-serif; color: #ffffff;
+      background-color: #17212b;
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
       user-select: none;
@@ -37,7 +28,6 @@
       padding: 8px;
     }
 
-    /* ── Хедер — одна строка ── */
     @font-face {
       font-family: 'Ageta';
       src: url('https://raw.githubusercontent.com/CakeBoxDeveloper/3dstore/main/liquid.italic.ttf') format('truetype');
@@ -54,23 +44,15 @@
       background: transparent;
     }
 
-    .header-back, .header-next, .back-link, .next-model-btn {
-      backdrop-filter: blur(12px) saturate(1.4);
-      -webkit-backdrop-filter: blur(12px) saturate(1.4);
-      background: rgba(10,10,15,0.55);
-      border-radius: 4px;
-    }
     .back-link {
       display: flex; align-items: center; justify-content: center;
-      padding: 0 12px; font-size: 13px; font-weight: 700; color: #f0f0f0;
+      padding: 0 12px; font-size: 13px; font-weight: 700; color: #6ab2f2;
       text-decoration: none; transition: color 0.15s;
-      background: #000; border-radius: 4px; white-space: nowrap;
+      background: #1d2b3a; border-radius: 4px; white-space: nowrap;
       position: relative;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 0 0 16px 2px rgba(80,100,255,0.10),
-        inset 0 0 16px 2px rgba(255,60,120,0.06);
+      border: 1px solid rgba(106, 178, 242, 0.2);
     }
-    .back-link:hover { color: #fff; }
+    .back-link:hover, .back-link:active { color: #ffffff; }
 
     /* ── Флип-призма навигации моделей ── */
     .nav-flip-wrap {
@@ -97,10 +79,8 @@
       display: flex; align-items: center;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      background: #000;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 0 0 16px 2px rgba(80,100,255,0.10),
-        inset 0 0 16px 2px rgba(255,160,0,0.06);
+      background: #1d2b3a;
+      border: 1px solid rgba(106, 178, 242, 0.2);
       overflow: hidden;
     }
     .nav-flip-face-a { transform: rotateX(0deg)   translateZ(22px); }
@@ -109,79 +89,37 @@
     .nav-flip-arrow {
       width: 44px; height: 44px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px; color: rgba(255,255,255,0.4);
+      font-size: 16px; color: rgba(106, 178, 242, 0.6);
       cursor: pointer; flex-shrink: 0;
       background: none; border: none; font-family: inherit;
       transition: color 0.15s; z-index: 1;
     }
-    .nav-flip-arrow:hover { color: #fff; }
+    .nav-flip-arrow:hover, .nav-flip-arrow:active { color: #ffffff; }
     .nav-flip-label {
       flex: 1;
       text-align: center;
       font-size: 13px;
       font-weight: 700;
-      color: #f0f0f0;
+      color: #ffffff;
       white-space: nowrap;
       overflow: hidden;
       padding: 0 4px;
       margin: 0 2px;
-      text-shadow: -0.5px 0 0.5px rgba(255,80,80,0.5), 0.5px 0 0.5px rgba(80,160,255,0.5);
       display: flex;
       justify-content: center;
       align-items: center;
       position: relative;
       z-index: 2;
-      /* Умный fadeout по краям */
-      -webkit-mask-image: linear-gradient(
-        90deg,
-        transparent 0px,
-        black 10px,
-        black calc(100% - 10px),
-        transparent 100%
-      );
-      mask-image: linear-gradient(
-        90deg,
-        transparent 0px,
-        black 10px,
-        black calc(100% - 10px),
-        transparent 100%
-      );
+      -webkit-mask-image: linear-gradient(90deg, transparent 0px, black 10px, black calc(100% - 10px), transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0px, black 10px, black calc(100% - 10px), transparent 100%);
     }
 
-    /* Shimmer при флипе */
-    .nav-flip-rotor.flipping .nav-flip-face::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(
-        to bottom,
-        transparent 5%,
-        rgba(255,255,255,0.06) 40%,
-        rgba(220,235,255,0.18) 50%,
-        rgba(255,255,255,0.06) 60%,
-        transparent 95%
-      );
-      animation: nav-shimmer 0.5s cubic-bezier(0.4,0,0.2,1) both;
-      pointer-events: none; border-radius: 4px;
-    }
-    @keyframes nav-shimmer {
-      from { transform: translateY(-120%); }
-      to   { transform: translateY(120%); }
-    }
-    .logo {
-      font-size: 17px;
-      font-weight: 700;
-      letter-spacing: -0.4px;
-      text-align: center;
-    }
+    .nav-flip-rotor.flipping .nav-flip-face::after { display: none; }
 
-    /* ── Контент — фиксированный, не растягивается ── */
+    /* ── Контент ── */
     .card-content {
-      background: #000;
-      border: none;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 0 0 24px 4px rgba(80,100,255,0.10),
-        inset 0 0 24px 4px rgba(255,60,120,0.06),
-        inset 0 0 24px 4px rgba(255,160,0,0.05);
+      background: #1d2b3a;
+      border: 1px solid rgba(106, 178, 242, 0.2);
       border-radius: 4px;
       overflow: hidden;
       flex: 1;
@@ -189,25 +127,21 @@
       position: relative;
     }
 
-    /* Вьювер — -10% по ширине и высоте */
     .viewer-wrap {
-      background: #000;
+      background: #17212b;
+      border: 1px solid rgba(106, 178, 242, 0.2);
       border-radius: 4px;
       overflow: hidden;
       position: relative;
       margin: 0 5% 10px;
       flex-shrink: 0;
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 0 0 20px 2px rgba(80,100,255,0.10),
-        inset 0 0 20px 2px rgba(255,60,120,0.06);
     }
     #viewer-canvas { width: 100%; aspect-ratio: 16 / 10; display: block; }
 
     .viewer-loader {
       position: absolute; inset: 0;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: #000;
+      background: #17212b;
       gap: 0;
     }
 
@@ -224,9 +158,9 @@
     .material-section { margin: 0 5% 8px; flex-shrink: 0; }
     .product-name-big {
       font-size: 16px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3;
-      text-shadow: -0.5px 0 0.5px rgba(255,80,80,0.5), 0.5px 0 0.5px rgba(80,160,255,0.5);
+      color: #ffffff;
     }
-    .product-sizes    { font-size: 16px; font-weight: 700; color: #f0f0f0; white-space: nowrap; flex-shrink: 0; }
+    .product-sizes { font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.7); white-space: nowrap; flex-shrink: 0; }
 
     .product-page {
       height: 100%;
@@ -234,12 +168,12 @@
       scrollbar-width: none;
       padding: 10px 14px 14px;
       display: flex; flex-direction: column;
-      background: #000;
+      background: #1d2b3a;
     }
     .product-page::-webkit-scrollbar { display: none; }
 
     .material-slider-outer { position: relative; }
-    .material-slider-wrap  { overflow-x: auto; scrollbar-width: none; }
+    .material-slider-wrap { overflow-x: auto; scrollbar-width: none; }
     .material-slider-wrap::-webkit-scrollbar { display: none; }
     .material-slider { display: flex; gap: 7px; width: max-content; padding-bottom: 4px; }
 
@@ -248,33 +182,31 @@
       content: ''; position: absolute; top: 0; bottom: 4px;
       width: 24px; z-index: 2; pointer-events: none; transition: opacity 0.2s;
     }
-    .material-slider-outer::before { left: 0;  background: linear-gradient(to right, #000, transparent); z-index: 1; }
-    .material-slider-outer::after  { right: 0; background: linear-gradient(to left,  #000, transparent); z-index: 1; }
+    .material-slider-outer::before { left: 0; background: linear-gradient(to right, #1d2b3a, transparent); z-index: 1; }
+    .material-slider-outer::after { right: 0; background: linear-gradient(to left, #1d2b3a, transparent); z-index: 1; }
     .material-slider-outer.at-start::before { opacity: 0; }
-    .material-slider-outer.at-end::after    { opacity: 0; }
+    .material-slider-outer.at-end::after { opacity: 0; }
 
     .mat-chip {
       display: flex; flex-direction: column; align-items: center; gap: 3px;
       padding: 4px 4px 5px;
       min-width: 48px;
-      background: transparent; border: 1.5px solid #2e2e2e; border-radius: 4px;
+      background: #17212b; border: 1.5px solid rgba(106, 178, 242, 0.2); border-radius: 4px;
       cursor: pointer; font-family: inherit;
       transition: border-color 0.15s; flex-shrink: 0;
     }
-    .mat-chip:hover  { border-color: #666; }
-    .mat-chip.active { border-color: #f0f0f0; }
+    .mat-chip:hover, .mat-chip:active { border-color: rgba(106, 178, 242, 0.6); }
+    .mat-chip.active { border-color: #6ab2f2; }
     .mat-chip-color {
       width: 40px; height: 26px; border-radius: 2px;
       display: flex; align-items: center; justify-content: center;
     }
     .mat-chip-type {
       font-size: 8px; font-weight: 800; letter-spacing: 0.05em;
-      /* Цвет текста = фон родителя — эффект "дырки" */
       mix-blend-mode: luminosity;
       color: #000;
       opacity: 0.55;
     }
-    /* подпись цвета убрана */
 
     /* ── Тумблер процедурной генерации ── */
     .procedural-toggle {
@@ -286,55 +218,20 @@
       font-weight: 800;
       color: #ffffff;
       flex-shrink: 0;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(106, 178, 242, 0.2);
       border-radius: 4px;
       margin: 4px 5%;
       flex-direction: column;
       gap: 6px;
-      background: #000;
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.06),
-        inset 0 0 14px 2px rgba(80,100,255,0.08);
+      background: #17212b;
       position: relative;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      transition: border-color 0.2s ease;
       overflow: hidden;
     }
-    /* Анимация зажигания глоу: яркая вспышка на 100% и плавный спад до 50% за 1 секунду */
-    @keyframes toggle-glow-ignition {
-      0% {
-        box-shadow:
-          inset 0 0 0 1px rgba(255,255,255,0.35),
-          inset 0 0 32px 6px rgba(80,100,255,0.36),
-          inset 0 0 32px 6px rgba(255,60,120,0.28),
-          inset 0 0 32px 6px rgba(255,160,0,0.22),
-          0 0 24px 4px rgba(80,120,255,0.45);
-      }
-      100% {
-        box-shadow:
-          inset 0 0 0 1px rgba(255,255,255,0.18),
-          inset 0 0 16px 3px rgba(80,100,255,0.15),
-          inset 0 0 16px 3px rgba(255,60,120,0.11),
-          inset 0 0 16px 3px rgba(255,160,0,0.09),
-          0 0 10px 2px rgba(80,120,255,0.18);
-      }
-    }
 
-    /* Активное состояние тумблера */
     .procedural-toggle:has(input:checked),
     .procedural-toggle.active {
-      border-color: rgba(255, 255, 255, 0.35);
-      animation: toggle-glow-ignition 3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-    }
-    /* Рамка с шиммером сохраняет 100% интенсивности без затухания */
-    .procedural-toggle:has(input:checked) .border-glow-sm,
-    .procedural-toggle.active .border-glow-sm {
-      opacity: 1 !important;
-      filter: blur(0.5px) drop-shadow(0 0 6px rgba(255, 255, 255, 0.95)) !important;
-    }
-    .procedural-toggle:has(input:checked) .border-glow-aura,
-    .procedural-toggle.active .border-glow-aura {
-      opacity: 0.85 !important;
-      filter: blur(12px) drop-shadow(0 0 10px rgba(80, 140, 255, 0.8)) !important;
+      border-color: #6ab2f2;
     }
     .procedural-toggle-row {
       display: flex;
@@ -345,7 +242,7 @@
     .procedural-hint {
       font-size: 11px;
       font-weight: 400;
-      color: #a0a8b0;
+      color: rgba(255,255,255,0.6);
       padding-bottom: 4px;
       width: 100%;
       line-height: 1.4;
@@ -353,7 +250,7 @@
     }
     .procedural-toggle:has(input:checked) .procedural-hint,
     .procedural-toggle.active .procedural-hint {
-      color: #d8e4f0;
+      color: #ffffff;
     }
     .toggle-switch {
       position: relative;
@@ -365,10 +262,10 @@
     .toggle-track {
       position: absolute;
       inset: 0;
-      background: #222228;
-      border: 1px solid rgba(255,255,255,0.12);
+      background: #1d2b3a;
+      border: 1px solid rgba(106, 178, 242, 0.3);
       border-radius: 4px;
-      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+      transition: background 0.25s, border-color 0.25s;
       cursor: pointer;
     }
     .toggle-track::after {
@@ -376,22 +273,19 @@
       position: absolute;
       top: 2px; left: 2px;
       width: 16px; height: 16px;
-      border-radius: 3px;
-      background: #666;
-      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s, box-shadow 0.25s;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.4);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s;
     }
     .toggle-switch input:checked + .toggle-track {
-      background: rgba(80, 120, 255, 0.4);
-      border-color: rgba(255, 255, 255, 0.6);
-      box-shadow: 0 0 10px rgba(80, 140, 255, 0.5);
+      background: rgba(106, 178, 242, 0.3);
+      border-color: #6ab2f2;
     }
     .toggle-switch input:checked + .toggle-track::after {
       transform: translateX(16px);
-      background: #ffffff;
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+      background: #6ab2f2;
     }
 
-    /* ── Бегущая строка (Marquee) влево-вправо ── */
     .marquee-container {
       overflow: hidden;
       white-space: nowrap;
@@ -414,7 +308,7 @@
       100% { transform: translateX(0); }
     }
 
-    /* ── Призма-кнопка — CSS с двухслойным фоном ── */
+    /* ── Призма-кнопка заказа ── */
     .card-order {
       overflow: visible;
       background: transparent;
@@ -439,7 +333,6 @@
       transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Грань: жидкое стекло через SVG filter */
     .v-face {
       position: absolute;
       inset: 0;
@@ -453,94 +346,39 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       gap: 6px;
-      background: transparent;
+      background: #1d2b3a;
+      border: 1px solid rgba(106, 178, 242, 0.2);
       outline: none;
-      border: none;
     }
 
-    /* Слой 1: glow + контур + преломление */
-    .v-face::before {
-      content: '';
-      position: absolute; inset: 0; border-radius: 4px;
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.10),
-        inset 0 0 20px 3px rgba(80,100,255,0.12),
-        inset 0 0 20px 3px rgba(255,60,120,0.07);
-      background: rgba(0, 0, 0, 0.60);
-      -webkit-backdrop-filter: url(#catalog-glass);
-      backdrop-filter: url(#catalog-glass);
-      z-index: 0;
-    }
-
-    /* Слой 2: жидкое стекло через SVG filter */
-    .v-face::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 4px;
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
-      filter: url(#btn-glass);
-      -webkit-filter: url(#btn-glass);
-      overflow: hidden;
-      isolation: isolate;
-      z-index: -1;
-    }
-
+    .v-face::before { display: none; }
+    .v-face::after { display: none; }
     .v-face > * { position: relative; z-index: 1; }
 
-    .v-f0 { transform: rotateX(0deg)    translateZ(17px); cursor: pointer; width: 100%; font-family: inherit; flex-direction: row; gap: 5px; }
+    .v-f0 {
+      transform: rotateX(0deg) translateZ(17px);
+      cursor: pointer; width: 100%; font-family: inherit; flex-direction: row; gap: 5px;
+      background: #6ab2f2;
+      color: #17212b;
+      border: none;
+    }
     .v-f1 { transform: rotateX(-120deg) translateZ(17px); padding: 0 16px; }
     .v-f2 { transform: rotateX(-240deg) translateZ(17px); }
 
     .v-f0-top { font-size: 14px; font-weight: 700; white-space: nowrap; }
-    .v-f0-sub { font-size: 12px; font-weight: 800; white-space: nowrap; color: #ffffff; }
+    .v-f0-sub { font-size: 12px; font-weight: 800; white-space: nowrap; color: #17212b; }
 
     .v-f1 input {
       width: 100%; background: transparent; border: none; outline: none;
-      color: #fff; font-size: 16px; font-family: inherit;
+      color: #ffffff; font-size: 16px; font-family: inherit;
       text-align: center; letter-spacing: 0.04em;
     }
-    .v-f1 input::placeholder { color: rgba(255,255,255,0.35); }
-    .v-f2 { color: #a8f0c0; font-size: 14px; font-weight: 600; }
+    .v-f1 input::placeholder { color: rgba(255,255,255,0.4); }
+    .v-f2 { color: #6ab2f2; font-size: 14px; font-weight: 600; }
 
-    /* ── Анимированный контур (из index.html) ── */
-    @property --ca {
-      syntax: '<angle>';
-      initial-value: 0deg;
-      inherits: false;
-    }
-    .border-glow-wrap {
-      position: absolute; inset: 0; border-radius: 4px;
-      pointer-events: none; z-index: 10; overflow: hidden;
-    }
-    .border-glow-sm {
-      position: absolute; inset: 0; border-radius: 4px;
-      padding: 0.8px; pointer-events: none;
-      background: conic-gradient(
-        from var(--ca) at 50% 50%,
-        hsla(300,20%,55%,0.35), hsla(275,20%,40%,0.30),
-        hsla(240,20%,55%,0.35), hsla(180,20%,55%,0.30),
-        hsla(0,0%,100%,0.65),  hsla(120,20%,50%,0.30),
-        hsla(60,20%,55%,0.35), hsla(30,20%,55%,0.30),
-        hsla(0,20%,55%,0.35),  hsla(300,20%,55%,0.35)
-      );
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude;
-      animation: ca-spin 40s linear infinite;
-    }
-    @keyframes ca-spin { from{--ca:0deg} to{--ca:360deg} }
+    .border-glow-wrap { display: none; }
+    .border-glow-sm { display: none; }
 
-    /* Инset glow для всех блоков */
-    .card-glow {
-      background: #000 !important;
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.08),
-        inset 0 0 20px 2px rgba(80,100,255,0.10),
-        inset 0 0 20px 2px rgba(255,60,120,0.06),
-        inset 0 0 20px 2px rgba(255,160,0,0.05) !important;
-    }
-    /* ── Стили пульсирующего лоадера PRISM ── */
     .prism-loader-box {
       position: relative;
       width: 220px;
@@ -576,13 +414,14 @@
         transform: scale(0.97);
       }
     }
+
   </style>
 </head>
 <body>
   <!-- ── Лоадер страницы ── -->
   <div id="page-loader" style="
     position:fixed;inset:0;z-index:9999;
-    background:#000;
+    background:#17212b;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     transition:opacity 0.5s ease;
   ">
@@ -611,7 +450,7 @@
   <div class="page">
 
     <div class="card-header">
-      <a href="index.html" class="back-link">назад в каталог</a>
+      <a href="mobile-index.html" class="back-link">назад в каталог</a>
       <div class="nav-flip-wrap" id="nav-flip-wrap">
         <div class="nav-flip-scene">
           <div class="nav-flip-rotor" id="nav-flip-rotor">
