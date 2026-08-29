@@ -70,14 +70,13 @@
     .nav-flip-wrap {
       position: relative;
       height: 44px;
-      overflow: hidden;
+      overflow: visible;
       border-radius: 4px;
     }
     .nav-flip-scene {
       width: 100%; height: 44px;
       perspective: 400px;
       perspective-origin: 50% 50%;
-      overflow: hidden;
     }
     .nav-flip-rotor {
       width: 100%; height: 44px;
@@ -594,11 +593,10 @@
 
   <script src="catalog.js"></script>
   <script>
-    // Анимированные контуры на блоки
+    // Анимированные контуры на статические блоки
     [
       ['.viewer-wrap', '-0s'],
       ['.back-link', '-8s'],
-      ['.nav-flip-wrap', '-16s'],
       ['.card-content', '-24s'],
     ].forEach(([sel, delay]) => {
       document.querySelectorAll(sel).forEach(el => {
@@ -609,7 +607,14 @@
         wrap.appendChild(g); el.appendChild(wrap);
       });
     });
-    // Контур на каждую грань кнопки — флипается вместе с ней
+    // Контур на каждую грань флип-ротора навигации — вращается вместе с гранью
+    document.querySelectorAll('.nav-flip-face').forEach((face, i) => {
+      const wrap = document.createElement('div'); wrap.className = 'border-glow-wrap';
+      const g = document.createElement('div'); g.className = 'border-glow-sm';
+      g.style.animationDelay = `${-16 - i * 8}s`;
+      wrap.appendChild(g); face.appendChild(wrap);
+    });
+    // Контур на каждую грань кнопки заказа — флипается вместе с ней
     document.querySelectorAll('.v-face').forEach((face, i) => {
       const wrap = document.createElement('div'); wrap.className = 'border-glow-wrap';
       const g = document.createElement('div'); g.className = 'border-glow-sm';

@@ -36,6 +36,15 @@ const MATERIALS = [
   { id: 'clear-smoke',       label: 'Прозрачный', sublabel: 'Дымчатый',        hex: '#555566', roughness: 0.05, metalness: 0, type: 'clear' },
   { id: 'clear-amber',       label: 'Прозрачный', sublabel: 'Янтарный',        hex: '#d4820a', roughness: 0.02, metalness: 0, type: 'clear' },
   { id: 'clear-teal',        label: 'Прозрачный', sublabel: 'Бирюза',          hex: '#1abc9c', roughness: 0.02, metalness: 0, type: 'clear' },
+  // Воск (WAX) — свечные изделия без текстуры печати
+  { id: 'wax-white',         label: 'Воск',       sublabel: 'Белый',           hex: '#f8f6f0', roughness: 0.55, metalness: 0, type: 'wax' },
+  { id: 'wax-cream',         label: 'Воск',       sublabel: 'Кремовый',        hex: '#f3e8d2', roughness: 0.55, metalness: 0, type: 'wax' },
+  { id: 'wax-honey',         label: 'Воск',       sublabel: 'Медовый / Натур', hex: '#e8b86d', roughness: 0.55, metalness: 0, type: 'wax' },
+  { id: 'wax-black',         label: 'Воск',       sublabel: 'Чёрный',          hex: '#222222', roughness: 0.55, metalness: 0, type: 'wax' },
+  { id: 'wax-red',           label: 'Воск',       sublabel: 'Красный',         hex: '#b82b2b', roughness: 0.55, metalness: 0, type: 'wax' },
+  { id: 'wax-sage',          label: 'Воск',       sublabel: 'Шалфей / Олива',  hex: '#7d8c75', roughness: 0.55, metalness: 0, type: 'wax' },
+  { id: 'wax-lavender',      label: 'Воск',       sublabel: 'Лаванда',         hex: '#a394b8', roughness: 0.55, metalness: 0, type: 'wax' },
+  { id: 'wax-terracotta',    label: 'Воск',       sublabel: 'Терракот',        hex: '#c06c52', roughness: 0.55, metalness: 0, type: 'wax' },
 ];
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -317,6 +326,23 @@ const _layerTextures = null; // убрали DataTexture, используем �
 function buildMaterial() {
   const color = new THREE.Color(currentMat.hex);
 
+  // Воск (WAX) — чистый полуматовый материал с мягким восковым отблеском, БЕЗ полосок FDM печати
+  if (currentMat.type === 'wax') {
+    return new THREE.MeshPhysicalMaterial({
+      color,
+      roughness: 0.55,
+      metalness: 0.0,
+      clearcoat: 0.10,
+      clearcoatRoughness: 0.35,
+      sheen: 0.40,
+      sheenColor: new THREE.Color(0xffffff),
+      sheenRoughness: 0.30,
+      transmission: 0.03,
+      thickness: 0.25,
+      ior: 1.48,
+    });
+  }
+
   if (currentMat.type === 'clear') {
     return new THREE.MeshPhysicalMaterial({
       color, roughness: 0.0, metalness: 0,
@@ -331,7 +357,7 @@ function buildMaterial() {
       sheenColor: new THREE.Color(0xffffff),
     });
   }
-  // Матовый / глянец — MeshStandardMaterial с world-space FDM слоями
+  // Матовый / глянец для 3D печати — MeshStandardMaterial с world-space FDM слоями
   return applyFDMLayer(new THREE.MeshStandardMaterial({
     color,
     roughness: currentMat.roughness,
@@ -349,14 +375,8 @@ function applyMaterialToAll() {
 
 // ── Material slider + fade edges ─────────────────────────────────────────────
 
-// Типы материалов для подписи на чипе
-const MAT_TYPE_LABEL = {
-  'standard': { roughness_hi: 'PLA',  roughness_lo: 'PETG' },
-  'silk':     'TPU',
-  'clear':    'PETG-T',
-};
-
 function getMatTypeLabel(mat) {
+  if (mat.type === 'wax')   return 'WAX';
   if (mat.type === 'silk')  return 'TPU';
   if (mat.type === 'clear') return 'PETG-T';
   // standard: матовый = PLA, глянец = PETG

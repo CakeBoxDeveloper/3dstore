@@ -1684,19 +1684,24 @@
         }
       });
 
-      const box = new THREE.Box3().setFromObject(model);
-      const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const scale = 1.4 / maxDim;
+      // 1. Сбрасываем позицию и масштабируем
+      model.position.set(0, 0, 0);
+      model.scale.setScalar(1);
 
-      model.position.sub(center.multiplyScalar(scale));
+      const box0 = new THREE.Box3().setFromObject(model);
+      const size0 = box0.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size0.x, size0.y, size0.z) || 1.0;
+      const scale = 1.4 / maxDim;
       model.scale.setScalar(scale);
 
-      const finalBox = new THREE.Box3().setFromObject(model);
-      model.position.y += (-0.8 - finalBox.min.y);
-      shadowPlane.position.y = -0.8;
+      // 2. Выравниваем центр модели строго в (0, 0, 0)
+      const box1 = new THREE.Box3().setFromObject(model);
+      const center1 = box1.getCenter(new THREE.Vector3());
+      model.position.x = -center1.x;
+      model.position.y = -center1.y;
+      model.position.z = -center1.z;
 
+      const finalBox = new THREE.Box3().setFromObject(model);
       state.modelBounds = finalBox;
       scene.add(model);
       applyMaterials();
